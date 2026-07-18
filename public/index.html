@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CNGPI Student Portal</title>
+  <meta name="description" content="Premium mobile education portal for CNGPI students. View timetables, join live classes, and manage focus.">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.344.0/dist/umd/lucide.min.js"></script>
+  <!-- HTML2Canvas for 16:9 Image generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <link rel="stylesheet" href="style.css?v=3">
+</head>
+<body>
+  <!-- Light subtle ambient glow circles in background -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+
+  <!-- Loading Spinner -->
+  <div id="loading-overlay" class="loading-overlay hidden">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- SMARTPHONE PORTAL CONTAINER -->
+  <main id="app-container" class="app-container">
+
+    <!-- MOBILE DASHBOARD VIEW -->
+    <section id="dashboard-section" class="dashboard-section">
+      
+      <!-- TOP HEADER -->
+      <header class="mobile-header">
+        <button class="header-icon-btn" id="btn-hamburger">
+          <i data-lucide="menu"></i>
+        </button>
+        <div class="header-right-group">
+          <!-- Active Group Code Pill (Clickable to change group) -->
+          <button id="header-group-pill" class="header-group-pill" title="Change Group Code">
+            <i data-lucide="users" style="width: 14px; height: 14px;"></i>
+            <span id="header-group-label">...</span>
+          </button>
+          
+          <div class="bell-wrapper">
+            <i data-lucide="bell" class="bell-icon"></i>
+            <span class="bell-dot"></span>
+          </div>
+          <div class="header-avatar-container" style="width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid #fff; box-shadow: 0 4px 8px rgba(0,0,0,0.05); background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #64748b; cursor: pointer;">
+            <i data-lucide="user" style="width: 18px; height: 18px;"></i>
+          </div>
+        </div>
+      </header>
+
+      <!-- VIEW: HOME SCREEN -->
+      <div id="view-home" class="dashboard-view">
+        <div class="dashboard-greeting">
+          <h1 id="greeting-title">Welcome! 👋</h1>
+          <p id="greeting-date" class="greeting-date">Thursday, July 2</p>
+        </div>
+
+        <!-- 2x2 Menu Options Grid -->
+        <div class="menu-grid-2x2">
+          <!-- Card 1: Routine (Active, Purple Gradient) -->
+          <div class="grid-card routine-card" id="card-routine">
+            <span class="card-badge badge-active">Active</span>
+            <div class="card-icon-circle white-circle">
+              <i data-lucide="calendar"></i>
+            </div>
+            <div class="card-details">
+              <h3>Routine</h3>
+              <p>View your daily class routine</p>
+            </div>
+            <i data-lucide="arrow-right" class="arrow-icon"></i>
+          </div>
+
+          <!-- Card 2: Notice (Black & White Coming Soon) -->
+          <div class="grid-card notice-card" id="card-notice" style="filter: grayscale(100%); opacity: 0.75; cursor: not-allowed; position: relative;">
+            <div class="card-icon-circle yellow-circle" style="background: #e2e8f0; color: #64748b;">
+              <i data-lucide="bell"></i>
+            </div>
+            <div class="card-details">
+              <h3 style="color: #475569;">Notice</h3>
+              <p style="color: #64748b;">Stay updated with important notices</p>
+            </div>
+            <i data-lucide="arrow-right" class="arrow-icon yellow-arrow" style="color: #94a3b8;"></i>
+            <!-- Coming Soon Stamp -->
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-12deg); border: 2px solid #475569; color: #475569; font-size: 13px; font-weight: 900; font-family: 'Outfit', sans-serif; padding: 4px 10px; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.05em; background: rgba(255, 255, 255, 0.95); box-shadow: 0 4px 10px rgba(0,0,0,0.03); white-space: nowrap; pointer-events: none; z-index: 5;">
+              Coming Soon
+            </div>
+          </div>
+
+          <!-- Card 3: Result (Black & White Coming Soon) -->
+          <div class="grid-card result-card" id="card-result" style="filter: grayscale(100%); opacity: 0.75; cursor: not-allowed; position: relative;">
+            <div class="card-icon-circle green-circle" style="background: #e2e8f0; color: #64748b;">
+              <i data-lucide="shield-check"></i>
+            </div>
+            <div class="card-details">
+              <h3 style="color: #475569;">Result</h3>
+              <p style="color: #64748b;">Check your academic performance</p>
+            </div>
+            <i data-lucide="arrow-right" class="arrow-icon green-arrow" style="color: #94a3b8;"></i>
+            <!-- Coming Soon Stamp -->
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-12deg); border: 2px solid #475569; color: #475569; font-size: 13px; font-weight: 900; font-family: 'Outfit', sans-serif; padding: 4px 10px; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.05em; background: rgba(255, 255, 255, 0.95); box-shadow: 0 4px 10px rgba(0,0,0,0.03); white-space: nowrap; pointer-events: none; z-index: 5;">
+              Coming Soon
+            </div>
+          </div>
+
+          <!-- Card 4: BTEB CGPA Calculator (Active, Lavender theme) -->
+          <div class="grid-card calculator-card" id="card-calculator">
+            <span class="card-badge badge-active" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;">Active</span>
+            <div class="card-icon-circle purple-circle">
+              <i data-lucide="calculator"></i>
+            </div>
+            <div class="card-details">
+              <h3>CGPA Calc</h3>
+              <p>Calculate BTEB Semester CGPA</p>
+            </div>
+            <i data-lucide="arrow-right" class="arrow-icon purple-arrow"></i>
+          </div>
+
+          <!-- Card 5: Book List (Active, Blue theme) -->
+          <div class="grid-card books-card" id="card-books" style="grid-column: span 2; height: 100px; flex-direction: row; align-items: center; justify-content: flex-start; gap: 16px; padding: 18px 24px; background: #eef2ff; border: 1px solid #dbeafe; color: #1e3a8a; cursor: pointer;">
+            <div class="card-icon-circle blue-circle" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6; width: 44px; height: 44px; border-radius: 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+              <i data-lucide="book-open" style="width: 20px; height: 20px;"></i>
+            </div>
+            <div class="card-details" style="flex: 1; text-align: left;">
+              <h3 style="color: #1e3a8a; font-size: 16px; font-weight: 800; font-family: 'Outfit', sans-serif;">Book List</h3>
+              <p style="color: #3b82f6; font-size: 11px; margin-top: 1px;">Access all semester polytechnic textbooks</p>
+            </div>
+            <span class="card-badge badge-active" style="position: static; font-size: 9px; font-weight: 750; background: rgba(59, 130, 246, 0.15); color: #3b82f6; padding: 3px 8px; border-radius: 6px; margin-right: 8px;">Active</span>
+            <i data-lucide="arrow-right" class="arrow-icon blue-arrow" style="position: static; width: 16px; height: 16px; color: #3b82f6; display: block;"></i>
+          </div>
+      </div>
+
+      <!-- VIEW: INTERACTIVE ROUTINE -->
+      <div id="view-routine" class="dashboard-view hidden">
+        <div class="view-navigation">
+          <div class="nav-left">
+            <button id="btn-routine-back" class="btn-back">
+              <i data-lucide="arrow-left"></i>
+              <span>Back</span>
+            </button>
+            <h2>Class Routine</h2>
+          </div>
+          <button id="sourceBtn" class="btn-source">
+            <i data-lucide="image"></i>
+            <span>Original Source</span>
+          </button>
+        </div>
+
+        <!-- Timetable Day Pill Selector -->
+        <div class="day-selector-container">
+          <div class="day-selector">
+            <button class="day-pill active" data-day="Sunday">Sun</button>
+            <button class="day-pill" data-day="Monday">Mon</button>
+            <button class="day-pill" data-day="Tuesday">Tue</button>
+            <button class="day-pill" data-day="Wednesday">Wed</button>
+            <button class="day-pill" data-day="Thursday">Thu</button>
+            <button class="day-pill" data-day="FullWeek">Full Week</button>
+            <button class="day-pill" data-day="Teachers">Teachers</button>
+          </div>
+        </div>
+
+        <!-- 1. Day Schedule View Area -->
+        <div id="dayViewContainer" class="timetable-list">
+          <!-- Dynamic classes loaded here -->
+        </div>
+
+        <!-- 2. Full Week Main Layout View Frame -->
+        <div id="weekViewContainer" class="hidden space-y-4">
+          <!-- Mobile Friendly View Mode & Export Toolbar -->
+          <div class="week-toolbar">
+            <div class="view-mode-toggle">
+              <button id="toggleGridView" class="toggle-btn active">Grid</button>
+              <button id="toggleListView" class="toggle-btn">List</button>
+            </div>
+
+            <button id="exportImageBtn" class="btn-export">
+              <i data-lucide="download"></i>
+              <span>Export HD (16:9)</span>
+            </button>
+          </div>
+
+          <!-- Grid Table View -->
+          <div id="weekGridSection" class="week-grid-section">
+            <div class="grid-scroll-wrapper">
+              <div class="swipe-indicator">
+                <i data-lucide="arrow-left-right"></i>
+                <span>Swipe horizontally to view full routine</span>
+              </div>
+
+              <table class="week-table">
+                <thead>
+                  <tr>
+                    <th class="sticky-col">Day / Period</th>
+                    <th>1st<br><span class="time-sub">8:00 - 8:45 AM</span></th>
+                    <th>2nd<br><span class="time-sub">8:45 - 9:30 AM</span></th>
+                    <th>3rd<br><span class="time-sub">9:30 - 10:15 AM</span></th>
+                    <th>4th<br><span class="time-sub">10:15 - 11:00 AM</span></th>
+                    <th>5th<br><span class="time-sub">11:00 - 11:45 AM</span></th>
+                    <th>6th<br><span class="time-sub">11:45 - 12:30 PM</span></th>
+                    <th>7th<br><span class="time-sub">12:30 - 1:15 PM</span></th>
+                  </tr>
+                </thead>
+                <tbody id="weekTableBody">
+                  <!-- Dynamic week routine rows populated via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Responsive List View (Mobile) -->
+          <div id="weekListSection" class="hidden week-list-section">
+            <!-- Grouped day-by-day class cards list populated via JS -->
+          </div>
+        </div>
+
+        <!-- 3. Teachers Directory View -->
+        <div id="teachersViewContainer" class="hidden teachers-grid">
+          <!-- Populated dynamically via JS -->
+        </div>
+
+      </div>
+
+
+
+    </section>
+
+  </main>
+
+  <!-- Original Scanned Source Image Modal -->
+  <div id="sourceModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <h3>Original Routine Source</h3>
+          <p class="ref-text">Reference: image_959de5.jpg</p>
+        </div>
+        <button id="closeModalBtn" class="btn-close-modal">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="source-img-wrapper">
+          <img src="image_959de5.jpg" alt="Routine Sheet" onerror="this.onerror=null; this.src='https://placehold.co/600x800/1e293b/ffffff?text=image_959de5.jpg+Original+Routine+Missing';">
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        This app digitizes and processes the static document to create an automated schedule.
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden Export Template Renderer (Always populated in the background at 16:9 ratio to avoid squishing in export) -->
+  <div id="exportOffscreenContainer" class="export-offscreen-container">
+    <div class="export-card">
+      <!-- Top brand header matching style -->
+      <div class="export-header">
+        <div>
+          <h1>CLASS ROUTINE</h1>
+          <p class="export-sub">WEEKLY SCHEDULE • Electrical Technology (3-1)</p>
+        </div>
+        <div class="export-header-right">
+          <span class="export-badge">CHAPAINAWABGANJ POLYTECHNIC INSTITUTE</span>
+          <p class="export-info">First Shift • Routine 2026</p>
+        </div>
+      </div>
+
+      <!-- Routines Grid Layout -->
+      <div class="export-grid-layout">
+        <!-- Period Header Cells -->
+        <div class="export-cell-header font-bold">
+          Day / Period
+        </div>
+        <div class="export-cell-period">
+          <span class="period-num">1ST</span>
+          <span class="period-time">8:00 AM - 8:45 AM</span>
+        </div>
+        <div class="export-cell-period">
+          <span class="period-num">2ND</span>
+          <span class="period-time">8:45 AM - 9:30 AM</span>
+        </div>
+        <div class="export-cell-period">
+          <span class="period-num">3RD</span>
+          <span class="period-time">9:30 AM - 10:15 AM</span>
+        </div>
+        <div class="export-cell-period">
+          <span class="period-num">4TH</span>
+          <span class="period-time">10:15 AM - 11:00 AM</span>
+        </div>
+        <div class="export-cell-period">
+          <span class="period-num">5TH</span>
+          <span class="period-time">11:00 AM - 11:45 AM</span>
+        </div>
+        <div class="export-cell-period">
+          <span class="period-num">6TH</span>
+          <span class="period-time">11:45 AM - 12:30 PM</span>
+        </div>
+        <div class="export-cell-period">
+          <span class="period-num">7TH</span>
+          <span class="period-time">12:30 PM - 1:15 PM</span>
+        </div>
+
+        <!-- Generated cells mapped in the background JS -->
+        <div id="exportGridContent" class="export-grid-content">
+          <!-- Dynamic Grid Rows populated via JS -->
+        </div>
+      </div>
+
+      <!-- Footer area -->
+      <div class="export-footer">
+        <span>Class Companion Portal (Offline Mode Compatible)</span>
+        <span>Exported Aspect Ratio 16:9 (HD Landscape sharing template)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Group Selector Overlay Modal (Visible for first-time users) -->
+  <div id="group-selector-overlay" class="modal-overlay hidden" style="background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; position: fixed; inset: 0; z-index: 9999;">
+    <div class="modal-card select-group-modal" style="background: white; border-radius: 28px; width: 90%; max-width: 380px; padding: 28px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15); border: 1px solid rgba(241, 245, 249, 0.8); text-align: center; position: relative;">
+      
+      <!-- Top Icon & Header -->
+      <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
+        <div style="width: 56px; height: 56px; border-radius: 20px; background: linear-gradient(135deg, rgba(92, 61, 255, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%); display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+          <i data-lucide="graduation-cap" style="width: 28px; height: 28px; color: var(--color-primary);"></i>
+        </div>
+        <h3 style="font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 800; color: #0f172a; margin: 0;">Select Academic Group</h3>
+        <p style="font-size: 13px; color: #64748b; margin-top: 6px; line-height: 1.4; padding: 0 10px;">Choose your group below to instantly view your today's schedule and notices.</p>
+      </div>
+
+      <!-- Quick Group Cards (Single-Tap Selection) -->
+      <div style="margin-bottom: 20px;">
+        <div style="font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; text-align: left; margin-bottom: 8px; tracking-wider: 0.05em;">Quick Select</div>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;">
+          <!-- Card 1: CST 3/1 -->
+          <div id="quick-card-cst" class="quick-group-card" style="border: 2px solid #e2e8f0; border-radius: 16px; padding: 14px; cursor: pointer; transition: all 0.2s ease; text-align: center; background: #f8fafc;">
+            <i data-lucide="monitor" style="width: 20px; height: 20px; color: #5c3dff; margin-bottom: 6px; display: inline-block;"></i>
+            <div style="font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 700; color: #1e293b;">CST 3/1</div>
+            <div style="font-size: 9px; color: #64748b; margin-top: 2px;">Computer Tech</div>
+          </div>
+          <!-- Card 2: ET 3/1 -->
+          <div id="quick-card-et" class="quick-group-card" style="border: 2px solid #e2e8f0; border-radius: 16px; padding: 14px; cursor: pointer; transition: all 0.2s ease; text-align: center; background: #f8fafc;">
+            <i data-lucide="zap" style="width: 20px; height: 20px; color: #f59e0b; margin-bottom: 6px; display: inline-block;"></i>
+            <div style="font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 700; color: #1e293b;">ET 3/1</div>
+            <div style="font-size: 9px; color: #64748b; margin-top: 2px;">Electrical Tech</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search / Input box Section -->
+      <div style="margin-bottom: 24px;">
+        <div style="font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; text-align: left; margin-bottom: 8px; tracking-wider: 0.05em;">Or search other group</div>
+        <div class="form-group" style="position: relative; text-align: left;">
+          <div style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; pointer-events: none;">
+            <i data-lucide="search" style="width: 16px; height: 16px;"></i>
+          </div>
+          <input type="text" id="group-code-input" class="input-field" placeholder="Type group code (e.g. CST 3/1)" autocomplete="off" style="width: 100%; border: 1.5px solid #e2e8f0; padding: 12px 12px 12px 38px; border-radius: 16px; background: #f8fafc; outline: none; font-size: 14px; font-family: 'Inter', sans-serif; font-weight: 500; transition: border-color 0.2s; box-sizing: border-box;">
+          <!-- Suggestions Dropdown wrapper -->
+          <div id="group-suggestions" class="suggestions-dropdown hidden" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); z-index: 10; max-height: 200px; overflow-y: auto; margin-top: 6px;">
+            <!-- Suggestions dynamically populated via JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Action -->
+      <div style="display: flex; flex-direction: column;">
+        <button id="btn-select-group-submit" class="btn btn-primary" style="padding: 14px 20px; border-radius: 16px; width: 100%; background: linear-gradient(135deg, #5c3dff 0%, #3b82f6 100%); border: none; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 15px; color: white; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 10px 20px -10px rgba(92,61,255,0.4); cursor: pointer; transition: all 0.2s ease; box-sizing: border-box;">
+          <span>Confirm and Enter</span>
+          <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
+        </button>
+      </div>
+
+    </div>
+
+
+  <script type="module" src="app.js?v=5"></script>
+</body>
+</html>

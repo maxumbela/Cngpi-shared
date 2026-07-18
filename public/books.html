@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BTEB Book List - CNGPI</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.344.0/dist/umd/lucide.min.js"></script>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Outfit', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f5f3ff',
+              100: '#ede9fe',
+              200: '#ddd6fe',
+              500: '#5c3dff',
+              600: '#4f32e0',
+              700: '#4328c0',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .app-container {
+      width: 100%;
+      max-width: 430px;
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 20px 16px 40px 16px;
+      position: relative;
+    }
+    @media (min-width: 450px) {
+      .app-container {
+        min-height: 860px;
+        border-radius: 36px;
+        border: 8px solid #e2e8f0;
+        background: #f8fafc;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+        overflow-y: auto;
+        margin-top: 20px;
+        margin-bottom: 20px;
+      }
+    }
+    .ambient-glow {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.15;
+      z-index: -1;
+      pointer-events: none;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+    #tech-tabs-container::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans min-h-screen relative flex items-center justify-center overflow-x-hidden">
+
+  <!-- Ambient Glow Circles -->
+  <div class="ambient-glow w-[250px] h-[250px] bg-indigo-200 top-[5%] left-[10%]"></div>
+  <div class="ambient-glow w-[250px] h-[250px] bg-purple-200 bottom-[5%] right-[10%]"></div>
+
+  <!-- smartphone frame -->
+  <main class="app-container">
+
+    <!-- Top Navigation -->
+    <div class="flex items-center justify-between mb-6">
+      <a href="index.html" class="px-4 py-2.5 rounded-xl bg-white shadow-sm border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center gap-1.5">
+        <i data-lucide="arrow-left" class="w-3.5 h-3.5 text-brand-500"></i>
+        <span>Back to Home</span>
+      </a>
+      <span class="text-xs font-bold text-slate-400">BTEB Portal</span>
+    </div>
+
+    <!-- Header Block -->
+    <header class="mb-6">
+      <div class="flex items-center gap-2 mb-1.5">
+        <span class="px-2 py-0.5 text-[9px] font-black tracking-wider uppercase rounded bg-brand-500/15 text-brand-600 border border-brand-500/20">
+          Syllabus Books
+        </span>
+        <span class="text-xs font-semibold text-slate-400">Probidhan 2016</span>
+      </div>
+      <h1 class="text-2xl font-black tracking-tight text-slate-900 font-display">
+        Polytechnic <span class="text-brand-500">Book List</span>
+      </h1>
+      <p class="text-xs font-semibold text-slate-500 mt-0.5">
+        Browse required textbook lists across all semesters.
+      </p>
+    </header>
+
+    <!-- Technology selector switch (Dynamic Swipe Container) -->
+    <div id="tech-tabs-container" class="flex gap-2.5 overflow-x-auto pb-1 mb-6 -mx-4 px-4 snap-x scrollbar-none" style="-ms-overflow-style: none; scrollbar-width: none; white-space: nowrap;">
+      <!-- Populated dynamically -->
+    </div>
+
+    <!-- Semester Accordion Container -->
+    <div id="semesters-accordion" class="flex flex-col gap-3">
+      <!-- Generated via JavaScript -->
+    </div>
+
+  </main>
+
+  <script>
+    // Scraped data fallback seeding
+    const defaultBooksData = {
+      "ET": {
+        "technology_name": "Electrical Technology (ET)",
+        "semesters": {
+          "1": [
+            { "name": "Basic Electricity", "code": "66711" },
+            { "name": "Electrical Engineering Materials", "code": "66713" },
+            { "name": "Basic Electronics", "code": "66811" },
+            { "name": "Engineering Drawing", "code": "61011" },
+            { "name": "Mathematics-1", "code": "65911" },
+            { "name": "Chemistry", "code": "65913" },
+            { "name": "Physical Education & Life Skill Development", "code": "65812" }
+          ],
+          "2": [
+            { "name": "Electrical Circuits-1", "code": "66721" },
+            { "name": "Electrical Appliances", "code": "66722" },
+            { "name": "Computer Application", "code": "66611" },
+            { "name": "Mathematics-2", "code": "65921" },
+            { "name": "Physics-1", "code": "65912" },
+            { "name": "Bangla", "code": "65711" },
+            { "name": "English", "code": "65712" }
+          ],
+          "3": [
+            { "name": "Electrical Circuits -2", "code": "66731" },
+            { "name": "Advanced Electricity", "code": "66732" },
+            { "name": "Electrical Engineering Drawing", "code": "66733" },
+            { "name": "Mathematics -3", "code": "65931" },
+            { "name": "Physics -2", "code": "65922" },
+            { "name": "Communicative English", "code": "65722" },
+            { "name": "Social Science", "code": "65811" }
+          ],
+          "4": [
+            { "name": "Electrical Installation Planning and Estimating", "code": "66741" },
+            { "name": "DC Machines", "code": "66742" },
+            { "name": "Industrial Electronics", "code": "66845" },
+            { "name": "Applied Mechanics", "code": "67045" },
+            { "name": "Programming Essentials", "code": "66631" },
+            { "name": "Business organization & Communication", "code": "65841" }
+          ],
+          "5": [
+            { "name": "Electrical & Electronic Measurement-1", "code": "66751" },
+            { "name": "Generation of Electrical Power", "code": "66752" },
+            { "name": "Renewable Energy", "code": "66753" },
+            { "name": "Digital Electronics & Microprocessor", "code": "66856" },
+            { "name": "Environmental Studies", "code": "69054" },
+            { "name": "Accounting Theory & Practice", "code": "65851" }
+          ],
+          "6": [
+            { "name": "Alternating Current Machines-1", "code": "66761" },
+            { "name": "Electrical & Electronic Measurement-2", "code": "66762" },
+            { "name": "Transmission and Distribution of Electrical Power-1", "code": "66763" },
+            { "name": "Communication Engineering", "code": "66867" },
+            { "name": "Micro Controller & PLC", "code": "66868" },
+            { "name": "Industrial Management", "code": "65852" }
+          ],
+          "7": [
+            { "name": "Alternating Current Machines-2", "code": "66771" },
+            { "name": "Electrical Engineering project", "code": "66772" },
+            { "name": "Switch Gear & Protection", "code": "66773" },
+            { "name": "Transmission and Distribution of Electrical Power-2", "code": "66774" },
+            { "name": "Testing and Maintenance of Electrical Equipment", "code": "66775" },
+            { "name": "Instrumentation and Process Control", "code": "66863" },
+            { "name": "Innovation & Entrepreneurship", "code": "65853" }
+          ],
+          "8": [
+            { "name": "Industrial Attachment", "code": "Dedicated" }
+          ]
+        }
+      },
+      "CST": {
+        "technology_name": "Computer Science & Technology (CST)",
+        "semesters": {
+          "1": [
+            { "name": "Mathematics-1", "code": "65911" },
+            { "name": "Computer application", "code": "66611" },
+            { "name": "Physics-1", "code": "65912" },
+            { "name": "Electrical engineering fundamentals", "code": "66712" },
+            { "name": "English", "code": "65712" },
+            { "name": "Physical education & life skills development", "code": "65812" },
+            { "name": "Bangla", "code": "65711" }
+          ],
+          "2": [
+            { "name": "Database Application", "code": "66621" },
+            { "name": "Mathematics-2", "code": "65921" },
+            { "name": "IT support System-I", "code": "66622" },
+            { "name": "Physics-2", "code": "65922" },
+            { "name": "Graphics Design-I", "code": "66623" },
+            { "name": "Communicative English", "code": "65722" },
+            { "name": "Analog Electronics", "code": "66823" }
+          ],
+          "3": [
+            { "name": "Programming Essentials", "code": "66631" },
+            { "name": "Mathematics-3", "code": "65931" },
+            { "name": "Web Design", "code": "66632" },
+            { "name": "Chemistry", "code": "65913" },
+            { "name": "Graphics design-II", "code": "66633" },
+            { "name": "Social Science", "code": "65811" },
+            { "name": "IT support System-II", "code": "66634" }
+          ],
+          "4": [
+            { "name": "Object-Oriented Programming", "code": "66641" },
+            { "name": "Web Development", "code": "66643" },
+            { "name": "Data Structure & Algorithm", "code": "66642" },
+            { "name": "Computer Peripherals", "code": "66645" },
+            { "name": "Data Communication System", "code": "66644" },
+            { "name": "Business Organization & Communication", "code": "65841" },
+            { "name": "The principle of Digital Electronics", "code": "66842" }
+          ],
+          "5": [
+            { "name": "Programming in Java", "code": "66651" },
+            { "name": "Surveillance Security System", "code": "66653" },
+            { "name": "Web Development Project", "code": "66654" },
+            { "name": "Operating Systems application", "code": "66652" },
+            { "name": "PCB Design and Circuit Making", "code": "66656" },
+            { "name": "Accounting Theory & Practice", "code": "65851" },
+            { "name": "Sequential Logic System", "code": "66655" }
+          ],
+          "6": [
+            { "name": "Principals of Software Engineering", "code": "66661" },
+            { "name": "Microcontroller Application", "code": "66663" },
+            { "name": "Microprocessor & Interfacing", "code": "66662" },
+            { "name": "Optional Subject", "code": "6666X" },
+            { "name": "Database Management System", "code": "66664" },
+            { "name": "Industrial Management", "code": "65852" },
+            { "name": "Environmental Studies", "code": "64054" }
+          ],
+          "7": [
+            { "name": "System Analysis & Design", "code": "66671" },
+            { "name": "E-Commerce & CMS", "code": "66674" },
+            { "name": "Network Administration & Services", "code": "66672" },
+            { "name": "Cyber Security & Ethics", "code": "66675" },
+            { "name": "Innovation & Entrepreneurship", "code": "65853" },
+            { "name": "Apps Development Project", "code": "66673" },
+            { "name": "Optional Subject-II", "code": "6667X" }
+          ],
+          "8": [
+            { "name": "Industrial Attachment", "code": "Dedicated" }
+          ]
+        }
+      }
+    };
+
+    // Firebase compat configuration
+    let db;
+    try {
+      const firebaseConfig = {
+        apiKey: "AIzaSyAs-X12345EXAMPLE",
+        authDomain: "cngpi-edu.firebaseapp.com",
+        indigoProjectId: "cngpi-edu",
+        storageBucket: "cngpi-edu.appspot.com",
+        messagingSenderId: "1234567890",
+        appId: "1:12345:web:abcdef"
+      };
+
+      if (typeof firebase !== 'undefined') {
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.firestore();
+      } else {
+        console.warn("Firebase SDK not loaded. Books page running in offline fallback mode.");
+      }
+    } catch (e) {
+      console.error("Firebase init failed in books:", e);
+    }
+
+    let activeTechnology = "";
+    let loadedBooksData = {};
+
+    function renderTechTabs() {
+      const container = document.getElementById("tech-tabs-container");
+      if (!container) return;
+      container.innerHTML = "";
+
+      Object.keys(loadedBooksData).forEach(techId => {
+        const data = loadedBooksData[techId];
+        const label = data.technology_name || techId;
+
+        const button = document.createElement("button");
+        if (techId === activeTechnology) {
+          button.className = "snap-center shrink-0 px-4 py-2.5 bg-brand-500 text-white text-xs font-extrabold rounded-xl shadow-md transition-all shadow-brand-500/10";
+        } else {
+          button.className = "snap-center shrink-0 px-4 py-2.5 bg-slate-100 text-slate-500 text-xs font-bold rounded-xl border border-slate-200/40 hover:bg-slate-200/50 active:scale-[0.98] transition-all";
+        }
+        button.innerHTML = `<span>${label}</span>`;
+        button.onclick = () => {
+          activeTechnology = techId;
+          renderTechTabs();
+          renderAccordions();
+        };
+        container.appendChild(button);
+      });
+    }
+
+    function getOrdinalSuffix(i) {
+      const j = i % 10, k = i % 100;
+      if (j === 1 && k !== 11) return "st";
+      if (j === 2 && k !== 12) return "nd";
+      if (j === 3 && k !== 13) return "rd";
+      return "th";
+    }
+
+    function renderAccordions() {
+      const container = document.getElementById("semesters-accordion");
+      if (!container) return;
+      container.innerHTML = "";
+      
+      if (!activeTechnology) {
+        container.innerHTML = `<div class="text-xs text-slate-400 py-6 text-center">No technologies loaded.</div>`;
+        return;
+      }
+
+      const techData = loadedBooksData[activeTechnology] || defaultBooksData[activeTechnology] || { semesters: {} };
+
+      for (let sem = 1; sem <= 8; sem++) {
+        const booksList = (techData.semesters && techData.semesters[sem.toString()]) || [];
+        const isLastSem = sem === 8;
+
+        const accordion = document.createElement("div");
+        accordion.className = "bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-sm transition-all duration-300";
+        
+        let booksHtml = "";
+        if (booksList.length === 0) {
+          booksHtml = `<div class="text-xs text-slate-400 py-3 text-center">No textbooks added for this semester yet.</div>`;
+        } else {
+          booksList.forEach(b => {
+            booksHtml += `
+              <div class="flex items-center justify-between py-3 border-b border-slate-100 last:border-b-0">
+                <div class="text-left max-w-[260px]">
+                  <h4 class="text-xs font-bold text-slate-800 leading-tight">${b.name}</h4>
+                  <span class="text-[9px] font-semibold text-slate-400 mt-0.5 block">Textbook</span>
+                </div>
+                <div class="shrink-0 flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-lg">
+                  <i data-lucide="hash" class="w-3 h-3 text-brand-500"></i>
+                  <span class="font-mono text-[10px] font-bold text-slate-600">${b.code}</span>
+                </div>
+              </div>
+            `;
+          });
+        }
+
+        accordion.innerHTML = `
+          <button class="w-full flex items-center justify-between p-4 focus:outline-none" onclick="toggleAccordion(this)">
+            <div class="flex items-center gap-2.5">
+              <div class="w-7 h-7 rounded-lg bg-brand-50 border border-brand-100/50 flex items-center justify-center">
+                <span class="text-xs font-black text-brand-500 font-display">${sem}</span>
+              </div>
+              <h3 class="font-bold text-xs text-slate-800 font-display">${sem}${getOrdinalSuffix(sem)} Semester Book List</h3>
+            </div>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transform transition-transform duration-200"></i>
+          </button>
+          <div class="accordion-content hidden px-4 pb-4 transition-all">
+            ${booksHtml}
+          </div>
+        `;
+        container.appendChild(accordion);
+      }
+      lucide.createIcons();
+    }
+
+    function toggleAccordion(button) {
+      const content = button.nextElementSibling;
+      const icon = button.querySelector('i[data-lucide="chevron-down"]');
+      content.classList.toggle("hidden");
+      if (content.classList.contains("hidden")) {
+        if (icon) icon.style.transform = "rotate(0deg)";
+      } else {
+        if (icon) icon.style.transform = "rotate(180deg)";
+      }
+    }
+
+    // Load from Firestore with automatic local fallback
+    function loadBooksData() {
+      if (typeof db === 'undefined' || !db) {
+        console.warn("Database offline. Running in local fallback mode.");
+        loadedBooksData = JSON.parse(JSON.stringify(defaultBooksData));
+        const techKeys = Object.keys(loadedBooksData);
+        activeTechnology = techKeys.includes("CST") ? "CST" : techKeys[0];
+        renderTechTabs();
+        renderAccordions();
+        return;
+      }
+      db.collection("books").get().then((querySnap) => {
+        if (querySnap.empty) {
+          console.log("No custom books found in Firestore. Seeding default scraped list...");
+          seedBooksData();
+          return;
+        }
+
+        loadedBooksData = {};
+        querySnap.forEach((doc) => {
+          loadedBooksData[doc.id] = doc.data();
+        });
+
+        const techKeys = Object.keys(loadedBooksData);
+        if (!activeTechnology || !techKeys.includes(activeTechnology)) {
+          activeTechnology = techKeys.includes("CST") ? "CST" : techKeys[0];
+        }
+
+        renderTechTabs();
+        renderAccordions();
+      }).catch(err => {
+        console.error("Failed to load from database, falling back to scraped list:", err);
+        loadedBooksData = JSON.parse(JSON.stringify(defaultBooksData));
+        activeTechnology = "CST";
+        renderTechTabs();
+        renderAccordions();
+      });
+    }
+
+    // Seeding books collection
+    function seedBooksData() {
+      if (typeof db === 'undefined' || !db) return;
+      const batch = db.batch();
+      Object.keys(defaultBooksData).forEach(techId => {
+        const docRef = db.collection("books").doc(techId);
+        batch.set(docRef, defaultBooksData[techId]);
+      });
+      batch.commit().then(() => {
+        console.log("Database seeded with scraped book list.");
+        loadBooksData();
+      }).catch(err => console.error("Database seeding failed:", err));
+    }
+
+    window.onload = function() {
+      loadBooksData();
+      lucide.createIcons();
+    };
+  </script>
+</body>
+</html>

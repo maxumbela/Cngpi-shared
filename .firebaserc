@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "cngpi-edu"
+  },
+  "targets": {
+    "cngpi-edu": {
+      "hosting": {
+        "cngpi": [
+          "cngpi"
+        ]
+      }
+    }
+  }
+}
