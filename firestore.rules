@@ -13,9 +13,22 @@ service cloud.firestore {
     match /books/{bookId} {
       allow read, write: if true;
     }
+    match /departments/{deptId} {
+      allow read, write: if true;
+    }
+    match /technologies/{techId} {
+      allow read, write: if true;
+    }
+    match /curriculums/{currId} {
+      allow read, write: if true;
+    }
+    match /settings/{settingId} {
+      allow read, write: if true;
+    }
     match /{document=**} {
       allow read, write: if true;
     }
   }
 }
+
 
