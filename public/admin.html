@@ -1712,6 +1712,11 @@
       const sem = document.getElementById("book-select-sem").value;
       const rows = document.getElementById("admin-books-rows-container").children;
 
+      if (!tech) {
+        triggerToast("Selection Required", "Please select a technology first.", "error");
+        return;
+      }
+
       const newBooks = [];
       for (let i = 0; i < rows.length; i++) {
         const nameInput = rows[i].querySelector(".admin-book-name");
@@ -1720,27 +1725,49 @@
         if (nameInput && codeInput) {
           const name = nameInput.value.trim();
           const code = codeInput.value.trim();
-          if (name && code) {
-            newBooks.push({ name, code });
+          if (name || code) {
+            newBooks.push({ name: name || "Untitled Book", code: code || "N/A" });
           }
         }
       }
 
       if (!adminBooksData[tech]) {
-        adminBooksData[tech] = { technology_name: tech === "CST" ? "Computer Science & Technology (CST)" : "Electrical Technology (ET)", semesters: {} };
+        adminBooksData[tech] = { technology_name: tech, semesters: {} };
       }
       if (!adminBooksData[tech].semesters) {
         adminBooksData[tech].semesters = {};
       }
       adminBooksData[tech].semesters[sem] = newBooks;
 
-      db.collection("books").doc(tech).set(adminBooksData[tech]).then(() => {
-        triggerToast("Save Successful", `Textbooks list updated for ${tech} - Semester ${sem}.`, "success");
+      // Update local default fallback as well
+      if (typeof defaultBooksData !== 'undefined') {
+        if (!defaultBooksData[tech]) {
+          defaultBooksData[tech] = { technology_name: tech, semesters: {} };
+        }
+        if (!defaultBooksData[tech].semesters) defaultBooksData[tech].semesters = {};
+        defaultBooksData[tech].semesters[sem] = newBooks;
+      }
+
+      const finalizeSave = (isSuccess, errMsg = "") => {
+        if (isSuccess) {
+          triggerToast("Save Successful", `Textbooks list updated for ${tech} - Semester ${sem}.`, "success");
+        } else {
+          console.warn("Firestore save notice:", errMsg);
+          triggerToast("Saved Locally", `Books saved locally for ${tech} - Semester ${sem}. (${errMsg})`, "warning");
+        }
         loadAdminBooksList();
-      }).catch(err => {
-        console.error("Save failed:", err);
-        triggerToast("Save Failed", "Failed to update database.", "error");
-      });
+      };
+
+      if (typeof db !== 'undefined' && db) {
+        db.collection("books").doc(tech).set(adminBooksData[tech], { merge: true }).then(() => {
+          finalizeSave(true);
+        }).catch(err => {
+          console.error("Save failed:", err);
+          finalizeSave(false, err.message || "Permission restricted");
+        });
+      } else {
+        finalizeSave(false, "Offline mode / Database uninitialized");
+      }
     }
 
     // Default book list fallback dataset for fallback load
