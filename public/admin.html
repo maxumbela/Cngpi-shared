@@ -12,6 +12,7 @@
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.344.0/dist/umd/lucide.min.js"></script>
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
   <style>
@@ -1637,12 +1638,19 @@
       toggleAddTechPanel();
       loadTechDropdown(code);
 
-      // Save to Firestore DB
-      db.collection("books").doc(code).set(newDocData).then(() => {
-        triggerToast("Technology Added", `Successfully registered ${fullName} to Firebase database.`, "success");
+      // Save directly to Firebase Datastore
+      db.collection("books").doc(code).set(newDocData, { merge: true }).then(() => {
+        adminBooksData[code] = newDocData;
+        if (typeof defaultBooksData !== 'undefined') defaultBooksData[code] = newDocData;
+
+        document.getElementById("new-tech-code").value = "";
+        document.getElementById("new-tech-name").value = "";
+        toggleAddTechPanel();
+        loadTechDropdown(code);
+        triggerToast("Firebase Datastore Saved", `Successfully registered ${fullName} directly in Firebase Datastore.`, "success");
       }).catch(err => {
-        console.error("Firestore add tech error:", err);
-        triggerToast("Technology Added (Local)", `Registered ${code} locally. (${err.message})`, "warning");
+        console.error("Firebase Datastore save error:", err);
+        triggerToast("Datastore Error", `Failed to save ${code} to Firebase: ${err.message}`, "error");
       });
     }
 
