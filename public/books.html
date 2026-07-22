@@ -408,16 +408,17 @@
       }
       // Real-time Firebase Datastore listener for instant live updates
       db.collection("books").onSnapshot((querySnap) => {
-        if (querySnap.empty) {
+        // Start with default books data (ET, CST) so default list is preserved
+        loadedBooksData = JSON.parse(JSON.stringify(defaultBooksData));
+
+        if (!querySnap.empty) {
+          querySnap.forEach((doc) => {
+            loadedBooksData[doc.id] = doc.data();
+          });
+        } else {
           console.log("No custom books found in Firestore. Seeding default scraped list...");
           seedBooksData();
-          return;
         }
-
-        loadedBooksData = {};
-        querySnap.forEach((doc) => {
-          loadedBooksData[doc.id] = doc.data();
-        });
 
         const techKeys = Object.keys(loadedBooksData);
         if (!activeTechnology || !techKeys.includes(activeTechnology)) {

@@ -1570,6 +1570,9 @@
       if (typeof defaultBooksData !== 'undefined') {
         Object.keys(defaultBooksData).forEach(k => {
           techMap[k] = (defaultBooksData[k] && defaultBooksData[k].technology_name) || k;
+          if (!adminBooksData[k]) {
+            adminBooksData[k] = defaultBooksData[k];
+          }
         });
       }
       if (typeof adminBooksData !== 'undefined') {
@@ -1603,15 +1606,27 @@
       // Fetch from Firestore and merge
       if (typeof db !== 'undefined' && db) {
         db.collection("books").get().then((querySnap) => {
+          const existingDocIds = [];
           if (!querySnap.empty) {
             querySnap.forEach((doc) => {
               const techId = doc.id;
               const data = doc.data();
+              existingDocIds.push(techId);
               techMap[techId] = data.technology_name || techId;
               adminBooksData[techId] = data;
             });
-            renderOptions();
           }
+
+          // Auto-seed missing default technologies to Firestore
+          if (typeof defaultBooksData !== 'undefined') {
+            Object.keys(defaultBooksData).forEach(k => {
+              if (!existingDocIds.includes(k)) {
+                db.collection("books").doc(k).set(defaultBooksData[k], { merge: true }).catch(e => console.warn("Auto-seed notice:", e));
+              }
+            });
+          }
+
+          renderOptions();
         }).catch(err => {
           console.warn("Firestore tech dropdown sync notice:", err);
           renderOptions();
