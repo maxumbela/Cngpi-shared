@@ -744,6 +744,9 @@
     };
 
     firebase.initializeApp(firebaseConfig);
+    if (firebase.auth) {
+      firebase.auth().signInAnonymously().catch(err => console.warn("Anon Auth notice:", err));
+    }
     const db = firebase.firestore();
 
     // Default static credentials
@@ -1546,39 +1549,63 @@
       if (panel) panel.classList.toggle("hidden");
     }
 
-    function loadTechDropdown() {
+    function loadTechDropdown(preferredTechCode = "") {
       const selectEl = document.getElementById("book-select-tech");
       if (!selectEl) return;
       
-      const currentVal = selectEl.value;
-      selectEl.innerHTML = "";
+      const currentVal = preferredTechCode || selectEl.value;
 
-      db.collection("books").get().then((querySnap) => {
-        if (querySnap.empty) {
-          // Seed defaults if database collection doesn't exist
-          seedBooksData();
-          return;
-        }
+      const techMap = {};
+      if (typeof defaultBooksData !== 'undefined') {
+        Object.keys(defaultBooksData).forEach(k => {
+          techMap[k] = (defaultBooksData[k] && defaultBooksData[k].technology_name) || k;
+        });
+      }
+      if (typeof adminBooksData !== 'undefined') {
+        Object.keys(adminBooksData).forEach(k => {
+          techMap[k] = (adminBooksData[k] && adminBooksData[k].technology_name) || k;
+        });
+      }
 
-        querySnap.forEach((doc) => {
-          const techId = doc.id;
-          const data = doc.data();
-          const label = data.technology_name || techId;
+      const renderOptions = () => {
+        selectEl.innerHTML = "";
+        Object.keys(techMap).forEach(techId => {
+          const label = techMap[techId];
           const opt = document.createElement("option");
           opt.value = techId;
-          opt.textContent = `${label} (${techId})`;
+          opt.textContent = label.includes(`(${techId})`) ? label : `${label} (${techId})`;
           selectEl.appendChild(opt);
         });
 
-        // Retain selection if valid, else select first
         if (currentVal && selectEl.querySelector(`option[value="${currentVal}"]`)) {
           selectEl.value = currentVal;
+        } else if (selectEl.options.length > 0) {
+          selectEl.selectedIndex = 0;
         }
         
         loadAdminBooksList();
-      }).catch(err => {
-        console.error("Error loading tech dropdown:", err);
-      });
+      };
+
+      // Render local initial list immediately
+      renderOptions();
+
+      // Fetch from Firestore and merge
+      if (typeof db !== 'undefined' && db) {
+        db.collection("books").get().then((querySnap) => {
+          if (!querySnap.empty) {
+            querySnap.forEach((doc) => {
+              const techId = doc.id;
+              const data = doc.data();
+              techMap[techId] = data.technology_name || techId;
+              adminBooksData[techId] = data;
+            });
+            renderOptions();
+          }
+        }).catch(err => {
+          console.warn("Firestore tech dropdown sync notice:", err);
+          renderOptions();
+        });
+      }
     }
 
     function addNewTechnology() {
@@ -1590,43 +1617,32 @@
         return;
       }
 
+      const fullName = name.includes(`(${code})`) ? name : `${name} (${code})`;
+
       // Create blank semesters document structure
       const newDocData = {
-        technology_name: `${name} (${code})`,
+        technology_name: fullName,
         semesters: {
           "1": [], "2": [], "3": [], "4": [], "5": [], "6": [], "7": [], "8": []
         }
       };
 
-      // Register locally in memory
-      defaultBooksData[code] = newDocData;
-      adminBooksData[code] = newDocData;
+      // Register locally in memory right away
+      if (typeof defaultBooksData !== 'undefined') defaultBooksData[code] = newDocData;
+      if (typeof adminBooksData !== 'undefined') adminBooksData[code] = newDocData;
 
-      const finalizeAddTech = (isSuccess, errMsg = "") => {
-        if (isSuccess) {
-          triggerToast("Technology Added", `Successfully registered ${code} technology.`, "success");
-        } else {
-          console.warn("Firestore save warning:", errMsg);
-          triggerToast("Technology Added", `Registered ${code} technology locally. (${errMsg})`, "warning");
-        }
-        
-        document.getElementById("new-tech-code").value = "";
-        document.getElementById("new-tech-name").value = "";
-        toggleAddTechPanel();
-        
-        loadTechDropdown();
-        setTimeout(() => {
-          const selectEl = document.getElementById("book-select-tech");
-          if (selectEl) selectEl.value = code;
-          loadAdminBooksList();
-        }, 300);
-      };
+      // Update UI & dropdown immediately so the new tech appears in Manage Books dropdown
+      document.getElementById("new-tech-code").value = "";
+      document.getElementById("new-tech-name").value = "";
+      toggleAddTechPanel();
+      loadTechDropdown(code);
 
+      // Save to Firestore DB
       db.collection("books").doc(code).set(newDocData).then(() => {
-        finalizeAddTech(true);
+        triggerToast("Technology Added", `Successfully registered ${fullName} to Firebase database.`, "success");
       }).catch(err => {
-        console.error("Failed to add tech to Firestore:", err);
-        finalizeAddTech(false, err.message || "Permission restricted");
+        console.error("Firestore add tech error:", err);
+        triggerToast("Technology Added (Local)", `Registered ${code} locally. (${err.message})`, "warning");
       });
     }
 
