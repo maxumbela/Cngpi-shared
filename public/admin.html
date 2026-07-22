@@ -1598,8 +1598,17 @@
         }
       };
 
-      db.collection("books").doc(code).set(newDocData).then(() => {
-        triggerToast("Technology Added", `Successfully registered ${code} technology.`, "success");
+      // Register locally in memory
+      defaultBooksData[code] = newDocData;
+      adminBooksData[code] = newDocData;
+
+      const finalizeAddTech = (isSuccess, errMsg = "") => {
+        if (isSuccess) {
+          triggerToast("Technology Added", `Successfully registered ${code} technology.`, "success");
+        } else {
+          console.warn("Firestore save warning:", errMsg);
+          triggerToast("Technology Added", `Registered ${code} technology locally. (${errMsg})`, "warning");
+        }
         
         document.getElementById("new-tech-code").value = "";
         document.getElementById("new-tech-name").value = "";
@@ -1611,11 +1620,16 @@
           if (selectEl) selectEl.value = code;
           loadAdminBooksList();
         }, 300);
+      };
+
+      db.collection("books").doc(code).set(newDocData).then(() => {
+        finalizeAddTech(true);
       }).catch(err => {
-        console.error("Failed to add tech:", err);
-        triggerToast("Error", `Failed to add technology: ${err.message}`, "error");
+        console.error("Failed to add tech to Firestore:", err);
+        finalizeAddTech(false, err.message || "Permission restricted");
       });
     }
+
 
     function loadAdminBooksList() {
       const selectTech = document.getElementById("book-select-tech");
