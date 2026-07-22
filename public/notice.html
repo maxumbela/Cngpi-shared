@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CNGPI Notice Board | Student Portal</title>
+  <meta name="description" content="Official Notice Board for CNGPI students. Stay updated with exam schedules, academic announcements, and holiday notices.">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.344.0/dist/umd/lucide.min.js"></script>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <link rel="stylesheet" href="style.css?v=4">
+  <style>
+    /* Specific Notice Board Extensions */
+    .notice-header-bg {
+      background: linear-gradient(135deg, #5c3dff 0%, #7f69ff 50%, #9061f9 100%);
+      color: #ffffff;
+      padding: 28px 20px 24px;
+      border-radius: 0 0 24px 24px;
+      box-shadow: 0 10px 25px rgba(92, 61, 255, 0.2);
+    }
+    
+    .notice-top-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .btn-icon-link {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(8px);
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-icon-link:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .notice-title-box h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 26px;
+      font-weight: 800;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .notice-title-box p {
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    .search-notice-box {
+      margin-top: 18px;
+      position: relative;
+    }
+
+    .search-notice-box input {
+      width: 100%;
+      padding: 12px 16px 12px 42px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(12px);
+      color: #ffffff;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .search-notice-box input::placeholder {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .search-notice-box .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(255, 255, 255, 0.8);
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Category Filter Pills */
+    .notice-pills-scroll {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 16px 20px 8px;
+      scrollbar-width: none;
+    }
+    .notice-pills-scroll::-webkit-scrollbar { display: none; }
+
+    .notice-pill {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      color: #64748b;
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+      transition: all 0.2s ease;
+    }
+
+    .notice-pill.active {
+      background: #5c3dff;
+      color: #ffffff;
+      border-color: #5c3dff;
+      box-shadow: 0 4px 12px rgba(92, 61, 255, 0.25);
+    }
+
+    /* Pinned & Regular Notice Cards */
+    .notice-list-container {
+      padding: 12px 20px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .section-label-heading {
+      font-family: 'Outfit', sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin: 8px 0 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .notice-card {
+      background: #ffffff;
+      border: 1px solid #eef2f6;
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.03);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      position: relative;
+    }
+
+    .notice-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(92, 61, 255, 0.08);
+      border-color: #cbd5e1;
+    }
+
+    .notice-card.pinned-card {
+      border: 2px solid #a855f7;
+      background: linear-gradient(180deg, #ffffff 0%, #faf5ff 100%);
+    }
+
+    .notice-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .notice-tag {
+      font-size: 11px;
+      font-weight: 750;
+      padding: 4px 10px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .tag-urgent { background: #fee2e2; color: #dc2626; }
+    .tag-academic { background: #e0e7ff; color: #4338ca; }
+    .tag-exam { background: #fef3c7; color: #d97706; }
+    .tag-admission { background: #e0f2fe; color: #0369a1; }
+    .tag-holiday { background: #d1fae5; color: #047857; }
+    .tag-general { background: #f1f5f9; color: #475569; }
+
+    .pin-badge {
+      background: rgba(168, 85, 247, 0.15);
+      color: #9333ea;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 9px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .notice-card-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 16px;
+      font-weight: 750;
+      color: #0f172a;
+      line-height: 1.35;
+      margin-bottom: 8px;
+    }
+
+    .notice-card-excerpt {
+      font-size: 13px;
+      color: #475569;
+      line-height: 1.5;
+      margin-bottom: 12px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .notice-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid #f1f5f9;
+      padding-top: 10px;
+      font-size: 11px;
+      color: #64748b;
+    }
+
+    .notice-author {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: 600;
+    }
+
+    .notice-attachment-indicator {
+      color: #5c3dff;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Full Notice Detail Modal */
+    .notice-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    @media (min-width: 640px) {
+      .notice-modal-backdrop {
+        align-items: center;
+      }
+    }
+
+    .notice-modal-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .notice-modal-card {
+      background: #ffffff;
+      width: 100%;
+      max-width: 580px;
+      max-height: 85vh;
+      border-radius: 24px 24px 0 0;
+      padding: 24px;
+      box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.2);
+      overflow-y: auto;
+      transform: translateY(100%);
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @media (min-width: 640px) {
+      .notice-modal-card {
+        border-radius: 24px;
+        transform: translateY(30px);
+      }
+    }
+
+    .notice-modal-backdrop.open .notice-modal-card {
+      transform: translateY(0);
+    }
+
+    .notice-modal-close {
+      position: absolute;
+      right: 18px;
+      top: 18px;
+      background: #f1f5f9;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #64748b;
+    }
+
+    .notice-modal-body {
+      font-size: 14px;
+      color: #334155;
+      line-height: 1.65;
+      margin: 16px 0;
+      white-space: pre-line;
+    }
+
+    .notice-attachment-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #eef2ff;
+      color: #5c3dff;
+      border: 1px dashed #5c3dff;
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 13px;
+      text-decoration: none;
+      margin-top: 12px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .notice-attachment-btn:hover {
+      background: #5c3dff;
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+  <!-- Ambient glow background Tints -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+
+  <!-- Main Container -->
+  <main id="app-container" class="app-container" style="max-width: 480px; margin: 0 auto; min-height: 100vh; background: #fafafd; border-left: 1px solid #eef2f6; border-right: 1px solid #eef2f6; box-shadow: 0 0 40px rgba(0,0,0,0.03);">
+
+    <!-- Header Section -->
+    <header class="notice-header-bg">
+      <div class="notice-top-nav">
+        <a href="index.html" class="btn-icon-link">
+          <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i>
+          <span>Portal Home</span>
+        </a>
+      </div>
+
+      <div class="notice-title-box">
+        <h1><i data-lucide="bell-ring" style="width: 26px; height: 26px;"></i> Notice Board</h1>
+        <p>Official announcements, exam alerts & academic notices for CNGPI students.</p>
+      </div>
+
+      <div class="search-notice-box">
+        <i data-lucide="search" class="search-icon"></i>
+        <input type="text" id="noticeSearchInput" placeholder="Search notices by keyword or topic...">
+      </div>
+    </header>
+
+    <!-- Category Filter Pills -->
+    <div class="notice-pills-scroll" id="noticePills">
+      <button class="notice-pill active" data-category="all">
+        <i data-lucide="layers" style="width: 13px; height: 13px;"></i>
+        <span>All</span>
+      </button>
+      <button class="notice-pill" data-category="urgent">
+        <i data-lucide="alert-triangle" style="width: 13px; height: 13px; color: #dc2626;"></i>
+        <span>Urgent</span>
+      </button>
+      <button class="notice-pill" data-category="academic">
+        <i data-lucide="graduation-cap" style="width: 13px; height: 13px; color: #4338ca;"></i>
+        <span>Academic</span>
+      </button>
+      <button class="notice-pill" data-category="exam">
+        <i data-lucide="file-text" style="width: 13px; height: 13px; color: #d97706;"></i>
+        <span>Exam</span>
+      </button>
+      <button class="notice-pill" data-category="admission">
+        <i data-lucide="landmark" style="width: 13px; height: 13px; color: #0369a1;"></i>
+        <span>Admission</span>
+      </button>
+      <button class="notice-pill" data-category="holiday">
+        <i data-lucide="calendar" style="width: 13px; height: 13px; color: #047857;"></i>
+        <span>Holiday</span>
+      </button>
+    </div>
+
+    <!-- Notice List -->
+    <div class="notice-list-container">
+      <div id="pinnedSection" class="hidden">
+        <div class="section-label-heading">
+          <i data-lucide="pin" style="width: 14px; height: 14px; color: #9333ea;"></i>
+          <span>PINNED NOTICES</span>
+        </div>
+        <div id="pinnedNoticeList"></div>
+      </div>
+
+      <div id="allNoticesHeader" class="section-label-heading" style="margin-top: 10px;">
+        <i data-lucide="bell" style="width: 14px; height: 14px; color: #5c3dff;"></i>
+        <span>RECENT NOTICES</span>
+      </div>
+      <div id="recentNoticeList"></div>
+    </div>
+  </main>
+
+  <!-- Notice Details Modal Popup -->
+  <div id="noticeModal" class="notice-modal-backdrop">
+    <div class="notice-modal-card" style="position: relative;">
+      <button class="notice-modal-close" id="closeNoticeModalBtn">
+        <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+      </button>
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+        <span id="modalNoticeTag" class="notice-tag tag-academic">Academic</span>
+        <span id="modalNoticeGroup" style="font-size: 11px; font-weight: 700; color: #64748b; background: #f1f5f9; padding: 3px 8px; border-radius: 6px;">All Students</span>
+      </div>
+      <h2 id="modalNoticeTitle" style="font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 800; color: #0f172a; line-height: 1.3;">Notice Title</h2>
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 8px; font-size: 12px; color: #64748b; border-bottom: 1px solid #eef2f6; padding-bottom: 12px;">
+        <span id="modalNoticeDate" style="display: flex; align-items: center; gap: 4px;"><i data-lucide="calendar" style="width: 14px; height: 14px;"></i> Published: July 22, 2026</span>
+        <span id="modalNoticeAuthor" style="display: flex; align-items: center; gap: 4px;"><i data-lucide="user-check" style="width: 14px; height: 14px;"></i> Admin Office</span>
+      </div>
+      
+      <!-- Direct Inline Image Notice Container -->
+      <div id="modalImagePreviewSection" class="hidden" style="margin: 14px 0;">
+        <img id="modalNoticeImage" src="" alt="Attached Notice Document" style="width: 100%; height: auto; max-height: 380px; object-fit: contain; border-radius: 14px; border: 1px solid #eef2f6; box-shadow: 0 4px 16px rgba(0,0,0,0.06); display: block; cursor: pointer;" onclick="window.open(this.src, '_blank')">
+        <small style="display: block; text-align: center; color: #64748b; font-size: 11px; margin-top: 6px;">🔍 Tap image to view full screen</small>
+      </div>
+
+      <div id="modalNoticeBody" class="notice-modal-body"></div>
+
+      <!-- PDF Download Button Section -->
+      <div id="modalAttachmentSection" class="hidden">
+        <a id="modalAttachmentLink" href="#" download target="_blank" class="notice-attachment-btn">
+          <i data-lucide="download" style="width: 16px; height: 16px;"></i>
+          <span id="modalAttachmentLabel">Download Official PDF Attachment</span>
+        </a>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 20px;">
+        <button id="modalShareBtn" class="notice-pill" style="flex: 1; justify-content: center; padding: 10px; background: #f8fafc;">
+          <i data-lucide="share-2" style="width: 14px; height: 14px;"></i> Share Notice
+        </button>
+        <button id="modalPrintBtn" class="notice-pill" style="flex: 1; justify-content: center; padding: 10px; background: #f8fafc;">
+          <i data-lucide="printer" style="width: 14px; height: 14px;"></i> Print Notice
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Notice Data Management & Logic
+    const DEFAULT_NOTICES = [
+      {
+        id: 'notice_1',
+        title: '3rd Semester Mid-Term Examination Routine 2026 Released',
+        category: 'exam',
+        targetGroup: 'All Students',
+        publisher: 'Exam Controller Office',
+        date: 'July 22, 2026',
+        isPinned: true,
+        content: `Attention all CNGPI 3rd Semester Students,\n\nThe mid-term diploma in engineering examination routine for CST, ET, and Civil departments has been officially published.\n\nKey Highlights:\n1. Exams will commence from August 2, 2026.\n2. Admit cards must be collected from the department office by July 30.\n3. Clear all outstanding tuition fees before collecting admit cards.\n\nBest of luck to all students!`,
+        attachmentUrl: '#'
+      },
+      {
+        id: 'notice_2',
+        title: 'Urgent: Class Schedule Adjustment for Upcoming Rainy Days',
+        category: 'urgent',
+        targetGroup: 'CST 3/1',
+        publisher: 'Academic Head',
+        date: 'July 20, 2026',
+        isPinned: true,
+        content: `Due to forecasted heavy rain and waterlogging in the campus area, all theory classes for CST 3/1 will transition to online hybrid sessions for the next 2 days.\n\nGoogle Meet links will be shared in your class WhatsApp groups.`,
+        attachmentUrl: ''
+      },
+      {
+        id: 'notice_3',
+        title: 'Institute Closure Notice on Account of Public Holiday',
+        category: 'holiday',
+        targetGroup: 'All Students',
+        publisher: 'Principal Office',
+        date: 'July 18, 2026',
+        isPinned: false,
+        content: `This is for the information of all students, faculty members, and staff that the institute will remain closed on Sunday due to the upcoming national holiday.\n\nClasses will resume as per normal schedule on Monday.`,
+        attachmentUrl: ''
+      },
+      {
+        id: 'notice_4',
+        title: 'New Semester Textbooks Available in Digital Library Portal',
+        category: 'academic',
+        targetGroup: 'All Students',
+        publisher: 'CNGPI Library',
+        date: 'July 15, 2026',
+        isPinned: false,
+        content: `All recommended 3rd semester diploma engineering textbooks have been uploaded to the CNGPI Book List portal.\n\nStudents can download PDF copies or read online via the portal's Book List section.`,
+        attachmentUrl: '#'
+      }
+    ];
+
+    let notices = [];
+    let currentCategory = 'all';
+
+    // Helper: Detect Image URL
+    function isImageUrl(url) {
+      if (!url || url === '#') return false;
+      if (url.startsWith('data:image/')) return true;
+      const cleanUrl = url.toLowerCase().split('?')[0];
+      return cleanUrl.endsWith('.png') || cleanUrl.endsWith('.jpg') || cleanUrl.endsWith('.jpeg') || cleanUrl.endsWith('.webp') || cleanUrl.endsWith('.gif') || cleanUrl.endsWith('.svg');
+    }
+
+    // Load Notices from LocalStorage / Firestore
+    function loadNotices() {
+      const saved = localStorage.getItem('cngpi_notices');
+      if (saved) {
+        try { notices = JSON.parse(saved); } catch(e) { notices = DEFAULT_NOTICES; }
+      } else {
+        notices = DEFAULT_NOTICES;
+        localStorage.setItem('cngpi_notices', JSON.stringify(DEFAULT_NOTICES));
+      }
+
+      // Also attempt Firebase fetch if available
+      if (typeof firebase !== 'undefined' && firebase.firestore) {
+        try {
+          const db = firebase.firestore();
+          db.collection('notices').orderBy('date', 'desc').get().then(snapshot => {
+            if (!snapshot.empty) {
+              const fbNotices = [];
+              snapshot.forEach(doc => fbNotices.push({ id: doc.id, ...doc.data() }));
+              notices = fbNotices;
+              localStorage.setItem('cngpi_notices', JSON.stringify(notices));
+              renderNoticeBoard();
+            }
+          }).catch(err => console.log('Firestore notice fetch fallback to local storage:', err));
+        } catch(e) {}
+      }
+
+      renderNoticeBoard();
+    }
+
+    // Render Notices to UI
+    function renderNoticeBoard() {
+      const search = document.getElementById('noticeSearchInput').value.toLowerCase().trim();
+      const pinnedContainer = document.getElementById('pinnedNoticeList');
+      const recentContainer = document.getElementById('recentNoticeList');
+      const pinnedSection = document.getElementById('pinnedSection');
+
+      pinnedContainer.innerHTML = '';
+      recentContainer.innerHTML = '';
+
+      const filtered = notices.filter(n => {
+        const matchesCategory = currentCategory === 'all' || n.category === currentCategory;
+        const matchesSearch = !search || n.title.toLowerCase().includes(search) || n.content.toLowerCase().includes(search);
+        return matchesCategory && matchesSearch;
+      });
+
+      const pinnedList = filtered.filter(n => n.isPinned);
+      const regularList = filtered.filter(n => !n.isPinned);
+
+      if (pinnedList.length > 0) {
+        pinnedSection.classList.remove('hidden');
+        pinnedList.forEach(n => pinnedContainer.appendChild(createNoticeCardEl(n, true)));
+      } else {
+        pinnedSection.classList.add('hidden');
+      }
+
+      if (regularList.length === 0 && pinnedList.length === 0) {
+        recentContainer.innerHTML = `
+          <div style="text-align: center; padding: 40px 16px; color: #64748b;">
+            <div style="display: inline-block; margin-bottom: 8px; color: #94a3b8;"><i data-lucide="search" style="width: 32px; height: 32px;"></i></div>
+            <h4 style="font-size: 15px; color: #334155;">No notices found</h4>
+            <p style="font-size: 12px; margin-top: 4px;">Try selecting another category or keyword.</p>
+          </div>
+        `;
+      } else {
+        regularList.forEach(n => recentContainer.appendChild(createNoticeCardEl(n, false)));
+      }
+
+      lucide.createIcons();
+    }
+
+    // Create Card Element
+    function createNoticeCardEl(notice, isPinned) {
+      const card = document.createElement('div');
+      card.className = `notice-card ${isPinned ? 'pinned-card' : ''}`;
+      
+      const tagClasses = {
+        urgent: 'tag-urgent',
+        academic: 'tag-academic',
+        exam: 'tag-exam',
+        admission: 'tag-admission',
+        holiday: 'tag-holiday',
+        general: 'tag-general'
+      };
+
+      const categoryIcons = {
+        urgent: '<i data-lucide="alert-triangle" style="width: 12px; height: 12px;"></i> Urgent',
+        academic: '<i data-lucide="graduation-cap" style="width: 12px; height: 12px;"></i> Academic',
+        exam: '<i data-lucide="file-text" style="width: 12px; height: 12px;"></i> Exam',
+        admission: '<i data-lucide="landmark" style="width: 12px; height: 12px;"></i> Admission',
+        holiday: '<i data-lucide="calendar" style="width: 12px; height: 12px;"></i> Holiday',
+        general: '<i data-lucide="megaphone" style="width: 12px; height: 12px;"></i> General'
+      };
+
+      const hasImg = isImageUrl(notice.attachmentUrl);
+      const hasAttachment = notice.attachmentUrl && notice.attachmentUrl !== '#';
+
+      card.innerHTML = `
+        <div class="notice-card-header">
+          <span class="notice-tag ${tagClasses[notice.category] || 'tag-general'}">${categoryIcons[notice.category] || notice.category}</span>
+          ${isPinned ? '<span class="pin-badge"><i data-lucide="pin" style="width: 12px; height: 12px;"></i> Pinned</span>' : ''}
+        </div>
+        <h3 class="notice-card-title">${notice.title}</h3>
+        <p class="notice-card-excerpt">${notice.content}</p>
+        <div class="notice-card-footer">
+          <span class="notice-author"><i data-lucide="calendar" style="width: 12px; height: 12px;"></i> ${notice.date}</span>
+          ${hasImg ? '<span class="notice-attachment-indicator"><i data-lucide="image" style="width: 12px; height: 12px;"></i> Photo Notice</span>' : (hasAttachment ? '<span class="notice-attachment-indicator"><i data-lucide="file-text" style="width: 12px; height: 12px;"></i> PDF File</span>' : '')}
+        </div>
+      `;
+
+      card.addEventListener('click', () => openNoticeModal(notice));
+      return card;
+    }
+
+    // Open Modal
+    function openNoticeModal(notice) {
+      document.getElementById('modalNoticeTitle').textContent = notice.title;
+      document.getElementById('modalNoticeBody').textContent = notice.content;
+      document.getElementById('modalNoticeDate').innerHTML = `<i data-lucide="calendar" style="width:14px; height:14px;"></i> Published: ${notice.date}`;
+      document.getElementById('modalNoticeAuthor').innerHTML = `<i data-lucide="user-check" style="width:14px; height:14px;"></i> ${notice.publisher || 'Admin'}`;
+      document.getElementById('modalNoticeGroup').textContent = notice.targetGroup || 'All Students';
+
+      const tagEl = document.getElementById('modalNoticeTag');
+      tagEl.className = `notice-tag tag-${notice.category || 'general'}`;
+      tagEl.textContent = (notice.category || 'general').toUpperCase();
+
+      const imagePreviewSection = document.getElementById('modalImagePreviewSection');
+      const modalNoticeImage = document.getElementById('modalNoticeImage');
+      const attachSection = document.getElementById('modalAttachmentSection');
+      const attachLink = document.getElementById('modalAttachmentLink');
+
+      const url = notice.attachmentUrl;
+      const isImg = isImageUrl(url);
+
+      if (isImg) {
+        // Direct Image Display on Web Page Modal
+        imagePreviewSection.classList.remove('hidden');
+        modalNoticeImage.src = url;
+        attachSection.classList.add('hidden');
+      } else if (url && url !== '#') {
+        // PDF / Document Attachment Download
+        imagePreviewSection.classList.add('hidden');
+        attachSection.classList.remove('hidden');
+        attachLink.href = url;
+        attachLink.setAttribute('download', 'cngpi_notice_attachment.pdf');
+        document.getElementById('modalAttachmentLabel').textContent = 'Download Official PDF Attachment';
+      } else {
+        imagePreviewSection.classList.add('hidden');
+        attachSection.classList.add('hidden');
+      }
+
+      document.getElementById('noticeModal').classList.add('open');
+      lucide.createIcons();
+    }
+
+    // Event Listeners
+    document.addEventListener('DOMContentLoaded', () => {
+      loadNotices();
+
+      document.getElementById('noticeSearchInput').addEventListener('input', renderNoticeBoard);
+
+      document.querySelectorAll('#noticePills .notice-pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+          document.querySelectorAll('#noticePills .notice-pill').forEach(p => p.classList.remove('active'));
+          pill.classList.add('active');
+          currentCategory = pill.getAttribute('data-category');
+          renderNoticeBoard();
+        });
+      });
+
+      document.getElementById('closeNoticeModalBtn').addEventListener('click', () => {
+        document.getElementById('noticeModal').classList.remove('open');
+      });
+
+      document.getElementById('noticeModal').addEventListener('click', (e) => {
+        if (e.target.id === 'noticeModal') {
+          document.getElementById('noticeModal').classList.remove('open');
+        }
+      });
+
+      document.getElementById('modalShareBtn').addEventListener('click', () => {
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(window.location.href);
+          alert('Notice link copied to clipboard!');
+        }
+      });
+
+      document.getElementById('modalPrintBtn').addEventListener('click', () => {
+        window.print();
+      });
+    });
+  </script>
+</body>
+</html>

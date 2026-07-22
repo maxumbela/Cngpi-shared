@@ -447,6 +447,10 @@
           <i data-lucide="book-open" style="width:14px; display:inline; margin-right:4px;"></i>
           Manage Books
         </button>
+        <button class="tab-btn" id="tab-btn-notices">
+          <i data-lucide="bell" style="width:14px; display:inline; margin-right:4px;"></i>
+          Manage Notices
+        </button>
       </div>
 
       <!-- TAB VIEW: MANUAL EDITOR -->
@@ -636,6 +640,95 @@
         </div>
       </div>
 
+      <!-- TAB VIEW: MANAGE NOTICES -->
+      <div id="view-notices" class="space-y-4 hidden">
+        <!-- Notice Form Card -->
+        <div class="card">
+          <h3 id="notice-form-title" class="font-bold mb-4" style="font-size:18px; margin-bottom:16px; color:var(--color-primary); display:flex; align-items:center; gap:8px;">
+            <i data-lucide="plus-circle" style="width:20px; height:20px;"></i>
+            <span>Publish New Notice</span>
+          </h3>
+
+          <input type="hidden" id="notice-editing-id" value="">
+
+          <div class="grid-fields-4">
+            <div class="form-group" style="grid-column: span 2;">
+              <label for="notice-input-title">Notice Title *</label>
+              <input type="text" id="notice-input-title" class="input-field" placeholder="e.g. Mid-Term Diploma Exam Schedule 2026" required>
+            </div>
+            <div class="form-group">
+              <label for="notice-input-category">Category *</label>
+              <select id="notice-input-category" class="input-field" style="padding:12px; background:#f8fafc;">
+                <option value="general">General Notice</option>
+                <option value="urgent">Urgent Alert</option>
+                <option value="academic">Academic Notice</option>
+                <option value="exam">Exam Schedule</option>
+                <option value="admission">Admission Notice</option>
+                <option value="holiday">Holiday Notice</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="notice-input-group">Target Audience</label>
+              <input type="text" id="notice-input-group" class="input-field" value="All Students" placeholder="All Students or CST 3/1">
+            </div>
+          </div>
+
+          <div class="grid-fields-4">
+            <div class="form-group">
+              <label for="notice-input-publisher">Publisher Office</label>
+              <input type="text" id="notice-input-publisher" class="input-field" value="Principal Office, CNGPI" placeholder="e.g. Exam Controller Office">
+            </div>
+            <div class="form-group" style="grid-column: span 2;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <label for="notice-input-attachment">Attachment (PDF / Image / Web Link)</label>
+                <label for="notice-file-picker" style="font-size:11px; font-weight:700; color:#5c3dff; cursor:pointer; display:inline-flex; align-items:center; gap:4px; background:#eef2ff; padding:3px 8px; border-radius:6px;">
+                  <i data-lucide="paperclip" style="width:12px; height:12px;"></i> Upload PDF / File
+                </label>
+                <input type="file" id="notice-file-picker" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx" style="display:none;" onchange="handleNoticeFileUpload(this)">
+              </div>
+              <input type="text" id="notice-input-attachment" class="input-field" placeholder="Paste link or click Upload PDF / File above">
+              <small id="notice-file-status" style="font-size:11px; color:#10b981; font-weight:600; display:block; margin-top:3px;"></small>
+            </div>
+            <div class="form-group" style="display:flex; align-items:flex-end;">
+              <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:700; font-size:13px; color:#5c3dff; padding:10px; background:#eef2ff; border-radius:12px; width:100%;">
+                <input type="checkbox" id="notice-input-pinned" style="width:18px; height:18px; accent-color:#5c3dff;">
+                <span style="display:flex; align-items:center; gap:4px;"><i data-lucide="pin" style="width:14px; height:14px;"></i> Pin Notice to Top</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top:12px;">
+            <label for="notice-input-content">Notice Content / Description *</label>
+            <textarea id="notice-input-content" class="input-field" style="height:140px; padding:14px; font-family:inherit; resize:vertical;" placeholder="Write detailed notice information here..." required></textarea>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:20px; border-top:1px solid var(--border-color); padding-top:16px;">
+            <button type="button" class="btn btn-secondary" onclick="resetNoticeForm()">Clear Form</button>
+            <button type="button" class="btn btn-primary" id="btn-save-notice" onclick="saveAdminNotice()">
+              <i data-lucide="send" style="width:16px; height:16px;"></i>
+              <span id="btn-save-notice-text">Publish Notice</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Published Notices List Card -->
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <h3 class="font-bold" style="font-size:16px; display:flex; align-items:center; gap:8px;">
+              <i data-lucide="list" style="width:18px; height:18px; color:var(--color-primary);"></i>
+              <span>Published Notices (<span id="admin-notice-count">0</span>)</span>
+            </h3>
+            <button class="btn btn-secondary" onclick="loadAdminNotices()" style="padding:6px 12px; font-size:12px;">
+              <i data-lucide="refresh-cw" style="width:14px; height:14px;"></i> Refresh List
+            </button>
+          </div>
+
+          <div id="admin-notices-table-container">
+            <!-- Notices list dynamically populated -->
+          </div>
+        </div>
+      </div>
+
     </div>
   </main>
 
@@ -758,37 +851,337 @@
     const tabEdit = document.getElementById("tab-btn-edit");
     const tabImport = document.getElementById("tab-btn-import");
     const tabBooks = document.getElementById("tab-btn-books");
+    const tabNotices = document.getElementById("tab-btn-notices");
     const viewEditor = document.getElementById("view-editor");
     const viewImport = document.getElementById("view-import");
     const viewBooks = document.getElementById("view-books");
+    const viewNotices = document.getElementById("view-notices");
 
     tabEdit.addEventListener("click", () => {
       tabEdit.classList.add("active");
       tabImport.classList.remove("active");
       tabBooks.classList.remove("active");
+      if (tabNotices) tabNotices.classList.remove("active");
       viewEditor.classList.remove("hidden");
       viewImport.classList.add("hidden");
       viewBooks.classList.add("hidden");
+      if (viewNotices) viewNotices.classList.add("hidden");
     });
 
     tabImport.addEventListener("click", () => {
       tabImport.classList.add("active");
       tabEdit.classList.remove("active");
       tabBooks.classList.remove("active");
+      if (tabNotices) tabNotices.classList.remove("active");
       viewImport.classList.remove("hidden");
       viewEditor.classList.add("hidden");
       viewBooks.classList.add("hidden");
+      if (viewNotices) viewNotices.classList.add("hidden");
     });
 
     tabBooks.addEventListener("click", () => {
       tabBooks.classList.add("active");
       tabEdit.classList.remove("active");
       tabImport.classList.remove("active");
+      if (tabNotices) tabNotices.classList.remove("active");
       viewBooks.classList.remove("hidden");
       viewEditor.classList.add("hidden");
       viewImport.classList.add("hidden");
+      if (viewNotices) viewNotices.classList.add("hidden");
       loadTechDropdown();
     });
+
+    if (tabNotices) {
+      tabNotices.addEventListener("click", () => {
+        tabNotices.classList.add("active");
+        tabEdit.classList.remove("active");
+        tabImport.classList.remove("active");
+        tabBooks.classList.remove("active");
+        viewNotices.classList.remove("hidden");
+        viewEditor.classList.add("hidden");
+        viewImport.classList.add("hidden");
+        viewBooks.classList.add("hidden");
+        loadAdminNotices();
+      });
+    }
+
+    // Notice Management Functions
+    function handleNoticeFileUpload(inputEl) {
+      const file = inputEl.files[0];
+      if (!file) return;
+
+      const statusEl = document.getElementById("notice-file-status");
+      const attachmentInput = document.getElementById("notice-input-attachment");
+
+      statusEl.textContent = `Processing ${file.name}...`;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        attachmentInput.value = e.target.result;
+        statusEl.innerHTML = `Attached: <strong>${file.name}</strong> (${(file.size / 1024).toFixed(1)} KB)`;
+        triggerToast("File Attached", `Attached ${file.name}`, "success");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function resetNoticeForm() {
+      document.getElementById("notice-editing-id").value = "";
+      document.getElementById("notice-input-title").value = "";
+      document.getElementById("notice-input-category").value = "general";
+      document.getElementById("notice-input-group").value = "All Students";
+      document.getElementById("notice-input-publisher").value = "Principal Office, CNGPI";
+      document.getElementById("notice-input-attachment").value = "";
+      document.getElementById("notice-file-status").textContent = "";
+      document.getElementById("notice-file-picker").value = "";
+      document.getElementById("notice-input-pinned").checked = false;
+      document.getElementById("notice-input-content").value = "";
+      document.getElementById("btn-save-notice-text").textContent = "Publish Notice";
+    }
+
+    const DEFAULT_NOTICES = [
+      {
+        id: 'notice_1',
+        title: '3rd Semester Mid-Term Examination Routine 2026 Released',
+        category: 'exam',
+        targetGroup: 'All Students',
+        publisher: 'Exam Controller Office',
+        date: 'July 22, 2026',
+        isPinned: true,
+        content: `Attention all CNGPI 3rd Semester Students,\n\nThe mid-term diploma in engineering examination routine for CST, ET, and Civil departments has been officially published.\n\nKey Highlights:\n1. Exams will commence from August 2, 2026.\n2. Admit cards must be collected from the department office by July 30.\n3. Clear all outstanding tuition fees before collecting admit cards.\n\nBest of luck to all students!`,
+        attachmentUrl: '#'
+      },
+      {
+        id: 'notice_2',
+        title: 'Urgent: Class Schedule Adjustment for Upcoming Rainy Days',
+        category: 'urgent',
+        targetGroup: 'CST 3/1',
+        publisher: 'Academic Head',
+        date: 'July 20, 2026',
+        isPinned: true,
+        content: `Due to forecasted heavy rain and waterlogging in the campus area, all theory classes for CST 3/1 will transition to online hybrid sessions for the next 2 days.\n\nGoogle Meet links will be shared in your class WhatsApp groups.`,
+        attachmentUrl: ''
+      },
+      {
+        id: 'notice_3',
+        title: 'Institute Closure Notice on Account of Public Holiday',
+        category: 'holiday',
+        targetGroup: 'All Students',
+        publisher: 'Principal Office',
+        date: 'July 18, 2026',
+        isPinned: false,
+        content: `This is for the information of all students, faculty members, and staff that the institute will remain closed on Sunday due to the upcoming national holiday.\n\nClasses will resume as per normal schedule on Monday.`,
+        attachmentUrl: ''
+      },
+      {
+        id: 'notice_4',
+        title: 'New Semester Textbooks Available in Digital Library Portal',
+        category: 'academic',
+        targetGroup: 'All Students',
+        publisher: 'CNGPI Library',
+        date: 'July 15, 2026',
+        isPinned: false,
+        content: `All recommended 3rd semester diploma engineering textbooks have been uploaded to the CNGPI Book List portal.\n\nStudents can download PDF copies or read online via the portal's Book List section.`,
+        attachmentUrl: '#'
+      }
+    ];
+
+    function loadAdminNotices() {
+      const saved = localStorage.getItem("cngpi_notices");
+      let noticesList = saved ? JSON.parse(saved) : null;
+
+      if (!noticesList || noticesList.length === 0) {
+        noticesList = DEFAULT_NOTICES;
+        localStorage.setItem("cngpi_notices", JSON.stringify(DEFAULT_NOTICES));
+      }
+
+      if (typeof db !== 'undefined' && db) {
+        db.collection("notices").orderBy("date", "desc").get().then(snapshot => {
+          if (!snapshot.empty) {
+            noticesList = [];
+            snapshot.forEach(doc => noticesList.push({ id: doc.id, ...doc.data() }));
+            localStorage.setItem("cngpi_notices", JSON.stringify(noticesList));
+          }
+          renderAdminNoticesTable(noticesList);
+        }).catch(err => {
+          console.warn("Firestore notice fetch fallback to local storage:", err);
+          renderAdminNoticesTable(noticesList);
+        });
+      } else {
+        renderAdminNoticesTable(noticesList);
+      }
+    }
+
+    function renderAdminNoticesTable(noticesList) {
+      const container = document.getElementById("admin-notices-table-container");
+      document.getElementById("admin-notice-count").textContent = noticesList.length;
+
+      if (!noticesList || noticesList.length === 0) {
+        container.innerHTML = `<p style="font-size:13px; color:var(--text-muted); text-align:center; padding:30px;">No published notices found. Fill out the form above to post your first notice!</p>`;
+        return;
+      }
+
+      const categoryBadges = {
+        urgent: { bg: '#fee2e2', color: '#dc2626', label: '<i data-lucide="alert-triangle" style="width:12px; height:12px; display:inline;"></i> Urgent' },
+        academic: { bg: '#e0e7ff', color: '#4338ca', label: '<i data-lucide="graduation-cap" style="width:12px; height:12px; display:inline;"></i> Academic' },
+        exam: { bg: '#fef3c7', color: '#d97706', label: '<i data-lucide="file-text" style="width:12px; height:12px; display:inline;"></i> Exam' },
+        admission: { bg: '#e0f2fe', color: '#0369a1', label: '<i data-lucide="landmark" style="width:12px; height:12px; display:inline;"></i> Admission' },
+        holiday: { bg: '#d1fae5', color: '#047857', label: '<i data-lucide="calendar" style="width:12px; height:12px; display:inline;"></i> Holiday' },
+        general: { bg: '#f1f5f9', color: '#475569', label: '<i data-lucide="megaphone" style="width:12px; height:12px; display:inline;"></i> General' }
+      };
+
+      let html = `
+        <div style="overflow-x:auto;">
+          <table style="width:100%; border-collapse:collapse; font-size:13px;">
+            <thead>
+              <tr style="background:#f8fafc; text-align:left; border-bottom:2px solid var(--border-color);">
+                <th style="padding:12px; color:var(--text-muted);">Status / Category</th>
+                <th style="padding:12px; color:var(--text-muted);">Notice Title</th>
+                <th style="padding:12px; color:var(--text-muted);">Audience</th>
+                <th style="padding:12px; color:var(--text-muted);">Date</th>
+                <th style="padding:12px; color:var(--text-muted); text-align:center;">Pinned</th>
+                <th style="padding:12px; color:var(--text-muted); text-align:right;">Admin Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+
+      noticesList.forEach(n => {
+        const catInfo = categoryBadges[n.category] || categoryBadges.general;
+        html += `
+          <tr style="border-bottom:1px solid var(--border-color); background:${n.isPinned ? '#faf5ff' : '#ffffff'};">
+            <td style="padding:12px;">
+              <span style="background:${catInfo.bg}; color:${catInfo.color}; padding:4px 10px; border-radius:8px; font-weight:750; font-size:11px; white-space:nowrap; display:inline-flex; align-items:center; gap:4px;">
+                ${catInfo.label}
+              </span>
+            </td>
+            <td style="padding:12px; max-width:280px;">
+              <strong style="display:block; font-size:13px; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${n.title}">${n.title}</strong>
+              <small style="color:#64748b; font-size:11px; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${n.publisher || 'Admin'}</small>
+            </td>
+            <td style="padding:12px; color:#475569; font-weight:600;">${n.targetGroup || 'All'}</td>
+            <td style="padding:12px; color:var(--text-muted); font-size:12px; white-space:nowrap;">${n.date}</td>
+            <td style="padding:12px; text-align:center;">
+              <button onclick="togglePinAdminNotice('${n.id}')" class="btn btn-secondary" style="padding:4px 10px; font-size:12px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" title="Click to pin/unpin notice">
+                ${n.isPinned ? '<i data-lucide="pin" style="width:12px; height:12px; color:#9333ea;"></i> Pinned' : '<i data-lucide="circle" style="width:12px; height:12px; color:#94a3b8;"></i> Normal'}
+              </button>
+            </td>
+            <td style="padding:12px; text-align:right; white-space:nowrap;">
+              <button class="btn btn-secondary" style="padding:6px 12px; font-size:12px; margin-right:6px; background:#e0e7ff; color:#4338ca; display:inline-flex; align-items:center; gap:4px;" onclick="editAdminNotice('${n.id}')">
+                <i data-lucide="edit-3" style="width:13px; height:13px;"></i> Edit
+              </button>
+              <button class="btn btn-danger" style="padding:6px 12px; font-size:12px; background:#ef4444; color:white; display:inline-flex; align-items:center; gap:4px;" onclick="deleteAdminNotice('${n.id}')">
+                <i data-lucide="trash-2" style="width:13px; height:13px;"></i> Delete
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+
+      html += `</tbody></table></div>`;
+      container.innerHTML = html;
+      lucide.createIcons();
+    }
+
+    function saveAdminNotice() {
+      const editId = document.getElementById("notice-editing-id").value;
+      const title = document.getElementById("notice-input-title").value.trim();
+      const category = document.getElementById("notice-input-category").value;
+      const targetGroup = document.getElementById("notice-input-group").value.trim() || "All Students";
+      const publisher = document.getElementById("notice-input-publisher").value.trim() || "Principal Office, CNGPI";
+      const attachmentUrl = document.getElementById("notice-input-attachment").value.trim();
+      const isPinned = document.getElementById("notice-input-pinned").checked;
+      const content = document.getElementById("notice-input-content").value.trim();
+
+      if (!title || !content) {
+        triggerToast("Incomplete Notice", "Please enter notice title and content body.", "error");
+        return;
+      }
+
+      const today = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+      const noticeObj = {
+        id: editId || 'notice_' + Date.now(),
+        title,
+        category,
+        targetGroup,
+        publisher,
+        attachmentUrl,
+        isPinned,
+        content,
+        date: today,
+        createdAt: Date.now()
+      };
+
+      const saved = localStorage.getItem("cngpi_notices");
+      let list = saved ? JSON.parse(saved) : [];
+
+      if (editId) {
+        const idx = list.findIndex(n => n.id === editId);
+        if (idx > -1) list[idx] = noticeObj;
+      } else {
+        list.unshift(noticeObj);
+      }
+
+      localStorage.setItem("cngpi_notices", JSON.stringify(list));
+
+      if (typeof db !== 'undefined' && db) {
+        db.collection("notices").doc(noticeObj.id).set(noticeObj).catch(e => console.warn("Firestore notice save error:", e));
+      }
+
+      triggerToast("Notice Published!", "Notice successfully updated on the portal.", "success");
+      resetNoticeForm();
+      loadAdminNotices();
+    }
+
+    function editAdminNotice(noticeId) {
+      const saved = localStorage.getItem("cngpi_notices");
+      const list = saved ? JSON.parse(saved) : [];
+      const n = list.find(item => item.id === noticeId);
+      if (!n) return;
+
+      document.getElementById("notice-editing-id").value = n.id;
+      document.getElementById("notice-input-title").value = n.title || "";
+      document.getElementById("notice-input-category").value = n.category || "general";
+      document.getElementById("notice-input-group").value = n.targetGroup || "All Students";
+      document.getElementById("notice-input-publisher").value = n.publisher || "";
+      document.getElementById("notice-input-attachment").value = n.attachmentUrl || "";
+      document.getElementById("notice-input-pinned").checked = !!n.isPinned;
+      document.getElementById("notice-input-content").value = n.content || "";
+      document.getElementById("btn-save-notice-text").textContent = "Update Notice 💾";
+
+      document.getElementById("view-notices").scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function deleteAdminNotice(noticeId) {
+      if (!confirm("Are you sure you want to delete this notice?")) return;
+
+      const saved = localStorage.getItem("cngpi_notices");
+      let list = saved ? JSON.parse(saved) : [];
+      list = list.filter(n => n.id !== noticeId);
+      localStorage.setItem("cngpi_notices", JSON.stringify(list));
+
+      if (typeof db !== 'undefined' && db) {
+        db.collection("notices").doc(noticeId).delete().catch(e => console.warn("Firestore delete error:", e));
+      }
+
+      triggerToast("Notice Deleted", "Notice removed from board.", "success");
+      loadAdminNotices();
+    }
+
+    function togglePinAdminNotice(noticeId) {
+      const saved = localStorage.getItem("cngpi_notices");
+      let list = saved ? JSON.parse(saved) : [];
+      const n = list.find(item => item.id === noticeId);
+      if (n) {
+        n.isPinned = !n.isPinned;
+        localStorage.setItem("cngpi_notices", JSON.stringify(list));
+        if (typeof db !== 'undefined' && db) {
+          db.collection("notices").doc(noticeId).update({ isPinned: n.isPinned }).catch(e => console.warn("Firestore pin toggle error:", e));
+        }
+        triggerToast("Pin Toggled", `Notice ${n.isPinned ? 'pinned to top' : 'unpinned'}.`, "success");
+        loadAdminNotices();
+      }
+    }
 
     // Build default blank forms structures
     function buildBlankEditor() {
