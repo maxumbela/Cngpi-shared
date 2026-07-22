@@ -425,9 +425,9 @@
         window.onload = function() {
             initTheme();
             
-            // Load routine from Firestore
+            // Real-time Firebase Datastore listener for instant routine updates
             const docId = selectedGroupCode.replace(/\//g, '_');
-            db.collection("routines").doc(docId).get().then((docSnap) => {
+            db.collection("routines").doc(docId).onSnapshot((docSnap) => {
                 if (!docSnap.exists) {
                     alert(`No routine data found for group code: ${selectedGroupCode}. Please set one up in the Admin Panel.`);
                     window.location.href = "index.html";

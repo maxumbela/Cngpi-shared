@@ -999,15 +999,15 @@
       }
 
       if (typeof db !== 'undefined' && db) {
-        db.collection("notices").orderBy("date", "desc").get().then(snapshot => {
+        db.collection("notices").orderBy("date", "desc").onSnapshot(snapshot => {
           if (!snapshot.empty) {
             noticesList = [];
             snapshot.forEach(doc => noticesList.push({ id: doc.id, ...doc.data() }));
             localStorage.setItem("cngpi_notices", JSON.stringify(noticesList));
           }
           renderAdminNoticesTable(noticesList);
-        }).catch(err => {
-          console.warn("Firestore notice fetch fallback to local storage:", err);
+        }, err => {
+          console.warn("Firestore notice real-time listener notice:", err);
           renderAdminNoticesTable(noticesList);
         });
       } else {

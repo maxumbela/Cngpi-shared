@@ -545,11 +545,11 @@
         localStorage.setItem('cngpi_notices', JSON.stringify(DEFAULT_NOTICES));
       }
 
-      // Also attempt Firebase fetch if available
+      // Real-time Firebase Datastore listener for instant live updates
       if (typeof firebase !== 'undefined' && firebase.firestore) {
         try {
           const db = firebase.firestore();
-          db.collection('notices').orderBy('date', 'desc').get().then(snapshot => {
+          db.collection('notices').orderBy('date', 'desc').onSnapshot(snapshot => {
             if (!snapshot.empty) {
               const fbNotices = [];
               snapshot.forEach(doc => fbNotices.push({ id: doc.id, ...doc.data() }));
@@ -557,7 +557,7 @@
               localStorage.setItem('cngpi_notices', JSON.stringify(notices));
               renderNoticeBoard();
             }
-          }).catch(err => console.log('Firestore notice fetch fallback to local storage:', err));
+          }, err => console.warn('Firestore real-time notice listener error:', err));
         } catch(e) {}
       }
 

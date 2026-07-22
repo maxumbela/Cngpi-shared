@@ -406,7 +406,8 @@
         renderAccordions();
         return;
       }
-      db.collection("books").get().then((querySnap) => {
+      // Real-time Firebase Datastore listener for instant live updates
+      db.collection("books").onSnapshot((querySnap) => {
         if (querySnap.empty) {
           console.log("No custom books found in Firestore. Seeding default scraped list...");
           seedBooksData();
@@ -425,8 +426,8 @@
 
         renderTechTabs();
         renderAccordions();
-      }).catch(err => {
-        console.error("Failed to load from database, falling back to scraped list:", err);
+      }, err => {
+        console.error("Firestore real-time books listener error:", err);
         loadedBooksData = JSON.parse(JSON.stringify(defaultBooksData));
         activeTechnology = "CST";
         renderTechTabs();
