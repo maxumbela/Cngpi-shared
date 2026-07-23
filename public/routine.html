@@ -689,6 +689,62 @@
       margin-bottom: 8px;
     }
 
+    /* Ultra Live Class Highlighting */
+    .period-card.is-live-class {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.28) 0%, rgba(225, 29, 72, 0.18) 100%) !important;
+      border: 2px solid #f43f5e !important;
+      box-shadow: 0 0 28px rgba(244, 63, 94, 0.55), 0 0 10px rgba(239, 68, 68, 0.4) !important;
+      animation: liveGlowPulse 1.8s infinite ease-in-out;
+      transform: scale(1.02);
+    }
+
+    @keyframes liveGlowPulse {
+      0%, 100% {
+        border-color: #f43f5e;
+        box-shadow: 0 0 28px rgba(244, 63, 94, 0.6), 0 0 10px rgba(239, 68, 68, 0.5);
+      }
+      50% {
+        border-color: #ff2a55;
+        box-shadow: 0 0 40px rgba(255, 42, 85, 0.85), 0 0 20px rgba(244, 63, 94, 0.7);
+      }
+    }
+
+    .live-badge-glow {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      font-weight: 900;
+      color: #ffffff;
+      background: linear-gradient(135deg, #ef4444 0%, #e11d48 100%);
+      padding: 4px 10px;
+      border-radius: 10px;
+      box-shadow: 0 4px 14px rgba(239, 68, 68, 0.5);
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .table-class-box.is-live-cell {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.35) 0%, rgba(225, 29, 72, 0.25) 100%) !important;
+      border: 2px solid #ef4444 !important;
+      box-shadow: inset 0 0 12px rgba(239, 68, 68, 0.4), 0 0 22px rgba(239, 68, 68, 0.6) !important;
+      animation: liveGlowPulse 1.8s infinite ease-in-out;
+    }
+
+    .table-live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 8px;
+      font-weight: 900;
+      color: #ffffff;
+      background: #ef4444;
+      padding: 2px 6px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
     /* Export Routine Button Styles */
     .btn-export-routine {
       display: inline-flex;
@@ -974,6 +1030,50 @@
       fetchGroupRoutinesFromFirestore();
     });
 
+    // Dhaka Time & Live Class Checker Helpers
+    function getDhakaCurrentTimeInfo() {
+      const now = new Date();
+      const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
+      const dhakaTime = new Date(utcMs + (6 * 3600000));
+      const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      const dayName = dayNames[dhakaTime.getDay()];
+      const currentMinutes = dhakaTime.getHours() * 60 + dhakaTime.getMinutes();
+      return { dhakaTime, dayName, currentMinutes };
+    }
+
+    function parseTimeStringToMinutes(timeStr) {
+      if (!timeStr) return null;
+      const parts = timeStr.split("-");
+      if (parts.length !== 2) return null;
+
+      function convertToMin(str) {
+        str = str.trim().toUpperCase();
+        const isPM = str.includes("PM");
+        const isAM = str.includes("AM");
+        const cleanStr = str.replace(/(AM|PM)/g, "").trim();
+        const [hStr, mStr] = cleanStr.split(":");
+        let hours = parseInt(hStr, 10);
+        let minutes = parseInt(mStr || "0", 10);
+
+        if (isPM && hours < 12) hours += 12;
+        if (isAM && hours === 12) hours = 0;
+
+        return hours * 60 + minutes;
+      }
+
+      const start = convertToMin(parts[0]);
+      const end = convertToMin(parts[1]);
+      return { start, end };
+    }
+
+    function checkIsSlotLive(slotTime, targetDay) {
+      const { dayName: todayName, currentMinutes } = getDhakaCurrentTimeInfo();
+      if (targetDay !== todayName) return false;
+      const range = parseTimeStringToMinutes(slotTime);
+      if (!range) return false;
+      return currentMinutes >= range.start && currentMinutes < range.end;
+    }
+
     // Auto Highlight Today's Tab
     function determineTodayTab() {
       const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"];
@@ -1228,6 +1328,7 @@
               if (slot && slot.subject_name) {
                 const teacherInfo = getTeacherByShortCode(routine.teachers_details, slot.teacher_short_code);
                 const pStr = (slot.period || "").toLowerCase();
+                const isLive = checkIsSlotLive(slot.time, day);
 
                 let spanCount = 1;
                 if (pStr.includes("5th, 6th & 7th") || pStr.includes("5th,6th,7th")) spanCount = 3;
@@ -1237,7 +1338,8 @@
                   skipUntilPeriod = p + spanCount - 1;
                   tableHTML += `
                     <td colspan="${spanCount}">
-                      <div class="table-class-box multi-period-glow">
+                      <div class="table-class-box multi-period-glow ${isLive ? 'is-live-cell' : ''}">
+                        ${isLive ? `<div class="table-live-badge">🔴 LIVE CLASS NOW</div>` : ''}
                         <div class="table-span-badge">
                           <i data-lucide="layers" style="width: 10px; height: 10px;"></i>
                           <span>${spanCount}-Period Class (${slot.period})</span>
@@ -1251,7 +1353,8 @@
                 } else {
                   tableHTML += `
                     <td>
-                      <div class="table-class-box">
+                      <div class="table-class-box ${isLive ? 'is-live-cell' : ''}">
+                        ${isLive ? `<div class="table-live-badge">🔴 LIVE CLASS NOW</div>` : ''}
                         <div class="table-sub-title">${slot.subject_name}</div>
                         <div class="table-sub-info">Code: ${slot.subject_code || '-'} • Room: ${slot.room || '-'}</div>
                         <div class="table-teacher-tag">${teacherInfo ? teacherInfo.name : (slot.teacher_short_code || '-')}</div>
@@ -1301,13 +1404,21 @@
         const isOff = !slot.subject_name;
         const pStr = (slot.period || "").toLowerCase();
         const isMultiPeriod = pStr.includes("&") || pStr.includes(",");
+        const isLive = !isOff && checkIsSlotLive(slot.time, activeDay);
 
         const card = document.createElement("div");
-        card.className = `period-card ${isOff ? 'off-period' : ''} ${isMultiPeriod ? 'multi-period-card' : ''}`;
+        card.className = `period-card ${isOff ? 'off-period' : ''} ${isMultiPeriod ? 'multi-period-card' : ''} ${isLive ? 'is-live-class' : ''}`;
 
         const teacherInfo = getTeacherByShortCode(routine.teachers_details, slot.teacher_short_code);
 
         card.innerHTML = `
+          ${isLive ? `
+            <div class="live-badge-glow">
+              <span class="pink-dot" style="width: 6px; height: 6px; background: #ffffff; box-shadow: 0 0 8px #ffffff;"></span>
+              <span>🔴 LIVE CLASS NOW IN SESSION</span>
+            </div>
+          ` : ''}
+
           <div class="period-card-top">
             <div class="period-time-badge">
               <i data-lucide="clock" style="width: 13px; height: 13px;"></i>

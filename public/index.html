@@ -2124,6 +2124,11 @@
               const teacher = getTeacherInfo(slot.teacher_short_code);
               const pStr = (slot.period || "").toLowerCase();
 
+              const now = new Date();
+              const { dayName: currentDayName, currentMinutes } = getDhakaCurrentTimeInfo(now);
+              const range = parseTimeStringToMinutes(slot.time);
+              const isLive = (day === currentDayName) && range && (currentMinutes >= range.start && currentMinutes < range.end);
+
               let spanCount = 1;
               if (pStr.includes("5th, 6th & 7th") || pStr.includes("5th,6th,7th")) spanCount = 3;
               else if (pStr.includes("&") || pStr.includes(",")) spanCount = 2;
@@ -2132,7 +2137,8 @@
                 skipUntilPeriod = p + spanCount - 1;
                 tableHTML += `
                   <td colspan="${spanCount}" style="padding: 6px; vertical-align: top;">
-                    <div style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.25) 0%, rgba(99, 102, 241, 0.25) 100%); border: 1px solid rgba(168, 85, 247, 0.5); border-left: 4px solid var(--color-purple); border-radius: 10px; padding: 8px; box-shadow: 0 4px 15px rgba(168, 85, 247, 0.25);">
+                    <div style="background: ${isLive ? 'linear-gradient(135deg, rgba(239, 68, 68, 0.35) 0%, rgba(225, 29, 72, 0.25) 100%)' : 'linear-gradient(135deg, rgba(168, 85, 247, 0.25) 0%, rgba(99, 102, 241, 0.25) 100%)'}; border: ${isLive ? '2px solid #ef4444' : '1px solid rgba(168, 85, 247, 0.5)'}; border-left: 4px solid ${isLive ? '#ef4444' : 'var(--color-purple)'}; border-radius: 10px; padding: 8px; box-shadow: ${isLive ? '0 0 20px rgba(239,68,68,0.65)' : '0 4px 15px rgba(168, 85, 247, 0.25)'};">
+                      ${isLive ? `<div style="display: inline-block; font-size: 8px; font-weight: 900; color: #fff; background: #ef4444; padding: 2px 6px; border-radius: 4px; margin-bottom: 4px;">🔴 LIVE CLASS NOW</div>` : ''}
                       <div style="display: inline-flex; align-items: center; gap: 4px; font-size: 9px; font-weight: 800; color: #e9d5ff; background: rgba(168, 85, 247, 0.3); padding: 2px 6px; border-radius: 6px; margin-bottom: 4px;">
                         <i data-lucide="layers" style="width: 10px; height: 10px;"></i>
                         <span>${spanCount}-Period Class (${slot.period})</span>
@@ -2146,7 +2152,8 @@
               } else {
                 tableHTML += `
                   <td style="padding: 6px; vertical-align: top;">
-                    <div style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); border-left: 3px solid var(--color-primary); border-radius: 10px; padding: 8px;">
+                    <div style="background: ${isLive ? 'linear-gradient(135deg, rgba(239, 68, 68, 0.35) 0%, rgba(225, 29, 72, 0.25) 100%)' : 'rgba(255,255,255,0.04)'}; border: ${isLive ? '2px solid #ef4444' : '1px solid var(--border-color)'}; border-left: 3px solid ${isLive ? '#ef4444' : 'var(--color-primary)'}; border-radius: 10px; padding: 8px; box-shadow: ${isLive ? '0 0 20px rgba(239,68,68,0.65)' : 'none'};">
+                      ${isLive ? `<div style="display: inline-block; font-size: 8px; font-weight: 900; color: #fff; background: #ef4444; padding: 2px 6px; border-radius: 4px; margin-bottom: 4px;">🔴 LIVE CLASS NOW</div>` : ''}
                       <div style="font-weight: 800; color: #ffffff; font-size: 11px;">${slot.subject_name}</div>
                       <div style="font-size: 9px; color: var(--color-pink); font-weight: 600;">Code: ${slot.subject_code || '-'} • Room: ${slot.room || '-'}</div>
                       <div style="font-size: 9px; color: var(--text-muted);">${teacher ? teacher.name : (slot.teacher_short_code || '-')}</div>
