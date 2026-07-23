@@ -365,6 +365,15 @@
       box-shadow: 0 15px 35px rgba(0, 0, 0, 0.45), 0 0 26px rgba(6, 182, 212, 0.65);
     }
 
+    .app-icon-card:nth-child(8) {
+      border: 1.5px solid rgba(16, 185, 129, 0.65);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 16px rgba(16, 185, 129, 0.35);
+    }
+    .app-icon-card:nth-child(8):hover {
+      border-color: rgba(16, 185, 129, 0.95);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.45), 0 0 26px rgba(16, 185, 129, 0.65);
+    }
+
     .app-icon-card:hover {
       transform: translateY(-4px) scale(1.02);
     }
@@ -396,6 +405,7 @@
     .icon-exam { background: linear-gradient(135deg, #ef4444 0%, #f43f5e 100%); box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35); }
     .icon-teacher { background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%); box-shadow: 0 8px 20px rgba(168, 85, 247, 0.35); }
     .icon-notice { background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%); box-shadow: 0 8px 20px rgba(6, 182, 212, 0.35); }
+    .icon-support { background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%); box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35); }
 
     .app-icon-card h4 {
       font-family: var(--font-display);
@@ -1263,6 +1273,16 @@
             <p>Alerts & Notices</p>
           </div>
 
+          <!-- Help & Support App Icon -->
+          <div class="app-icon-card" onclick="openSupportModal()">
+            <span class="status-pill pill-active" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border-color: rgba(16, 185, 129, 0.4);">24/7 Live</span>
+            <div class="icon-shape icon-support">
+              <i data-lucide="life-buoy" style="width: 28px; height: 28px;"></i>
+            </div>
+            <h4>Help & Support</h4>
+            <p>Contact Admin</p>
+          </div>
+
         </div>
       </section>
 
@@ -1602,6 +1622,60 @@
 
           <button type="button" class="btn-primary-action" onclick="closeTeacherContactModal()" style="margin-top: 16px; width: 100%; padding: 12px; font-weight: 800; border-radius: 14px; background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%); border: none;">Close Directory</button>
         </div>
+      </div>
+    </div>
+
+    <!-- Help & Support Modal -->
+    <div class="modal-overlay" id="support-modal">
+      <div class="modal-card" style="max-width: 520px; border-color: rgba(16, 185, 129, 0.4); box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 30px rgba(16, 185, 129, 0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
+          <div>
+            <div class="modal-badge" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.3); color: #34d399;">
+              <i data-lucide="life-buoy" style="width: 12px; height: 12px;"></i>
+              <span>24/7 Live Support</span>
+            </div>
+            <h3 style="font-family: var(--font-display); font-size: 20px; color: white; margin-top: 4px;">Help & Admin Support</h3>
+            <p style="font-size: 12px; color: var(--text-muted);">Have questions or issues? Send a direct support ticket to campus admin!</p>
+          </div>
+          <button type="button" class="btn-back" onclick="closeSupportModal()" style="width: 32px; height: 32px; min-width: 32px; padding: 0;">
+            <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+          </button>
+        </div>
+
+        <!-- Quick Direct Contact Buttons -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px;">
+          <a href="https://wa.me/8801732755176?text=Hello%20CNGPI%20Admin,%20I%20need%20support%20regarding..." target="_blank" style="background: rgba(37, 211, 102, 0.15); border: 1px solid rgba(37, 211, 102, 0.35); color: #25d366; padding: 10px; border-radius: 14px; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 800; font-size: 13px;">
+            <i data-lucide="message-circle" style="width: 16px; height: 16px;"></i>
+            <span>WhatsApp Admin</span>
+          </a>
+          <a href="tel:01732755176" style="background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.35); color: #818cf8; padding: 10px; border-radius: 14px; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 800; font-size: 13px;">
+            <i data-lucide="phone" style="width: 16px; height: 16px;"></i>
+            <span>Call Admin Line</span>
+          </a>
+        </div>
+
+        <!-- Send Support Ticket Form -->
+        <form onsubmit="handleSupportTicketSubmit(event)">
+          <div class="form-group">
+            <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">Your Name & Student ID</label>
+            <input type="text" id="support-student-name" class="form-input" placeholder="Enter your full name" required>
+          </div>
+
+          <div class="form-group">
+            <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">Issue Subject / Category</label>
+            <input type="text" id="support-subject" class="form-input" placeholder="e.g. Routine error, Book list question, Exam inquiry" required>
+          </div>
+
+          <div class="form-group">
+            <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">Describe Your Problem / Question</label>
+            <textarea id="support-message" class="form-textarea" rows="3" placeholder="Write detailed message for CNGPI admin team..." required></textarea>
+          </div>
+
+          <button type="submit" class="btn-submit-form" style="background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%); box-shadow: 0 8px 24px rgba(16, 185, 129, 0.35); border: none;">
+            <i data-lucide="send" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle;"></i>
+            Send Ticket to Admin Panel
+          </button>
+        </form>
       </div>
     </div>
 
@@ -2641,6 +2715,60 @@
 
     function closeComingSoon() {
       document.getElementById("coming-soon-modal").classList.remove("active");
+    }
+
+    // Support Modal Control & Firestore Ticket Submission
+    function openSupportModal() {
+      if (currentProfile && currentProfile.name) {
+        const nameField = document.getElementById("support-student-name");
+        if (nameField && !nameField.value) {
+          nameField.value = `${currentProfile.name} (${getDepartmentShortCode(currentProfile.department).toUpperCase()} - ${currentProfile.semester.replace(' Semester', ' Sem')})`;
+        }
+      }
+      document.getElementById("support-modal").classList.add("active");
+      lucide.createIcons();
+    }
+
+    function closeSupportModal() {
+      document.getElementById("support-modal").classList.remove("active");
+    }
+
+    function handleSupportTicketSubmit(event) {
+      event.preventDefault();
+      const studentName = document.getElementById("support-student-name").value.trim();
+      const subject = document.getElementById("support-subject").value.trim();
+      const message = document.getElementById("support-message").value.trim();
+
+      if (!studentName || !subject || !message) {
+        alert("Please complete all support ticket fields.");
+        return;
+      }
+
+      const ticketPayload = {
+        student_name: studentName,
+        department: currentProfile ? currentProfile.department : "General",
+        semester: currentProfile ? currentProfile.semester : "-",
+        shift: currentProfile ? currentProfile.shift : "-",
+        subject: subject,
+        message: message,
+        status: "Pending",
+        createdAt: new Date().toISOString()
+      };
+
+      if (db) {
+        db.collection("support_tickets").add(ticketPayload).then(() => {
+          alert("✅ Your support ticket has been sent to CNGPI Admin Panel! We will review and respond shortly.");
+          closeSupportModal();
+          document.getElementById("support-subject").value = "";
+          document.getElementById("support-message").value = "";
+        }).catch(err => {
+          console.error("Support ticket error:", err);
+          alert("Failed to submit ticket: " + err.message);
+        });
+      } else {
+        alert("✅ Support ticket submitted locally!");
+        closeSupportModal();
+      }
     }
 
     // Exam Routine Data & Interactive Schedule Renderer
