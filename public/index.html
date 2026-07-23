@@ -1134,10 +1134,16 @@
             <span id="routine-profile-text">CST • 7th Sem • 2nd Shift</span>
           </div>
 
-          <button class="action-btn" onclick="fetchFirestoreRoutine()" style="padding: 8px 12px;">
-            <i data-lucide="refresh-cw" style="width: 12px; height: 12px;"></i>
-            <span>Sync</span>
-          </button>
+          <div style="display: flex; gap: 6px;">
+            <button class="action-btn" onclick="fetchFirestoreRoutine()" style="padding: 8px 12px;">
+              <i data-lucide="refresh-cw" style="width: 12px; height: 12px;"></i>
+              <span>Sync</span>
+            </button>
+            <button class="action-btn" onclick="exportFullWeekRoutineFromIndex()" style="padding: 8px 12px; background: rgba(168, 85, 247, 0.15); border-color: rgba(168, 85, 247, 0.35); color: #c084fc;">
+              <i data-lucide="download" style="width: 12px; height: 12px;"></i>
+              <span>Export</span>
+            </button>
+          </div>
         </div>
 
         <!-- Routine Available View Container -->
@@ -1815,6 +1821,13 @@
         secWeek.style.display = 'block';
         secDaily.style.display = 'none';
       }
+    }
+
+    function exportFullWeekRoutineFromIndex() {
+      switchRoutineView('week');
+      setTimeout(() => {
+        window.print();
+      }, 350);
     }
 
     // Render Day Tabs

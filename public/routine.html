@@ -646,6 +646,77 @@
       font-size: 9px;
       color: var(--text-muted);
     }
+
+    /* Export Routine Button Styles */
+    .btn-export-routine {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.25) 0%, rgba(99, 102, 241, 0.25) 100%);
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      color: #e9d5ff;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 15px rgba(168, 85, 247, 0.2);
+    }
+
+    .btn-export-routine:hover {
+      background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
+      color: #ffffff;
+      box-shadow: 0 6px 20px rgba(168, 85, 247, 0.4);
+    }
+
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+      .bg-glow-top, .bg-glow-bottom, .app-header, .day-tabs, .bottom-nav, .btn-back, .btn-export-routine, .selector-row, .cngpi-badge {
+        display: none !important;
+      }
+      .web-app-container {
+        max-width: 100% !important;
+        padding: 0 !important;
+      }
+      .routine-header-card {
+        background: #f8fafc !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #0f172a !important;
+      }
+      .routine-info-title, .routine-info-sub {
+        color: #0f172a !important;
+      }
+      .routine-week-table-container {
+        box-shadow: none !important;
+        border: 1px solid #cbd5e1 !important;
+        background: #ffffff !important;
+      }
+      .routine-grid-table th {
+        background: #f1f5f9 !important;
+        color: #0f172a !important;
+        border-color: #cbd5e1 !important;
+      }
+      .routine-grid-table td {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        border-color: #cbd5e1 !important;
+      }
+      .table-day-cell {
+        background: #e2e8f0 !important;
+        color: #0f172a !important;
+      }
+      .table-class-box {
+        background: #f8fafc !important;
+        border-color: #cbd5e1 !important;
+      }
+      .table-sub-title {
+        color: #0f172a !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -690,15 +761,22 @@
         <h2 class="routine-info-title" id="info-group-title">CST 7/2</h2>
         <div class="routine-info-sub" id="info-dept-sem">Computer Science & Technology (Second Shift) • Seventh Semester</div>
 
-        <div class="routine-meta-row">
-          <div class="meta-tag">
-            <i data-lucide="clock" style="width: 13px; height: 13px;"></i>
-            <span id="info-load-tag">Total Load: 26 Periods/Week</span>
+        <div class="routine-meta-row" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <div class="meta-tag">
+              <i data-lucide="clock" style="width: 13px; height: 13px;"></i>
+              <span id="info-load-tag">Total Load: 26 Periods/Week</span>
+            </div>
+            <div class="meta-tag">
+              <i data-lucide="building" style="width: 13px; height: 13px;"></i>
+              <span>CNGPI Building</span>
+            </div>
           </div>
-          <div class="meta-tag">
-            <i data-lucide="building" style="width: 13px; height: 13px;"></i>
-            <span>CNGPI Academic Building</span>
-          </div>
+
+          <button class="btn-export-routine" onclick="exportFullWeekRoutine()" title="Export / Download Full Week Routine">
+            <i data-lucide="download" style="width: 14px; height: 14px;"></i>
+            <span>Export Routine</span>
+          </button>
         </div>
       </div>
 
@@ -1224,6 +1302,17 @@
       });
 
       lucide.createIcons();
+    }
+
+    // Export / Download Full Week Routine
+    function exportFullWeekRoutine() {
+      // 1. Switch to Full Week Grid Table mode
+      switchDayTab('FullWeek');
+
+      // 2. Trigger browser print / PDF download
+      setTimeout(() => {
+        window.print();
+      }, 350);
     }
   </script>
 
