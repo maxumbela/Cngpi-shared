@@ -1331,16 +1331,20 @@
           <span>Admin Portal</span>
         </div>
         <h3 style="font-family: var(--font-display); font-size: 20px; color: white; margin-bottom: 4px;">Routine Upload Panel</h3>
-        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Paste or edit JSON format class routine and upload directly to Firebase Firestore.</p>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Upload a JSON routine file or paste JSON code. Group code will be detected automatically!</p>
 
         <form onsubmit="handleAdminRoutineUpload(event)">
           <div class="form-group">
-            <label for="admin-group-code">Group Code (Document ID)</label>
-            <input type="text" id="admin-group-code" class="form-input" placeholder="e.g. cst_7_2" required>
+            <label>Select Routine JSON File</label>
+            <input type="file" id="admin-file-input" accept=".json" onchange="handleAdminJsonFileSelect(event)" style="display: none;">
+            <button type="button" class="btn-secondary-action" onclick="document.getElementById('admin-file-input').click()" style="background: rgba(99, 102, 241, 0.15); border-color: rgba(99, 102, 241, 0.3); color: white;">
+              <i data-lucide="file-up" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle;"></i>
+              Choose JSON File from Device
+            </button>
           </div>
 
           <div class="form-group">
-            <label for="admin-json-input">Routine JSON Format</label>
+            <label for="admin-json-input">Or Paste Routine JSON Code</label>
             <textarea id="admin-json-input" class="form-textarea" placeholder="Paste routine JSON here..." required></textarea>
           </div>
 
@@ -1995,18 +1999,26 @@
       document.getElementById('admin-modal').classList.remove('active');
     }
 
+    function handleAdminJsonFileSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('admin-json-input').value = e.target.result;
+      };
+      reader.readAsText(file);
+    }
+
     function loadAdminPresetJSON() {
-      document.getElementById('admin-group-code').value = "cst_7_2";
       document.getElementById('admin-json-input').value = JSON.stringify(CST_7_2_ROUTINE, null, 2);
     }
 
     async function handleAdminRoutineUpload(event) {
       event.preventDefault();
-      const groupCode = document.getElementById('admin-group-code').value.trim();
       const jsonText = document.getElementById('admin-json-input').value.trim();
 
-      if (!groupCode || !jsonText) {
-        alert("Please specify the Group Code and paste the JSON routine.");
+      if (!jsonText) {
+        alert("Please select a JSON file or paste JSON code.");
         return;
       }
 
@@ -2016,6 +2028,28 @@
       } catch (err) {
         alert("Invalid JSON format. Please check syntax!");
         return;
+      }
+
+      // Automatically determine document ID / group code from JSON object
+      let groupCode = parsedRoutine.id;
+      if (!groupCode && parsedRoutine.group_short_code) {
+        // e.g. "CST 7/2" -> "cst_7_2"
+        groupCode = parsedRoutine.group_short_code
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, '_')
+          .replace(/_+/g, '_')
+          .replace(/^_|_$/g, '');
+      }
+
+      if (!groupCode && parsedRoutine.department) {
+        const deptShort = parsedRoutine.department.split(' ')[0].toLowerCase();
+        const semNum = (parsedRoutine.semester || '').replace(/[^0-9]/g, '') || '1';
+        const shiftNum = (parsedRoutine.department || '').includes('Second') ? '2' : '1';
+        groupCode = `${deptShort}_${semNum}_${shiftNum}`;
+      }
+
+      if (!groupCode) {
+        groupCode = "routine_" + Date.now();
       }
 
       parsedRoutine.id = groupCode;
@@ -2030,7 +2064,7 @@
           alert("Error saving to Firestore: " + err.message);
         }
       } else {
-        alert("Firebase Firestore is offline. Routine validated successfully!");
+        alert(`Routine '${groupCode}' validated successfully!`);
         closeAdminModal();
       }
     }
