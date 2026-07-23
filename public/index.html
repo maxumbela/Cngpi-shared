@@ -219,14 +219,20 @@
 
     /* Home View Styles */
     .hero-banner {
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(168, 85, 247, 0.15) 100%);
-      border: 1px solid var(--border-accent);
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(168, 85, 247, 0.2) 100%);
+      border: 1.5px solid rgba(168, 85, 247, 0.65);
       border-radius: 24px;
       padding: 22px 20px;
       margin-bottom: 24px;
       position: relative;
       overflow: hidden;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35), 0 0 18px rgba(168, 85, 247, 0.35);
+      transition: all 0.3s ease;
+    }
+
+    .hero-banner:hover {
+      border-color: rgba(168, 85, 247, 0.95);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.45), 0 0 26px rgba(168, 85, 247, 0.6);
     }
 
     .banner-tag {
@@ -282,7 +288,6 @@
 
     .app-icon-card {
       background: var(--grad-card);
-      border: 1px solid var(--border-color);
       border-radius: 24px;
       padding: 22px 18px;
       display: flex;
@@ -291,16 +296,50 @@
       justify-content: center;
       gap: 12px;
       cursor: pointer;
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
       overflow: hidden;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Individual Card Neon Glow Borders */
+    .app-icon-card:nth-child(1) {
+      border: 1.5px solid rgba(168, 85, 247, 0.65);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 16px rgba(168, 85, 247, 0.35);
+    }
+    .app-icon-card:nth-child(1):hover {
+      border-color: rgba(168, 85, 247, 0.95);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.45), 0 0 26px rgba(168, 85, 247, 0.65);
+    }
+
+    .app-icon-card:nth-child(2) {
+      border: 1.5px solid rgba(6, 182, 212, 0.65);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 16px rgba(6, 182, 212, 0.35);
+    }
+    .app-icon-card:nth-child(2):hover {
+      border-color: rgba(6, 182, 212, 0.95);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.45), 0 0 26px rgba(6, 182, 212, 0.65);
+    }
+
+    .app-icon-card:nth-child(3) {
+      border: 1.5px solid rgba(16, 185, 129, 0.65);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 16px rgba(16, 185, 129, 0.35);
+    }
+    .app-icon-card:nth-child(3):hover {
+      border-color: rgba(16, 185, 129, 0.95);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.45), 0 0 26px rgba(16, 185, 129, 0.65);
+    }
+
+    .app-icon-card:nth-child(4) {
+      border: 1.5px solid rgba(245, 158, 11, 0.65);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 16px rgba(245, 158, 11, 0.35);
+    }
+    .app-icon-card:nth-child(4):hover {
+      border-color: rgba(245, 158, 11, 0.95);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.45), 0 0 26px rgba(245, 158, 11, 0.65);
     }
 
     .app-icon-card:hover {
-      transform: translateY(-4px);
-      border-color: var(--border-accent);
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+      transform: translateY(-4px) scale(1.02);
     }
 
     .app-icon-card:active {
@@ -360,13 +399,19 @@
     /* Live Dhaka Clock Card */
     .dhaka-clock-card {
       background: linear-gradient(135deg, rgba(13, 19, 33, 0.95) 0%, rgba(22, 30, 48, 0.9) 100%);
-      border: 1px solid var(--border-accent);
+      border: 1.5px solid rgba(16, 185, 129, 0.65);
       border-radius: 24px;
       padding: 20px;
       margin-bottom: 20px;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35), 0 0 18px rgba(16, 185, 129, 0.35);
       position: relative;
       overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .dhaka-clock-card:hover {
+      border-color: rgba(16, 185, 129, 0.95);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.45), 0 0 26px rgba(16, 185, 129, 0.6);
     }
 
     .dhaka-clock-card::after {
