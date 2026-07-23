@@ -570,6 +570,82 @@
       font-size: 10px;
       font-weight: 600;
     }
+
+    /* Full Week Grid Table Styles */
+    .routine-week-table-container {
+      width: 100%;
+      overflow-x: auto;
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+      background: rgba(13, 19, 33, 0.95);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.45);
+      margin-top: 10px;
+    }
+
+    .routine-grid-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      min-width: 850px;
+    }
+
+    .routine-grid-table th {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(168, 85, 247, 0.2) 100%);
+      color: #ffffff;
+      padding: 12px 8px;
+      font-family: var(--font-display);
+      font-weight: 800;
+      border-bottom: 1px solid var(--border-color);
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
+      text-align: center;
+    }
+
+    .routine-grid-table td {
+      padding: 10px 8px;
+      border-bottom: 1px solid var(--border-color);
+      border-right: 1px solid rgba(255, 255, 255, 0.04);
+      vertical-align: top;
+      background: rgba(22, 30, 48, 0.4);
+    }
+
+    .table-day-cell {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 13px;
+      color: var(--color-primary);
+      background: rgba(99, 102, 241, 0.12) !important;
+      text-align: center;
+      vertical-align: middle !important;
+    }
+
+    .table-class-box {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-color);
+      border-left: 3px solid var(--color-primary);
+      border-radius: 10px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .table-sub-title {
+      font-weight: 800;
+      color: #ffffff;
+      font-size: 11px;
+      line-height: 1.2;
+    }
+
+    .table-sub-info {
+      font-size: 9px;
+      color: var(--color-pink);
+      font-weight: 600;
+    }
+
+    .table-teacher-tag {
+      font-size: 9px;
+      color: var(--text-muted);
+    }
   </style>
 </head>
 <body>
@@ -965,57 +1041,90 @@
 
       if (activeDay === "FullWeek") {
         const weekDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"];
-        
-        weekDays.forEach(day => {
-          const daySchedule = (routine.weekly_schedule && routine.weekly_schedule[day]) ? routine.weekly_schedule[day] : [];
-          
-          const dayHeader = document.createElement("div");
-          dayHeader.style.cssText = "display:flex; align-items:center; gap:8px; margin: 18px 0 10px; font-family: var(--font-display); font-weight:800; font-size:15px; color: var(--color-primary);";
-          dayHeader.innerHTML = `<i data-lucide="calendar" style="width:16px; height:16px;"></i><span>${day} Schedule</span>`;
-          container.appendChild(dayHeader);
+        const timeSlots = [
+          { name: "1st Period", time: "1:30PM-2:15PM" },
+          { name: "2nd Period", time: "2:15PM-3:00PM" },
+          { name: "3rd Period", time: "3:00PM-3:45PM" },
+          { name: "4th Period", time: "3:45PM-4:30PM" },
+          { name: "5th Period", time: "4:30PM-5:15PM" },
+          { name: "6th Period", time: "5:15PM-6:00PM" },
+          { name: "7th Period", time: "6:00PM-6:45PM" }
+        ];
 
-          if (!daySchedule || daySchedule.length === 0) {
-            const emptyCard = document.createElement("div");
-            emptyCard.className = "period-card off-period";
-            emptyCard.style.padding = "14px";
-            emptyCard.innerHTML = `<div style="font-size:12px; color: var(--text-muted);">☕ No classes scheduled for ${day}</div>`;
-            container.appendChild(emptyCard);
-            return;
-          }
+        let tableWrapper = document.createElement("div");
+        tableWrapper.className = "routine-week-table-container";
 
-          daySchedule.forEach(slot => {
-            const isOff = !slot.subject_name;
-            const card = document.createElement("div");
-            card.className = `period-card ${isOff ? 'off-period' : ''}`;
-            const teacherInfo = getTeacherByShortCode(routine.teachers_details, slot.teacher_short_code);
+        let tableHTML = `
+          <table class="routine-grid-table">
+            <thead>
+              <tr>
+                <th style="width: 90px; background: rgba(99, 102, 241, 0.3);">Day \\ Period</th>
+        `;
 
-            card.innerHTML = `
-              <div class="period-card-top">
-                <div class="period-time-badge">
-                  <i data-lucide="clock" style="width: 13px; height: 13px;"></i>
-                  <span>${slot.period || 'Period'} • ${slot.time || ''}</span>
-                </div>
-                <div class="room-badge">
-                  <i data-lucide="map-pin" style="width: 13px; height: 13px;"></i>
-                  <span>Room: ${slot.room || '-'}</span>
-                </div>
-              </div>
-              <div class="subject-title">${slot.subject_name ? slot.subject_name : 'No Class / Off Period'}</div>
-              ${slot.subject_code ? `<div class="subject-code-tag">Subject Code: ${slot.subject_code}</div>` : ''}
-              ${!isOff ? `
-                <div class="period-teacher-row">
-                  <div class="teacher-code-name">
-                    <div class="teacher-avatar-mini">${slot.teacher_short_code || 'T'}</div>
-                    <span>${teacherInfo ? teacherInfo.name : (slot.teacher_short_code || 'Instructor')}</span>
-                  </div>
-                  <span style="color: var(--text-muted); font-size: 11px;">${teacherInfo ? teacherInfo.designation : ''}</span>
-                </div>
-              ` : ''}
-            `;
-            container.appendChild(card);
-          });
+        timeSlots.forEach((ts) => {
+          tableHTML += `
+            <th>
+              <div>${ts.name}</div>
+              <div style="font-size: 9px; opacity: 0.75; font-weight: 500;">${ts.time}</div>
+            </th>
+          `;
         });
 
+        tableHTML += `
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+        weekDays.forEach(day => {
+          const daySchedule = (routine.weekly_schedule && routine.weekly_schedule[day]) ? routine.weekly_schedule[day] : [];
+
+          tableHTML += `
+            <tr>
+              <td class="table-day-cell">${day}</td>
+          `;
+
+          if (!daySchedule || daySchedule.length === 0) {
+            tableHTML += `<td colspan="7" style="text-align: center; color: var(--text-muted); font-size: 11px; padding: 16px;">☕ Day Off (No Classes Scheduled)</td>`;
+          } else {
+            for (let p = 1; p <= 7; p++) {
+              const slot = daySchedule.find(s => {
+                if (!s.period) return false;
+                const pStr = s.period.toLowerCase();
+                return pStr.includes(`${p}st`) || pStr.includes(`${p}nd`) || pStr.includes(`${p}rd`) || pStr.includes(`${p}th`);
+              });
+
+              if (slot && slot.subject_name) {
+                const teacherInfo = getTeacherByShortCode(routine.teachers_details, slot.teacher_short_code);
+                tableHTML += `
+                  <td>
+                    <div class="table-class-box">
+                      <div class="table-sub-title">${slot.subject_name}</div>
+                      <div class="table-sub-info">Code: ${slot.subject_code || '-'} • Room: ${slot.room || '-'}</div>
+                      <div class="table-teacher-tag">👨‍🏫 ${teacherInfo ? teacherInfo.name : (slot.teacher_short_code || '-')}</div>
+                    </div>
+                  </td>
+                `;
+              } else {
+                tableHTML += `
+                  <td style="text-align: center; color: rgba(255,255,255,0.2); font-size: 10px; vertical-align: middle;">
+                    -
+                  </td>
+                `;
+              }
+            }
+          }
+
+          tableHTML += `</tr>`;
+        });
+
+        tableHTML += `
+            </tbody>
+          </table>
+        `;
+
+        tableWrapper.innerHTML = tableHTML;
+        container.appendChild(tableWrapper);
         lucide.createIcons();
         return;
       }
