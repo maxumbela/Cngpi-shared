@@ -814,8 +814,7 @@
 
         <button class="module-tab-btn" id="tab-btn-books" onclick="switchModule('books')">
           <i data-lucide="book-open" style="width: 16px; height: 16px;"></i>
-          <span>Book List</span>
-          <span class="tab-badge-soon">Soon</span>
+          <span>Book List Manager</span>
         </button>
 
         <button class="module-tab-btn" id="tab-btn-notices" onclick="switchModule('notices')">
@@ -1029,18 +1028,126 @@
         </div>
       </div>
 
-      <!-- MODULE 4: BOOK LIST MANAGEMENT (COMING SOON) -->
+      <!-- MODULE 4: BOOK LIST & SYLLABUS MANAGEMENT -->
       <div class="glass-card module-content" id="module-books" style="display: none;">
-        <div class="coming-soon-card">
-          <div class="coming-soon-icon">
-            <i data-lucide="book-open" style="width: 34px; height: 34px;"></i>
+        <div class="dash-section-header">
+          <div class="dash-title-group">
+            <div class="dash-icon-box" style="background: rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.3); color: var(--color-amber);">
+              <i data-lucide="book-open" style="width: 22px; height: 22px;"></i>
+            </div>
+            <div>
+              <h2 class="dash-title">Book List & Syllabus Manager</h2>
+              <p class="dash-subtitle">Add, edit, and publish semester-wise subject books and codes to Firestore</p>
+            </div>
           </div>
-          <div class="cs-badge">
-            <i data-lucide="clock" style="width: 13px; height: 13px;"></i>
-            <span>Feature Coming Soon</span>
+        </div>
+
+        <!-- Target Dept & Semester Selector -->
+        <div class="form-grid" style="margin-bottom: 20px;">
+          <div class="form-group">
+            <label for="book-manage-dept">Department</label>
+            <select id="book-manage-dept" class="form-select" onchange="loadAdminBooksList()">
+              <option value="CST">Computer Science & Technology (CST)</option>
+              <option value="CT">Civil Technology (CT)</option>
+              <option value="ET">Electrical Technology (ET)</option>
+              <option value="ENT">Electronics Technology (ENT)</option>
+              <option value="MT">Mechanical Technology (MT)</option>
+              <option value="AT">Architecture Technology (AT)</option>
+            </select>
           </div>
-          <h2 class="cs-title">Book List & Syllabus Manager</h2>
-          <p class="cs-desc">The admin interface for managing BTEB department book lists, subject credits, and syllabus downloads is currently under active development and will be available in the upcoming release.</p>
+
+          <div class="form-group">
+            <label for="book-manage-sem">Semester</label>
+            <select id="book-manage-sem" class="form-select" onchange="loadAdminBooksList()">
+              <option value="1st">1st Semester</option>
+              <option value="2nd">2nd Semester</option>
+              <option value="3rd">3rd Semester</option>
+              <option value="4th">4th Semester</option>
+              <option value="5th">5th Semester</option>
+              <option value="6th">6th Semester</option>
+              <option value="7th" selected>7th Semester</option>
+              <option value="8th">8th Semester</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Add / Edit Book Form -->
+        <form onsubmit="handleAdminBookAdd(event)" style="background: rgba(13, 19, 33, 0.6); padding: 18px; border-radius: 16px; border: 1px solid var(--border-color); margin-bottom: 24px;">
+          <h4 style="color: white; font-family: var(--font-display); font-size: 14px; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="plus-circle" style="width: 16px; height: 16px; color: var(--color-amber);"></i>
+            <span id="book-form-title">Add New Subject / Book</span>
+          </h4>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="input-book-name">Subject / Book Name</label>
+              <input type="text" id="input-book-name" class="form-input" placeholder="e.g. Apps Development Project" required>
+            </div>
+
+            <div class="form-group">
+              <label for="input-book-code">Subject Code</label>
+              <input type="text" id="input-book-code" class="form-input" placeholder="e.g. 28574" required>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="input-book-credits">Credits</label>
+              <input type="text" id="input-book-credits" class="form-input" placeholder="e.g. 3" required>
+            </div>
+
+            <div class="form-group">
+              <label for="input-book-type">Subject Type</label>
+              <select id="input-book-type" class="form-select">
+                <option value="Theory & Practical">Theory & Practical</option>
+                <option value="Theory">Theory Only</option>
+                <option value="Practical">Practical Only</option>
+                <option value="Practical / Project">Practical / Project</option>
+                <option value="Field Training">Field Training</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
+            <button type="submit" id="btn-save-book" class="btn-submit" style="background: var(--grad-amber); box-shadow: 0 6px 20px rgba(245, 158, 11, 0.3);">
+              <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+              <span id="btn-save-book-label">Add Book to List</span>
+            </button>
+            <button type="button" class="btn-reset-default" onclick="loadDefaultBtebPresetBooks()">
+              <i data-lucide="sparkles" style="width: 15px; height: 15px; color: var(--color-amber);"></i>
+              <span>Load BTEB Default Preset</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Current Books Table -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+          <h3 style="font-family: var(--font-display); font-size: 16px; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="list" style="width: 18px; height: 18px; color: var(--color-amber);"></i>
+            <span>Subject Books List</span>
+          </h3>
+
+          <button onclick="publishBooksToFirestore()" class="btn-submit" style="padding: 8px 16px; font-size: 12px; background: var(--grad-emerald); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);">
+            <i data-lucide="cloud-upload" style="width: 15px; height: 15px;"></i>
+            <span>Publish to Firestore</span>
+          </button>
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table class="data-list-table">
+            <thead>
+              <tr>
+                <th>Subject Name</th>
+                <th>Code</th>
+                <th>Credits</th>
+                <th>Type</th>
+                <th style="text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="admin-books-table-body">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -1217,6 +1324,10 @@
 
       if (targetBtn) targetBtn.classList.add("active");
       if (targetCard) targetCard.style.display = "block";
+
+      if (modKey === 'books') {
+        loadAdminBooksList();
+      }
 
       lucide.createIcons();
     }
@@ -1589,6 +1700,193 @@
           showToast("Failed to delete result PDF.", "error");
         });
       }
+    }
+
+    // ================= BOOK LIST MANAGEMENT LOGIC =================
+    let adminBooksState = {};
+    let editingBookIndex = -1;
+
+    const DEFAULT_BTEB_BOOKS_PRESETS = {
+      "CST_7th": [
+        { name: "Digital Marketing Technique", code: "28571", credits: "3", type: "Theory & Practical" },
+        { name: "Network Administration & Services", code: "28572", credits: "3", type: "Theory & Practical" },
+        { name: "Cyber Security & Ethics", code: "28573", credits: "3", type: "Theory & Practical" },
+        { name: "Apps Development Project", code: "28574", credits: "3", type: "Theory & Practical" },
+        { name: "Multimedia & Animation", code: "28575", credits: "3", type: "Theory & Practical" },
+        { name: "Project Work-II", code: "28576", credits: "4", type: "Practical / Project" },
+        { name: "Innovation & Entrepreneurship", code: "25853", credits: "2", type: "Theory" }
+      ]
+    };
+
+    function loadAdminBooksList() {
+      const dept = document.getElementById("book-manage-dept").value;
+      const sem = document.getElementById("book-manage-sem").value;
+      const key = `${dept}_${sem}`;
+
+      if (db) {
+        db.collection("books").doc(key).get().then((doc) => {
+          if (doc.exists && doc.data().list) {
+            adminBooksState[key] = doc.data().list;
+          } else if (!adminBooksState[key]) {
+            adminBooksState[key] = DEFAULT_BTEB_BOOKS_PRESETS[key] || [];
+          }
+          renderAdminBooksTable(key);
+        }).catch((err) => {
+          console.error("Fetch books error:", err);
+          if (!adminBooksState[key]) adminBooksState[key] = DEFAULT_BTEB_BOOKS_PRESETS[key] || [];
+          renderAdminBooksTable(key);
+        });
+      } else {
+        if (!adminBooksState[key]) adminBooksState[key] = DEFAULT_BTEB_BOOKS_PRESETS[key] || [];
+        renderAdminBooksTable(key);
+      }
+    }
+
+    function renderAdminBooksTable(key) {
+      const tbody = document.getElementById("admin-books-table-body");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      const booksList = adminBooksState[key] || [];
+
+      if (booksList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">No subject books added for ${key.replace('_', ' ')}. Click "Load BTEB Default Preset" or add a new book.</td></tr>`;
+        return;
+      }
+
+      booksList.forEach((b, idx) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td style="font-weight: 700; color: #ffffff;">${b.name}</td>
+          <td><span style="color: var(--color-amber); font-weight: 800; background: rgba(245,158,11,0.15); padding: 2px 6px; border-radius: 6px;">${b.code}</span></td>
+          <td>${b.credits} Credits</td>
+          <td><span style="font-size: 11px; color: var(--text-muted);">${b.type}</span></td>
+          <td style="text-align: right;">
+            <button type="button" class="btn-action-icon btn-action-view" title="Edit Book" onclick="editAdminBook(${idx})">
+              <i data-lucide="edit-3" style="width: 15px; height: 15px;"></i>
+            </button>
+            <button type="button" class="btn-action-icon btn-action-delete" title="Delete Book" onclick="deleteAdminBook(${idx})">
+              <i data-lucide="trash-2" style="width: 15px; height: 15px;"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      lucide.createIcons();
+    }
+
+    function handleAdminBookAdd(e) {
+      e.preventDefault();
+      const dept = document.getElementById("book-manage-dept").value;
+      const sem = document.getElementById("book-manage-sem").value;
+      const key = `${dept}_${sem}`;
+
+      const name = document.getElementById("input-book-name").value.trim();
+      const code = document.getElementById("input-book-code").value.trim();
+      const credits = document.getElementById("input-book-credits").value.trim();
+      const type = document.getElementById("input-book-type").value;
+
+      if (!name || !code || !credits) {
+        showToast("Please fill all book details.", "error");
+        return;
+      }
+
+      if (!adminBooksState[key]) adminBooksState[key] = [];
+
+      const bookObj = { name, code, credits, type };
+
+      if (editingBookIndex >= 0) {
+        adminBooksState[key][editingBookIndex] = bookObj;
+        editingBookIndex = -1;
+        document.getElementById("btn-save-book-label").textContent = "Add Book to List";
+        document.getElementById("book-form-title").textContent = "Add New Subject / Book";
+        showToast("Subject book updated successfully!", "success");
+      } else {
+        adminBooksState[key].push(bookObj);
+        showToast("New subject book added to list!", "success");
+      }
+
+      document.getElementById("input-book-name").value = "";
+      document.getElementById("input-book-code").value = "";
+      document.getElementById("input-book-credits").value = "";
+      renderAdminBooksTable(key);
+    }
+
+    function editAdminBook(idx) {
+      const dept = document.getElementById("book-manage-dept").value;
+      const sem = document.getElementById("book-manage-sem").value;
+      const key = `${dept}_${sem}`;
+
+      const book = adminBooksState[key] ? adminBooksState[key][idx] : null;
+      if (!book) return;
+
+      editingBookIndex = idx;
+      document.getElementById("input-book-name").value = book.name;
+      document.getElementById("input-book-code").value = book.code;
+      document.getElementById("input-book-credits").value = book.credits;
+      document.getElementById("input-book-type").value = book.type || "Theory & Practical";
+
+      document.getElementById("btn-save-book-label").textContent = "Update Subject Book";
+      document.getElementById("book-form-title").textContent = "Edit Subject / Book";
+    }
+
+    function deleteAdminBook(idx) {
+      const dept = document.getElementById("book-manage-dept").value;
+      const sem = document.getElementById("book-manage-sem").value;
+      const key = `${dept}_${sem}`;
+
+      if (!confirm("Are you sure you want to remove this book from the list?")) return;
+
+      if (adminBooksState[key]) {
+        adminBooksState[key].splice(idx, 1);
+        renderAdminBooksTable(key);
+        showToast("Book removed from list.", "success");
+      }
+    }
+
+    function loadDefaultBtebPresetBooks() {
+      const dept = document.getElementById("book-manage-dept").value;
+      const sem = document.getElementById("book-manage-sem").value;
+      const key = `${dept}_${sem}`;
+
+      if (DEFAULT_BTEB_BOOKS_PRESETS[key]) {
+        adminBooksState[key] = [...DEFAULT_BTEB_BOOKS_PRESETS[key]];
+      } else {
+        adminBooksState[key] = [
+          { name: `${dept} Core Subject-1`, code: "28511", credits: "3", type: "Theory & Practical" },
+          { name: `${dept} Lab Project`, code: "28512", credits: "2", type: "Practical" },
+          { name: "Mathematics", code: "25911", credits: "3", type: "Theory" }
+        ];
+      }
+
+      renderAdminBooksTable(key);
+      showToast(`Loaded BTEB default preset for ${key.replace('_', ' ')}`, "success");
+    }
+
+    function publishBooksToFirestore() {
+      const dept = document.getElementById("book-manage-dept").value;
+      const sem = document.getElementById("book-manage-sem").value;
+      const key = `${dept}_${sem}`;
+
+      const booksList = adminBooksState[key] || [];
+
+      if (!db) {
+        showToast("Database offline. Books saved locally.", "success");
+        return;
+      }
+
+      db.collection("books").doc(key).set({
+        department: dept,
+        semester: sem,
+        list: booksList,
+        updatedAt: new Date().toISOString(),
+        updatedBy: ADMIN_USER
+      }).then(() => {
+        showToast(`Book list published successfully for ${dept} (${sem} Sem)!`, "success");
+      }).catch((err) => {
+        console.error("Firestore books publish error:", err);
+        showToast("Failed to publish book list to Firestore.", "error");
+      });
     }
 
     // Toast Notification Display

@@ -458,6 +458,25 @@
 
     let activeSem = "7th";
 
+    let db;
+    try {
+      const firebaseConfig = {
+        apiKey: "AIzaSyD-EE4pIw9rD4tZmz9tKnzsd6VQzhC3ck0",
+        authDomain: "cngpi-edu.firebaseapp.com",
+        projectId: "cngpi-edu",
+        storageBucket: "cngpi-edu.firebasestorage.app",
+        messagingSenderId: "889275125335",
+        appId: "1:889275125335:web:a3e8a944d1a2d429501d12"
+      };
+
+      if (typeof firebase !== 'undefined') {
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.firestore();
+      }
+    } catch (e) {
+      console.log("Firebase init notice:", e);
+    }
+
     function initSemTabs() {
       const sems = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"];
       const container = document.getElementById("sem-tabs-box");
@@ -478,11 +497,33 @@
       const dept = document.getElementById("dept-filter-select").value;
       const searchQuery = document.getElementById("search-book-input").value.trim().toLowerCase();
       const container = document.getElementById("books-list-container");
-      
-      const deptBooks = (BTEB_BOOKS_DATABASE[dept] && BTEB_BOOKS_DATABASE[dept][activeSem]) ? BTEB_BOOKS_DATABASE[dept][activeSem] : (BTEB_BOOKS_DATABASE["CST"][activeSem] || []);
+      const key = `${dept}_${activeSem}`;
+
+      if (db) {
+        db.collection("books").doc(key).get().then((doc) => {
+          let list = [];
+          if (doc.exists && doc.data().list) {
+            list = doc.data().list;
+          } else {
+            list = (BTEB_BOOKS_DATABASE[dept] && BTEB_BOOKS_DATABASE[dept][activeSem]) ? BTEB_BOOKS_DATABASE[dept][activeSem] : (BTEB_BOOKS_DATABASE["CST"][activeSem] || []);
+          }
+          renderBooksGrid(list, searchQuery);
+        }).catch((err) => {
+          console.error("Firestore books fetch error:", err);
+          const list = (BTEB_BOOKS_DATABASE[dept] && BTEB_BOOKS_DATABASE[dept][activeSem]) ? BTEB_BOOKS_DATABASE[dept][activeSem] : (BTEB_BOOKS_DATABASE["CST"][activeSem] || []);
+          renderBooksGrid(list, searchQuery);
+        });
+      } else {
+        const list = (BTEB_BOOKS_DATABASE[dept] && BTEB_BOOKS_DATABASE[dept][activeSem]) ? BTEB_BOOKS_DATABASE[dept][activeSem] : (BTEB_BOOKS_DATABASE["CST"][activeSem] || []);
+        renderBooksGrid(list, searchQuery);
+      }
+    }
+
+    function renderBooksGrid(deptBooks, searchQuery) {
+      const container = document.getElementById("books-list-container");
 
       const filtered = deptBooks.filter(b => 
-        b.name.toLowerCase().includes(searchQuery) || b.code.includes(searchQuery)
+        b.name.toLowerCase().includes(searchQuery) || (b.code && b.code.includes(searchQuery))
       );
 
       if (filtered.length === 0) {
