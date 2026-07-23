@@ -641,6 +641,49 @@
         </div>
       </div>
 
+      <!-- Class Routine JSON Upload Card -->
+      <div class="glass-card">
+        <div class="dash-section-header">
+          <div class="dash-title-group">
+            <div class="dash-icon-box" style="background: rgba(99, 102, 241, 0.15); border-color: rgba(99, 102, 241, 0.3); color: #818cf8;">
+              <i data-lucide="calendar-days" style="width: 22px; height: 22px;"></i>
+            </div>
+            <div>
+              <h2 class="dash-title">Class Routine Upload (JSON Format)</h2>
+              <p class="dash-subtitle">Upload JSON routine files or paste JSON format schedule directly to Firestore</p>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px;">
+          <div class="form-group">
+            <label>Select Routine JSON File from Device</label>
+            <input type="file" id="admin-routine-file-input" accept=".json" onchange="onAdminRoutineFileSelected(event)" style="display: none;">
+            <button type="button" class="btn-reset-default" onclick="document.getElementById('admin-routine-file-input').click()" style="background: rgba(99, 102, 241, 0.15); border-color: rgba(99, 102, 241, 0.3); color: white;">
+              <i data-lucide="file-up" style="width: 16px; height: 16px;"></i>
+              <span>Choose JSON File</span>
+            </button>
+          </div>
+
+          <div class="form-group">
+            <label for="admin-routine-json-input">Or Paste Routine JSON Content</label>
+            <textarea id="admin-routine-json-input" class="form-input" style="height: 180px; font-family: monospace; font-size: 12px;" placeholder="Paste routine JSON code here..."></textarea>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="admin-actions-bar">
+          <button type="button" class="btn-reset-default" onclick="loadAdminRoutinePreset()">
+            <i data-lucide="file-code" style="width: 16px; height: 16px;"></i>
+            <span>Load CST 7/2 Preset</span>
+          </button>
+          <button type="button" class="btn-save-config" onclick="uploadRoutineToFirestore()" style="background: var(--grad-primary); box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);">
+            <i data-lucide="upload-cloud" style="width: 18px; height: 18px;"></i>
+            <span>Upload Routine to Firestore</span>
+          </button>
+        </div>
+      </div>
+
     </div>
 
   </main>
@@ -848,6 +891,146 @@
         console.error("Firestore save error:", err);
         showToast("Failed to save settings to Firestore.", "error");
       });
+    }
+
+    // Default CST 7/2 Routine Preset Data
+    const CST_7_2_ROUTINE_PRESET = {
+      "id": "cst_7_2",
+      "group_short_code": "CST 7/2",
+      "institute": "Chapainawabganj Polytechnic Institute",
+      "semester": "Seventh Semester Class Routine 2026",
+      "department": "Computer Science & Technology (Second Shift)",
+      "total_load": 26,
+      "time_slots": {
+        "1st": "1:30PM-2:15PM", "2nd": "2:15PM-3:00PM", "3rd": "3:00PM-3:45PM",
+        "4th": "3:45PM-4:30PM", "5th": "4:30PM-5:15PM", "6th": "5:15PM-6:00PM", "7th": "6:00PM-6:45PM"
+      },
+      "weekly_schedule": {
+        "Sunday": [
+          { "period": "1st & 2nd", "time": "1:30PM-3:00PM", "subject_name": "Project Work-II", "subject_code": "28576", "teacher_short_code": "AbM", "room": "Hardware Lab" },
+          { "period": "3rd & 4th", "time": "3:00PM-4:30PM", "subject_name": "Apps Development Project", "subject_code": "28574", "teacher_short_code": "IH", "room": "ICT Lab" },
+          { "period": "5th", "time": "4:30PM-5:15PM", "subject_name": "Digital Marketing Technique", "subject_code": "28571", "teacher_short_code": "KA", "room": "S-418" },
+          { "period": "6th", "time": "5:15PM-6:00PM", "subject_name": "Cyber Security & Ethics", "subject_code": "28573", "teacher_short_code": "AbM", "room": "S-418" },
+          { "period": "7th", "time": "6:00PM-6:45PM", "subject_name": null, "subject_code": null, "teacher_short_code": null, "room": "-" }
+        ],
+        "Monday": [
+          { "period": "1st", "time": "1:30PM-2:15PM", "subject_name": null, "subject_code": null, "teacher_short_code": null, "room": "-" },
+          { "period": "2nd", "time": "2:15PM-3:00PM", "subject_name": "Cyber Security & Ethics", "subject_code": "28573", "teacher_short_code": "AbM", "room": "S-418" },
+          { "period": "3rd", "time": "3:00PM-3:45PM", "subject_name": "Network Administration & Services", "subject_code": "28572", "teacher_short_code": "JR", "room": "S-418" },
+          { "period": "4th & 5th", "time": "3:45PM-5:15PM", "subject_name": "Digital Marketing Technique", "subject_code": "28571", "teacher_short_code": "KA", "room": "ICT Lab" },
+          { "period": "6th", "time": "5:15PM-6:00PM", "subject_name": "Multimedia & Animation", "subject_code": "28575", "teacher_short_code": "ZI", "room": "S-418" },
+          { "period": "7th", "time": "6:00PM-6:45PM", "subject_name": null, "subject_code": null, "teacher_short_code": null, "room": "-" }
+        ],
+        "Tuesday": [
+          { "period": "1st", "time": "1:30PM-2:15PM", "subject_name": null, "subject_code": null, "teacher_short_code": null, "room": "-" },
+          { "period": "2nd", "time": "2:15PM-3:00PM", "subject_name": "Innovation & Entrepreneurship", "subject_code": "25853", "teacher_short_code": "HA", "room": "S-418" },
+          { "period": "3rd & 4th", "time": "3:00PM-4:30PM", "subject_name": "Cyber Security & Ethics", "subject_code": "28573", "teacher_short_code": "AbM", "room": "Software Lab" },
+          { "period": "5th", "time": "4:30PM-5:15PM", "subject_name": "Network Administration & Services", "subject_code": "28572", "teacher_short_code": "JR", "room": "S-418" },
+          { "period": "6th & 7th", "time": "5:15PM-6:45PM", "subject_name": null, "subject_code": null, "teacher_short_code": null, "room": "-" }
+        ],
+        "Wednesday": [
+          { "period": "1st", "time": "1:30PM-2:15PM", "subject_name": "Network Administration & Services", "subject_code": "28572", "teacher_short_code": "JR", "room": "S-418" },
+          { "period": "2nd & 3rd", "time": "2:15PM-3:45PM", "subject_name": "Project Work-II", "subject_code": "28576", "teacher_short_code": "AbM", "room": "Hardware Lab" },
+          { "period": "4th", "time": "3:45PM-4:30PM", "subject_name": "Innovation & Entrepreneurship", "subject_code": "25853", "teacher_short_code": "HA", "room": "S-418" },
+          { "period": "5th, 6th & 7th", "time": "4:30PM-6:45PM", "subject_name": "Multimedia & Animation", "subject_code": "28575", "teacher_short_code": "ZI", "room": "ICT Lab" }
+        ],
+        "Thursday": [
+          { "period": "1st", "time": "1:30PM-2:15PM", "subject_name": "Digital Marketing Technique", "subject_code": "28571", "teacher_short_code": "KA", "room": "S-418" },
+          { "period": "2nd & 3rd", "time": "2:15PM-3:45PM", "subject_name": "Network Administration & Services", "subject_code": "28572", "teacher_short_code": "JR", "room": "Hardware Lab" },
+          { "period": "4th", "time": "3:45PM-4:30PM", "subject_name": "Apps Development Project", "subject_code": "28574", "teacher_short_code": "IH", "room": "S-418" },
+          { "period": "5th", "time": "4:30PM-5:15PM", "subject_name": "Multimedia & Animation", "subject_code": "28575", "teacher_short_code": "ZI", "room": "S-418" },
+          { "period": "6th & 7th", "time": "5:15PM-6:45PM", "subject_name": null, "subject_code": null, "teacher_short_code": null, "room": "-" }
+        ]
+      },
+      "teachers_details": [
+        { "short_code": "JR", "name": "Md. Jewel Rana", "designation": "Instructor (Tech/Computer)", "phone_no": "01732755176", "role": "Class Teacher" },
+        { "short_code": "HA", "name": "Hakimin Ahmed", "designation": "Part-Time Teacher (Electronics)", "phone_no": "01759731841", "role": null },
+        { "short_code": "AbM", "name": "Md. Abdul Malek", "designation": "Instructor (Tech/Computer)", "phone_no": "01314851894", "role": null },
+        { "short_code": "IH", "name": "Md. Idul Hasan Jony", "designation": "Part-Time Teacher (Computer)", "phone_no": "01791008770", "role": null },
+        { "short_code": "KA", "name": "Md. Kausar Ali", "designation": "Jr. Instructor (Tech/Computer)", "phone_no": "01753038380", "role": null },
+        { "short_code": "ZI", "name": "ZAHIDUL ISLAM", "designation": "Jr. Instructor (Tech/Computer)", "phone_no": "01738628365", "role": null }
+      ]
+    };
+
+    function onAdminRoutineFileSelected(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById("admin-routine-json-input").value = e.target.result;
+        showToast(`Loaded file: ${file.name}`, "success");
+      };
+      reader.readAsText(file);
+    }
+
+    function loadAdminRoutinePreset() {
+      document.getElementById("admin-routine-json-input").value = JSON.stringify(CST_7_2_ROUTINE_PRESET, null, 2);
+      showToast("Loaded CST 7/2 Routine JSON preset", "success");
+    }
+
+    function getDeptCode(deptString) {
+      if (!deptString) return "cst";
+      const str = deptString.toLowerCase();
+      if (str.includes("computer") || str.includes("cst")) return "cst";
+      if (str.includes("civil") || str.includes("ct")) return "ct";
+      if (str.includes("electrical") || str.includes("et")) return "et";
+      if (str.includes("electronics") || str.includes("ent")) return "ent";
+      if (str.includes("mechanical") || str.includes("mt")) return "mt";
+      if (str.includes("architecture") || str.includes("at")) return "at";
+      if (str.includes("telecommunication") || str.includes("tnt")) return "tnt";
+      return deptString.substring(0, 3).toLowerCase();
+    }
+
+    async function uploadRoutineToFirestore() {
+      const jsonText = document.getElementById("admin-routine-json-input").value.trim();
+      if (!jsonText) {
+        showToast("Please select a JSON file or paste routine JSON content.", "error");
+        return;
+      }
+
+      let parsedRoutine;
+      try {
+        parsedRoutine = JSON.parse(jsonText);
+      } catch (err) {
+        showToast("Invalid JSON format. Check syntax!", "error");
+        return;
+      }
+
+      // Auto-extract Document ID (e.g. cst_7_2)
+      let docId = parsedRoutine.id;
+      if (!docId && parsedRoutine.group_short_code) {
+        docId = parsedRoutine.group_short_code
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, '_')
+          .replace(/_+/g, '_')
+          .replace(/^_|_$/g, '');
+      }
+
+      if (!docId && parsedRoutine.department) {
+        const deptShort = getDeptCode(parsedRoutine.department);
+        const semNum = (parsedRoutine.semester || '').replace(/[^0-9]/g, '') || '1';
+        const shiftNum = (parsedRoutine.department || '').includes('Second') ? '2' : '1';
+        docId = `${deptShort}_${semNum}_${shiftNum}`;
+      }
+
+      if (!docId) {
+        docId = "cst_7_2";
+      }
+
+      parsedRoutine.id = docId;
+
+      if (!db) {
+        showToast(`Validated routine '${docId}' (Database offline)`, "success");
+        return;
+      }
+
+      try {
+        await db.collection("routines").doc(docId).set(parsedRoutine);
+        showToast(`Routine '${docId}' uploaded successfully to Firestore!`, "success");
+      } catch (err) {
+        console.error("Firestore upload error:", err);
+        showToast("Failed to upload routine: " + err.message, "error");
+      }
     }
 
     // Toast Function
