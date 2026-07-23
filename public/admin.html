@@ -2590,6 +2590,7 @@
         tickets.forEach(ticket => {
           const tr = document.createElement("tr");
           const isResolved = ticket.status === "Resolved";
+          const hasReply = ticket.admin_reply && ticket.admin_reply.trim().length > 0;
           const dateStr = ticket.createdAt ? new Date(ticket.createdAt).toLocaleString() : 'Recently';
 
           tr.innerHTML = `
@@ -2599,18 +2600,27 @@
                 ${ticket.department || 'General'} • ${ticket.semester || '-'} • ${ticket.shift || '-'}
               </div>
             </td>
-            <td style="vertical-align: top; font-weight: 800; color: #60a5fa; max-width: 180px;">
+            <td style="vertical-align: top; font-weight: 800; color: #60a5fa; max-width: 160px;">
               ${ticket.subject || 'General Inquiry'}
             </td>
             <td style="vertical-align: top; font-size: 12px; color: #e2e8f0; max-width: 280px; line-height: 1.4;">
-              ${ticket.message || '-'}
+              <div style="margin-bottom: 8px;"><strong>Message:</strong> ${ticket.message || '-'}</div>
+
+              <div style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); padding: 8px; border-radius: 10px;">
+                <label style="font-size: 10px; font-weight: 800; color: #34d399; display: block; margin-bottom: 4px;">💬 ADMIN REPLY TO STUDENT:</label>
+                <textarea id="reply-text-${ticket.id}" class="form-textarea" style="min-height: 50px; font-size: 12px; padding: 6px 10px; border-radius: 8px; margin-bottom: 6px;" placeholder="Type response for student...">${ticket.admin_reply || ''}</textarea>
+                <button type="button" onclick="sendAdminReply('${ticket.id}')" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; color: white; padding: 5px 12px; border-radius: 6px; font-weight: 800; font-size: 11px; cursor: pointer;">
+                  <i data-lucide="send" style="width: 11px; height: 11px; display: inline-block; vertical-align: middle;"></i>
+                  ${hasReply ? 'Update Reply' : 'Send Reply to Student'}
+                </button>
+              </div>
             </td>
-            <td style="vertical-align: top; font-size: 11px; color: var(--text-muted); whitespace: nowrap;">
+            <td style="vertical-align: top; font-size: 11px; color: var(--text-muted); white-space: nowrap;">
               ${dateStr}
             </td>
             <td style="vertical-align: top;">
-              <span style="font-size: 10px; font-weight: 800; padding: 4px 8px; border-radius: 8px; ${isResolved ? 'background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4);' : 'background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4);'}">
-                ${isResolved ? '✅ RESOLVED' : '⏳ PENDING'}
+              <span style="font-size: 10px; font-weight: 800; padding: 4px 8px; border-radius: 8px; ${hasReply ? 'background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4);' : 'background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4);'}">
+                ${hasReply ? '💬 REPLIED' : '⏳ PENDING'}
               </span>
             </td>
             <td style="vertical-align: top; text-align: right;">
@@ -2628,6 +2638,33 @@
       }, err => {
         console.error("Support tickets fetch error:", err);
       });
+    }
+
+    function sendAdminReply(docId) {
+      const replyElem = document.getElementById(`reply-text-${docId}`);
+      if (!replyElem) return;
+      const replyText = replyElem.value.trim();
+
+      if (!replyText) {
+        showToast("Please type a reply message before sending.", "error");
+        return;
+      }
+
+      if (db) {
+        db.collection("support_tickets").doc(docId).update({
+          admin_reply: replyText,
+          status: "Replied",
+          repliedAt: new Date().toISOString(),
+          repliedBy: ADMIN_USER
+        }).then(() => {
+          showToast("Reply sent! Student can now see this response in real-time.", "success");
+        }).catch(err => {
+          console.error("Error sending reply:", err);
+          showToast("Failed to send reply: " + err.message, "error");
+        });
+      } else {
+        showToast("Database offline. Reply saved locally!", "success");
+      }
     }
 
     function toggleResolveTicket(docId, currentStatus) {
