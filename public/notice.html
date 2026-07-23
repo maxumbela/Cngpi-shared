@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Notice Board | Chapainawabganj Polytechnic Institute</title>
+  <meta name="description" content="Official campus announcements, academic notices, and exam schedules for CNGPI students.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.344.0/dist/umd/lucide.min.js"></script>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    :root {
+      --font-primary: 'Inter', sans-serif;
+      --font-display: 'Outfit', sans-serif;
+      
+      --bg-dark: #090d16;
+      --bg-card: rgba(18, 26, 43, 0.75);
+      --bg-card-hover: rgba(30, 41, 65, 0.85);
+      --bg-nav: rgba(13, 19, 33, 0.92);
+      
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(99, 102, 241, 0.3);
+      --border-pinned: rgba(245, 158, 11, 0.4);
+      
+      --color-primary: #6366f1;
+      --color-purple: #a855f7;
+      --color-cyan: #06b6d4;
+      --color-emerald: #10b981;
+      --color-amber: #f59e0b;
+      --color-rose: #f43f5e;
+      
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      
+      --grad-primary: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+      --grad-pinned: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.08) 100%);
+      --grad-urgent: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+      --grad-academic: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+      --grad-exam: linear-gradient(135deg, #06b6d4 0%, #0284c7 100%);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      min-height: 100vh;
+      font-family: var(--font-primary);
+      background: var(--bg-dark);
+      color: var(--text-main);
+    }
+
+    /* Ambient Background Glows */
+    .bg-glow-top {
+      position: fixed;
+      top: -15%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(245, 158, 11, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
+      filter: blur(90px);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .bg-glow-bottom {
+      position: fixed;
+      bottom: -15%;
+      right: 10%;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
+      filter: blur(100px);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Responsive Container */
+    .web-app-container {
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 1;
+      padding-bottom: 95px;
+    }
+
+    /* Header Bar */
+    .app-header {
+      padding: 18px 20px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      background: rgba(9, 13, 22, 0.9);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      z-index: 100;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-back {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-back:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .header-title-group h1 {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header-title-group p {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .cngpi-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fbbf24;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    /* Content Wrapper */
+    .content-wrapper {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* Search & Filter Section */
+    .search-box-wrapper {
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 12px 16px 12px 42px;
+      color: var(--text-main);
+      font-size: 14px;
+      outline: none;
+      backdrop-filter: blur(12px);
+      transition: all 0.2s ease;
+    }
+
+    .search-input:focus {
+      border-color: var(--color-amber);
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+    }
+
+    .search-icon-pos {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    /* Category Filter Tabs */
+    .category-tabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+
+    .category-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .cat-tab-btn {
+      padding: 8px 14px;
+      border-radius: 12px;
+      background: rgba(18, 26, 43, 0.6);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-family: var(--font-display);
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .cat-tab-btn:hover {
+      background: rgba(30, 41, 65, 0.8);
+      color: var(--text-main);
+    }
+
+    .cat-tab-btn.active {
+      background: rgba(245, 158, 11, 0.2);
+      border-color: rgba(245, 158, 11, 0.4);
+      color: #fbbf24;
+      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.2);
+    }
+
+    /* Notice Cards List */
+    .notices-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .notice-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 18px;
+      backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.25s ease;
+    }
+
+    .notice-card:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Pinned Card Highlighting */
+    .notice-card.pinned {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(18, 26, 43, 0.85) 100%);
+      border: 1px solid var(--border-pinned);
+      box-shadow: 0 8px 28px rgba(245, 158, 11, 0.15);
+    }
+
+    .pinned-badge-bar {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      font-weight: 800;
+      color: #fbbf24;
+      background: rgba(245, 158, 11, 0.2);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      padding: 3px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      width: fit-content;
+    }
+
+    .notice-header-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .category-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 8px;
+    }
+
+    .cat-urgent {
+      background: rgba(244, 63, 94, 0.15);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      color: #fb7185;
+    }
+
+    .cat-academic {
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: #818cf8;
+    }
+
+    .cat-exam {
+      background: rgba(6, 182, 212, 0.15);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      color: #22d3ee;
+    }
+
+    .cat-general {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+    }
+
+    .notice-date {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .notice-title {
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.35;
+    }
+
+    .notice-desc {
+      font-size: 13px;
+      color: #cbd5e1;
+      line-height: 1.6;
+      white-space: pre-line;
+    }
+
+    .notice-attachment-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: #ffffff;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      width: fit-content;
+      margin-top: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .notice-attachment-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Fixed Bottom Navigation Bar */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 600px;
+      height: 70px;
+      background: var(--bg-nav);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border-color);
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      align-items: center;
+      z-index: 1000;
+      padding: 0 10px;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      color: var(--text-muted);
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .nav-item:hover, .nav-item.active {
+      color: var(--color-amber);
+    }
+
+    .nav-icon-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 28px;
+      border-radius: 12px;
+      transition: all 0.25s ease;
+    }
+
+    .nav-item.active .nav-icon-wrapper {
+      background: rgba(245, 158, 11, 0.15);
+    }
+
+    .nav-label {
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    /* Toast Notification */
+    .toast-popup {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      background: rgba(18, 26, 43, 0.95);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      padding: 12px 20px;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 2000;
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      backdrop-filter: blur(12px);
+    }
+
+    .toast-popup.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .toast-popup i {
+      color: #fbbf24;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Glow Effects -->
+  <div class="bg-glow-top"></div>
+  <div class="bg-glow-bottom"></div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast-popup">
+    <i data-lucide="info" style="width: 18px; height: 18px;"></i>
+    <span id="toast-msg">Notices updated</span>
+  </div>
+
+  <main class="web-app-container">
+
+    <!-- Header Navigation -->
+    <header class="app-header">
+      <div class="header-left">
+        <a href="index.html" class="btn-back" title="Back to Portal">
+          <i data-lucide="arrow-left" style="width: 20px; height: 20px;"></i>
+        </a>
+        <div class="header-title-group">
+          <h1>Notice Board</h1>
+          <p>Campus Alerts & Announcements</p>
+        </div>
+      </div>
+      <div class="cngpi-badge">
+        <i data-lucide="bell" style="width: 14px; height: 14px;"></i>
+        <span>CNGPI Notices</span>
+      </div>
+    </header>
+
+    <div class="content-wrapper">
+
+      <!-- Search Input Box -->
+      <div class="search-box-wrapper">
+        <i data-lucide="search" class="search-icon-pos" style="width: 18px; height: 18px;"></i>
+        <input 
+          type="text" 
+          id="search-input" 
+          class="search-input" 
+          placeholder="Search notices, exams, schedules..." 
+          oninput="onSearchChanged(this.value)"
+        >
+      </div>
+
+      <!-- Category Filter Tabs -->
+      <div class="category-tabs">
+        <button class="cat-tab-btn active" id="tab-cat-all" onclick="filterCategory('All')">
+          <i data-lucide="layers" style="width: 14px; height: 14px;"></i>
+          <span>All Notices</span>
+        </button>
+        <button class="cat-tab-btn" id="tab-cat-urgent" onclick="filterCategory('Urgent')">
+          <i data-lucide="alert-triangle" style="width: 14px; height: 14px; color: #fb7185;"></i>
+          <span>🚨 Urgent</span>
+        </button>
+        <button class="cat-tab-btn" id="tab-cat-academic" onclick="filterCategory('Academic')">
+          <i data-lucide="graduation-cap" style="width: 14px; height: 14px; color: #818cf8;"></i>
+          <span>🎓 Academic</span>
+        </button>
+        <button class="cat-tab-btn" id="tab-cat-exam" onclick="filterCategory('Exam')">
+          <i data-lucide="file-text" style="width: 14px; height: 14px; color: #22d3ee;"></i>
+          <span>📝 Exam</span>
+        </button>
+        <button class="cat-tab-btn" id="tab-cat-general" onclick="filterCategory('General')">
+          <i data-lucide="volume-2" style="width: 14px; height: 14px; color: #34d399;"></i>
+          <span>📢 General</span>
+        </button>
+      </div>
+
+      <!-- Notices Cards List -->
+      <div class="notices-list" id="notices-container">
+        <!-- Rendered dynamically from Cloud Firestore -->
+      </div>
+
+    </div>
+
+    <!-- Fixed Bottom Navigation Bar -->
+    <nav class="bottom-nav">
+      <a href="index.html" class="nav-item">
+        <div class="nav-icon-wrapper">
+          <i data-lucide="home" style="width: 20px; height: 20px;"></i>
+        </div>
+        <span class="nav-label">Home</span>
+      </a>
+
+      <a href="routine.html" class="nav-item">
+        <div class="nav-icon-wrapper">
+          <i data-lucide="calendar-days" style="width: 20px; height: 20px;"></i>
+        </div>
+        <span class="nav-label">Routine</span>
+      </a>
+
+      <a href="notice.html" class="nav-item active">
+        <div class="nav-icon-wrapper">
+          <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+        </div>
+        <span class="nav-label">Notice</span>
+      </a>
+
+      <a href="calculator.html" class="nav-item">
+        <div class="nav-icon-wrapper">
+          <i data-lucide="calculator" style="width: 20px; height: 20px;"></i>
+        </div>
+        <span class="nav-label">CGPA</span>
+      </a>
+
+      <a href="books.html" class="nav-item">
+        <div class="nav-icon-wrapper">
+          <i data-lucide="book-open" style="width: 20px; height: 20px;"></i>
+        </div>
+        <span class="nav-label">Book List</span>
+      </a>
+    </nav>
+
+  </main>
+
+  <script>
+    // Offline Sample Fallback Notices
+    const SAMPLE_NOTICES = [
+      {
+        id: "sample_1",
+        title: "7th Semester Midterm Examination Schedule 2026",
+        category: "Exam",
+        description: "All students of 7th Semester (CST, CT, ET, ENT, MT) are hereby notified that the Midterm Examinations 2026 will commence from next Sunday. Please collect your admit cards from your respective class teachers.",
+        attachmentUrl: "",
+        isPinned: true,
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: "sample_2",
+        title: "Urgent: Industrial Attachment & Internship Project Submission",
+        category: "Urgent",
+        description: "8th Semester students must submit their final Industrial Training report and presentation slides to the department head by Thursday, 4:00 PM without fail.",
+        attachmentUrl: "",
+        isPinned: false,
+        createdAt: new Date(Date.now() - 86400000).toISOString()
+      },
+      {
+        id: "sample_3",
+        title: "Academic Calendar & Class Timetable Update",
+        category: "Academic",
+        description: "The revised class routine for all 1st, 3rd, 5th, and 7th semester shifts has been uploaded to the portal. Please check the Class Routine section for updated room allocations.",
+        attachmentUrl: "",
+        isPinned: false,
+        createdAt: new Date(Date.now() - 172800000).toISOString()
+      }
+    ];
+
+    let db;
+    let allNotices = [];
+    let activeCategory = "All";
+    let searchQuery = "";
+
+    // Firebase Setup
+    try {
+      const firebaseConfig = {
+        apiKey: "AIzaSyD-EE4pIw9rD4tZmz9tKnzsd6VQzhC3ck0",
+        authDomain: "cngpi-edu.firebaseapp.com",
+        projectId: "cngpi-edu",
+        storageBucket: "cngpi-edu.firebasestorage.app",
+        messagingSenderId: "889275125335",
+        appId: "1:889275125335:web:a3e8a944d1a2d429501d12"
+      };
+
+      if (typeof firebase !== 'undefined') {
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.firestore();
+      }
+    } catch (e) {
+      console.log("Firebase setup notice:", e);
+    }
+
+    // Lifecycle On Load
+    document.addEventListener("DOMContentLoaded", () => {
+      fetchLiveNoticesFromFirestore();
+    });
+
+    // Fetch Live Notices from Cloud Firestore
+    function fetchLiveNoticesFromFirestore() {
+      if (!db) {
+        allNotices = [...SAMPLE_NOTICES];
+        renderNoticesList();
+        return;
+      }
+
+      db.collection("notices").onSnapshot((snapshot) => {
+        allNotices = [];
+        if (!snapshot.empty) {
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            allNotices.push({
+              id: doc.id,
+              ...data
+            });
+          });
+        }
+
+        if (allNotices.length === 0) {
+          allNotices = [...SAMPLE_NOTICES];
+        }
+
+        renderNoticesList();
+      }, (err) => {
+        console.error("Firestore notice listener error:", err);
+        allNotices = [...SAMPLE_NOTICES];
+        renderNoticesList();
+      });
+    }
+
+    // Filter Category Tab Switch
+    function filterCategory(catName) {
+      activeCategory = catName;
+      document.querySelectorAll(".cat-tab-btn").forEach(btn => btn.classList.remove("active"));
+      
+      const activeBtn = document.getElementById(`tab-cat-${catName.toLowerCase()}`);
+      if (activeBtn) activeBtn.classList.add("active");
+
+      renderNoticesList();
+    }
+
+    // Real-time Search Input
+    function onSearchChanged(val) {
+      searchQuery = val.trim().toLowerCase();
+      renderNoticesList();
+    }
+
+    // Render Notices List (Pinned First Sorting Logic)
+    function renderNoticesList() {
+      const container = document.getElementById("notices-container");
+      container.innerHTML = "";
+
+      // 1. Filter by category
+      let filtered = allNotices.filter(item => {
+        if (activeCategory !== "All" && item.category !== activeCategory) {
+          return false;
+        }
+        if (searchQuery !== "") {
+          const title = (item.title || "").toLowerCase();
+          const desc = (item.description || "").toLowerCase();
+          const cat = (item.category || "").toLowerCase();
+          return title.includes(searchQuery) || desc.includes(searchQuery) || cat.includes(searchQuery);
+        }
+        return true;
+      });
+
+      // 2. Sort Logic: Pinned items FIRST, then newest createdAt
+      filtered.sort((a, b) => {
+        const aPinned = a.isPinned ? 1 : 0;
+        const bPinned = b.isPinned ? 1 : 0;
+        if (aPinned !== bPinned) {
+          return bPinned - aPinned; // Pinned items come top
+        }
+        const dateA = new Date(a.createdAt || 0).getTime();
+        const dateB = new Date(b.createdAt || 0).getTime();
+        return dateB - dateA;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="notice-card" style="text-align: center; padding: 40px 20px;">
+            <i data-lucide="inbox" style="width: 36px; height: 36px; color: var(--text-muted); margin-bottom: 10px;"></i>
+            <div style="font-weight: 700; color: var(--text-main);">No notices found</div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">There are no notices under '${activeCategory}' category.</div>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      filtered.forEach(notice => {
+        const card = document.createElement("div");
+        const isPinned = notice.isPinned === true;
+        card.className = `notice-card ${isPinned ? 'pinned' : ''}`;
+
+        const catClass = getCategoryClass(notice.category);
+        const catIcon = getCategoryIcon(notice.category);
+        const dateFormatted = notice.createdAt ? formatDate(notice.createdAt) : 'Recently Published';
+
+        card.innerHTML = `
+          ${isPinned ? `
+            <div class="pinned-badge-bar">
+              <i data-lucide="pin" style="width: 12px; height: 12px;"></i>
+              <span>Pinned Announcement</span>
+            </div>
+          ` : ''}
+
+          <div class="notice-header-meta">
+            <div class="category-badge ${catClass}">
+              <i data-lucide="${catIcon}" style="width: 13px; height: 13px;"></i>
+              <span>${notice.category || 'General'}</span>
+            </div>
+            <div class="notice-date">
+              <i data-lucide="clock" style="width: 12px; height: 12px;"></i>
+              <span>${dateFormatted}</span>
+            </div>
+          </div>
+
+          <h3 class="notice-title">${notice.title}</h3>
+          <div class="notice-desc">${notice.description || ''}</div>
+
+          ${notice.attachmentUrl ? `
+            <a href="${notice.attachmentUrl}" target="_blank" class="notice-attachment-btn">
+              <i data-lucide="paperclip" style="width: 15px; height: 15px; color: #fbbf24;"></i>
+              <span>View Attachment / Download Document</span>
+            </a>
+          ` : ''}
+        `;
+
+        container.appendChild(card);
+      });
+
+      lucide.createIcons();
+    }
+
+    // Helper: Category Badge CSS Class
+    function getCategoryClass(cat) {
+      if (cat === "Urgent") return "cat-urgent";
+      if (cat === "Academic") return "cat-academic";
+      if (cat === "Exam") return "cat-exam";
+      return "cat-general";
+    }
+
+    // Helper: Category Icon Name
+    function getCategoryIcon(cat) {
+      if (cat === "Urgent") return "alert-triangle";
+      if (cat === "Academic") return "graduation-cap";
+      if (cat === "Exam") return "file-text";
+      return "volume-2";
+    }
+
+    // Helper: Format Date
+    function formatDate(dateStr) {
+      try {
+        const d = new Date(dateStr);
+        return d.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric"
+        });
+      } catch (e) {
+        return dateStr;
+      }
+    }
+  </script>
+
+</body>
+</html>

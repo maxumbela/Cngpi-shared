@@ -829,8 +829,7 @@
 
         <button class="module-tab-btn" id="tab-btn-notices" onclick="switchModule('notices')">
           <i data-lucide="bell" style="width: 16px; height: 16px;"></i>
-          <span>Notice Board</span>
-          <span class="tab-badge-soon">Soon</span>
+          <span>Notice Board Manager</span>
         </button>
       </div>
 
@@ -1297,6 +1296,86 @@
             </button>
           </div>
         </form>
+      <!-- MODULE 8: NOTICE BOARD MANAGER -->
+      <div class="glass-card module-content" id="module-notices" style="display: none;">
+        <div class="dash-section-header">
+          <div class="dash-title-group">
+            <div class="dash-icon-box" style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); color: #fbbf24;">
+              <i data-lucide="bell" style="width: 22px; height: 22px;"></i>
+            </div>
+            <div>
+              <h2 class="dash-title">Campus Notice Board Manager</h2>
+              <p class="dash-subtitle">Publish campus notices, pin important announcements to top, and manage alerts</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Publish Notice Form -->
+        <form onsubmit="handleNoticePublish(event)" style="margin-bottom: 30px;">
+          <div class="form-group">
+            <label for="notice-title">Notice Title / Headline</label>
+            <input type="text" id="notice-title" class="form-input" placeholder="e.g. 1st Semester Midterm Examination Schedule 2026" required>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="notice-category">Category / Tag</label>
+              <select id="notice-category" class="form-select" required>
+                <option value="Urgent">🚨 Urgent Notice</option>
+                <option value="Academic" selected>🎓 Academic Notice</option>
+                <option value="Exam">📝 Exam Notice</option>
+                <option value="General">📢 General Notice</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="notice-attachment-url">Attachment / PDF Link (Optional)</label>
+              <input type="url" id="notice-attachment-url" class="form-input" placeholder="https://example.com/notices/exam_routine.pdf">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="notice-desc">Notice Details / Announcement Message</label>
+            <textarea id="notice-desc" class="form-textarea" rows="4" placeholder="Enter complete notice announcement details..." required></textarea>
+          </div>
+
+          <div class="form-group" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); padding: 12px 16px; border-radius: 14px;">
+            <label style="display: flex; align-items: center; gap: 10px; font-weight: 700; color: #fbbf24; cursor: pointer; text-transform: none; font-size: 13px;">
+              <input type="checkbox" id="notice-pin-check" style="width: 18px; height: 18px; accent-color: #f59e0b;">
+              <span>📌 Pin Announcement to Top (Pinned notices always stay at the very top of Notice Board)</span>
+            </label>
+          </div>
+
+          <button type="submit" class="btn-submit" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);">
+            <i data-lucide="send" style="width: 18px; height: 18px;"></i>
+            <span>Publish Notice to Portal</span>
+          </button>
+        </form>
+
+        <!-- Published Notices List Table -->
+        <h3 style="font-family: var(--font-display); font-size: 16px; color: var(--text-main); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+          <i data-lucide="list" style="width: 18px; height: 18px; color: #fbbf24;"></i>
+          <span>Published Campus Notices in Firestore</span>
+        </h3>
+
+        <div style="overflow-x: auto;">
+          <table class="data-list-table">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Notice Title</th>
+                <th>Pin Status</th>
+                <th>Published Date</th>
+                <th style="text-align: right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="notices-table-body">
+              <tr>
+                <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">Loading published notices...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
     </div>
@@ -1417,6 +1496,7 @@
         loadFirestoreRoutines();
         loadFirestoreWeights();
         loadFirestoreResults();
+        loadFirestoreNotices();
       } else {
         loginPanel.style.display = "block";
         dashPanel.classList.remove("active");
@@ -2229,6 +2309,145 @@
       document.getElementById("admin-holiday-status").value = "false";
       toggleHolidayFormFields("false");
       handleSaveHolidayStatus(new Event('submit'));
+    }
+
+    // ================= NOTICE BOARD MANAGEMENT =================
+    function handleNoticePublish(event) {
+      event.preventDefault();
+
+      const title = document.getElementById("notice-title").value.trim();
+      const category = document.getElementById("notice-category").value;
+      const description = document.getElementById("notice-desc").value.trim();
+      const attachmentUrl = document.getElementById("notice-attachment-url").value.trim();
+      const isPinned = document.getElementById("notice-pin-check").checked;
+
+      if (!title || !description) {
+        showToast("Please provide notice title and announcement details.", "error");
+        return;
+      }
+
+      const payload = {
+        title,
+        category,
+        description,
+        attachmentUrl,
+        isPinned,
+        createdAt: new Date().toISOString(),
+        publishedBy: ADMIN_USER
+      };
+
+      if (db) {
+        db.collection("notices").add(payload).then(() => {
+          showToast("Notice published successfully to Portal!", "success");
+          document.getElementById("notice-title").value = "";
+          document.getElementById("notice-desc").value = "";
+          document.getElementById("notice-attachment-url").value = "";
+          document.getElementById("notice-pin-check").checked = false;
+          loadFirestoreNotices();
+        }).catch((err) => {
+          console.error("Notice save error:", err);
+          showToast("Failed to publish notice: " + err.message, "error");
+        });
+      } else {
+        showToast("Database offline. Notice validated!", "success");
+      }
+    }
+
+    // Load Published Notices from Cloud Firestore
+    function loadFirestoreNotices() {
+      if (!db) return;
+
+      db.collection("notices").onSnapshot((snapshot) => {
+        const tbody = document.getElementById("notices-table-body");
+        if (!tbody) return;
+        tbody.innerHTML = "";
+
+        if (snapshot.empty) {
+          tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">No published notices found. Create your first notice above.</td></tr>`;
+          return;
+        }
+
+        let noticesList = [];
+        snapshot.forEach((doc) => {
+          noticesList.push({ id: doc.id, ...doc.data() });
+        });
+
+        // Sort: Pinned items FIRST, then newest createdAt
+        noticesList.sort((a, b) => {
+          const aPinned = a.isPinned ? 1 : 0;
+          const bPinned = b.isPinned ? 1 : 0;
+          if (aPinned !== bPinned) return bPinned - aPinned;
+          return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+        });
+
+        noticesList.forEach((notice) => {
+          const tr = document.createElement("tr");
+          const dateStr = notice.createdAt ? new Date(notice.createdAt).toLocaleDateString() : 'Recently';
+
+          tr.innerHTML = `
+            <td>
+              <span class="category-badge cat-${(notice.category || 'general').toLowerCase()}" style="font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 6px;">
+                ${notice.category || 'General'}
+              </span>
+            </td>
+            <td style="font-weight: 700; max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+              ${notice.title}
+            </td>
+            <td>
+              ${notice.isPinned ? `
+                <span style="display: inline-flex; align-items: center; gap: 4px; color: #fbbf24; font-weight: 800; font-size: 11px; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); padding: 3px 8px; border-radius: 12px;">
+                  <i data-lucide="pin" style="width: 12px; height: 12px;"></i> PINNED
+                </span>
+              ` : `
+                <span style="color: var(--text-muted); font-size: 11px;">Normal</span>
+              `}
+            </td>
+            <td style="font-size: 12px; color: var(--text-muted);">${dateStr}</td>
+            <td style="text-align: right;">
+              <button type="button" class="btn-action-icon" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3);" title="${notice.isPinned ? 'Unpin Notice' : 'Pin Notice to Top'}" onclick="toggleNoticePin('${notice.id}', ${notice.isPinned === true})">
+                <i data-lucide="${notice.isPinned ? 'pin-off' : 'pin'}" style="width: 15px; height: 15px;"></i>
+              </button>
+              <button type="button" class="btn-action-icon btn-action-delete" title="Delete Notice" onclick="deleteNoticeDoc('${notice.id}')">
+                <i data-lucide="trash-2" style="width: 15px; height: 15px;"></i>
+              </button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+        lucide.createIcons();
+      }, (err) => {
+        console.error("Firestore notices error:", err);
+      });
+    }
+
+    // Toggle Pin / Unpin Notice
+    function toggleNoticePin(docId, currentPinState) {
+      if (!db) return;
+      const newPinState = !currentPinState;
+
+      db.collection("notices").doc(docId).update({
+        isPinned: newPinState,
+        updatedAt: new Date().toISOString()
+      }).then(() => {
+        showToast(newPinState ? "Notice pinned to top of Notice Board!" : "Notice unpinned.", "success");
+      }).catch((err) => {
+        console.error("Pin toggle error:", err);
+        showToast("Failed to update pin state.", "error");
+      });
+    }
+
+    // Delete Notice Document
+    function deleteNoticeDoc(docId) {
+      if (!confirm("Are you sure you want to delete this notice?")) return;
+
+      if (db) {
+        db.collection("notices").doc(docId).delete().then(() => {
+          showToast("Notice deleted successfully.", "success");
+        }).catch((err) => {
+          console.error("Notice delete error:", err);
+          showToast("Failed to delete notice.", "error");
+        });
+      }
     }
 
     // Toast Notification Display
