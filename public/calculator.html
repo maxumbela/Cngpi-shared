@@ -13,6 +13,11 @@
   
   <!-- Lucide Icons -->
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.344.0/dist/umd/lucide.min.js"></script>
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
   <style>
     :root {
@@ -1003,16 +1008,51 @@
       { label: "B 3.00", val: 3.00 }
     ];
 
+    let db;
+    try {
+      const firebaseConfig = {
+        apiKey: "AIzaSyD-EE4pIw9rD4tZmz9tKnzsd6VQzhC3ck0",
+        authDomain: "cngpi-edu.firebaseapp.com",
+        projectId: "cngpi-edu",
+        storageBucket: "cngpi-edu.firebasestorage.app",
+        messagingSenderId: "889275125335",
+        appId: "1:889275125335:web:a3e8a944d1a2d429501d12"
+      };
+
+      if (typeof firebase !== 'undefined') {
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.firestore();
+      }
+    } catch (e) {
+      console.log("Firebase setup:", e);
+    }
+
     let currentRegulation = '2016';
     let semesterGPAs = Array(8).fill('');
 
-    // Initialize Page
+    // Initialize Page & Live Firestore Sync
     document.addEventListener("DOMContentLoaded", () => {
       renderSemesterCards();
       loadSavedState();
       calculateCGPA();
+      initFirestorePercentageSync();
       lucide.createIcons();
     });
+
+    // Real-time Firestore sync
+    function initFirestorePercentageSync() {
+      if (!db) return;
+      db.collection("settings").doc("cgpa_weights").onSnapshot((doc) => {
+        if (doc.exists && doc.data().weights && Array.isArray(doc.data().weights)) {
+          const liveWeights = doc.data().weights;
+          BTEB_REGULATIONS['2016'] = liveWeights;
+          renderSemesterCards();
+          calculateCGPA();
+        }
+      }, (err) => {
+        console.log("Live weight sync notice:", err);
+      });
+    }
 
     // Switch Prabidhan Regulation
     function setRegulation(regKey) {

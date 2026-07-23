@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CNGPI Admin Console | CGPA Weight Configuration</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.344.0/dist/umd/lucide.min.js"></script>
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    :root {
+      --font-primary: 'Inter', sans-serif;
+      --font-display: 'Outfit', sans-serif;
+      
+      --bg-dark: #090d16;
+      --bg-card: rgba(18, 26, 43, 0.75);
+      --bg-card-hover: rgba(30, 41, 65, 0.85);
+      --bg-input: rgba(10, 15, 26, 0.75);
+      
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(99, 102, 241, 0.3);
+      
+      --color-primary: #6366f1;
+      --color-emerald: #10b981;
+      --color-amber: #f59e0b;
+      --color-rose: #f43f5e;
+      --color-cyan: #06b6d4;
+      
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      
+      --grad-primary: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+      --grad-emerald: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: var(--font-primary);
+      background: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Ambient Background Glows */
+    .bg-glow-top {
+      position: fixed;
+      top: -10%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+      filter: blur(90px);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .bg-glow-bottom {
+      position: fixed;
+      bottom: -10%;
+      right: 10%;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
+      filter: blur(100px);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Top Navigation Header */
+    header {
+      background: rgba(9, 13, 22, 0.9);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .logo-badge {
+      background: var(--grad-primary);
+      color: #ffffff;
+      font-family: var(--font-display);
+      font-weight: 800;
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
+    }
+
+    .brand-title {
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-header-link {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-header-link:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-logout {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(244, 63, 94, 0.12);
+      border: 1px solid rgba(244, 63, 94, 0.25);
+      color: #fb7185;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-logout:hover {
+      background: rgba(244, 63, 94, 0.22);
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      max-width: 800px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 30px 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Glass Card */
+    .glass-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 28px;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+      margin-bottom: 24px;
+    }
+
+    /* Login Panel */
+    .login-container {
+      max-width: 420px;
+      margin: 40px auto;
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .login-icon-box {
+      width: 56px;
+      height: 56px;
+      border-radius: 18px;
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: #818cf8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+    }
+
+    .login-title {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+
+    .login-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-input {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 14px;
+      color: var(--text-main);
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .form-input:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px var(--color-primary-glow);
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: var(--grad-primary);
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      color: #ffffff;
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+      transition: all 0.2s ease;
+      margin-top: 10px;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(99, 102, 241, 0.4);
+    }
+
+    /* Admin Dashboard Panel */
+    .dashboard-panel {
+      display: none;
+    }
+
+    .dashboard-panel.active {
+      display: block;
+    }
+
+    .dash-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .dash-title-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .dash-icon-box {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dash-title {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .dash-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Total Percentage Indicator Pill */
+    .total-pct-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+      transition: all 0.25s ease;
+    }
+
+    .total-pct-pill.invalid {
+      background: rgba(244, 63, 94, 0.15);
+      border-color: rgba(244, 63, 94, 0.3);
+      color: #fb7185;
+    }
+
+    /* Semesters Grid Inputs */
+    .pct-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 580px) {
+      .pct-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .sem-pct-card {
+      background: rgba(10, 15, 26, 0.5);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .sem-pct-card:focus-within {
+      border-color: var(--color-emerald);
+      background: rgba(10, 15, 26, 0.8);
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.1);
+    }
+
+    .sem-info-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sem-num-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: rgba(99, 102, 241, 0.15);
+      color: #818cf8;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sem-name-label {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .pct-input-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      width: 110px;
+    }
+
+    .pct-num-input {
+      width: 100%;
+      background: rgba(18, 26, 43, 0.9);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 800;
+      color: #ffffff;
+      text-align: right;
+      outline: none;
+    }
+
+    .pct-num-input:focus {
+      border-color: var(--color-emerald);
+    }
+
+    .pct-symbol {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    /* Actions Bar */
+    .admin-actions-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    .btn-save-config {
+      background: var(--grad-emerald);
+      border: none;
+      border-radius: 14px;
+      padding: 12px 24px;
+      color: #ffffff;
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+      transition: all 0.2s ease;
+    }
+
+    .btn-save-config:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 26px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-reset-default {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 12px 20px;
+      color: var(--text-main);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-reset-default:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Toast Notification */
+    .toast-popup {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      background: rgba(18, 26, 43, 0.95);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      padding: 12px 20px;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 2000;
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      backdrop-filter: blur(12px);
+    }
+
+    .toast-popup.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .toast-popup.error {
+      border-color: rgba(244, 63, 94, 0.4);
+    }
+
+    .toast-popup.error i {
+      color: #fb7185;
+    }
+
+    .toast-popup i {
+      color: #34d399;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Glows -->
+  <div class="bg-glow-top"></div>
+  <div class="bg-glow-bottom"></div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast-popup">
+    <i data-lucide="check-circle" id="toast-icon" style="width: 18px; height: 18px;"></i>
+    <span id="toast-msg">Settings saved!</span>
+  </div>
+
+  <!-- Header -->
+  <header>
+    <a href="index.html" class="brand-logo">
+      <div class="logo-badge">CNGPI</div>
+      <div class="brand-title">Admin Console</div>
+    </a>
+    <div class="header-actions">
+      <a href="calculator.html" class="btn-header-link" target="_blank">
+        <i data-lucide="calculator" style="width: 15px; height: 15px;"></i>
+        <span>CGPA Calculator</span>
+      </a>
+      <button class="btn-logout" id="btn-logout" style="display: none;" onclick="handleLogout()">
+        <i data-lucide="log-out" style="width: 15px; height: 15px;"></i>
+        <span>Logout</span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- LOGIN PANEL -->
+    <div class="glass-card login-container" id="login-panel">
+      <div class="login-header">
+        <div class="login-icon-box">
+          <i data-lucide="shield-check" style="width: 28px; height: 28px;"></i>
+        </div>
+        <h2 class="login-title">Admin Login</h2>
+        <p class="login-desc">Sign in to manage BTEB CGPA Percentage Weightings</p>
+      </div>
+
+      <form onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" class="form-input" placeholder="Enter admin username" required autocomplete="username">
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" class="form-input" placeholder="Enter admin password" required autocomplete="current-password">
+        </div>
+
+        <button type="submit" class="btn-submit">
+          <i data-lucide="key" style="width: 18px; height: 18px;"></i>
+          <span>Sign In to Admin Panel</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- DASHBOARD PANEL -->
+    <div class="dashboard-panel" id="dashboard-panel">
+
+      <!-- CGPA Weightings Config Card -->
+      <div class="glass-card">
+        <div class="dash-section-header">
+          <div class="dash-title-group">
+            <div class="dash-icon-box">
+              <i data-lucide="percent" style="width: 22px; height: 22px;"></i>
+            </div>
+            <div>
+              <h2 class="dash-title">BTEB CGPA Percentage Weighting</h2>
+              <p class="dash-subtitle">Configure 8-semester percentage weights for Student CGPA calculation</p>
+            </div>
+          </div>
+
+          <!-- Total Percentage Validation Pill -->
+          <div class="total-pct-pill" id="total-pct-pill">
+            <i data-lucide="check-circle" id="pct-status-icon" style="width: 16px; height: 16px;"></i>
+            <span id="total-pct-text">Total: 100%</span>
+          </div>
+        </div>
+
+        <!-- 8 Semesters Percentage Input Grid -->
+        <div class="pct-grid" id="pct-inputs-container">
+          <!-- Rendered dynamically -->
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="admin-actions-bar">
+          <button type="button" class="btn-reset-default" onclick="resetToBTEBDefaults()">
+            <i data-lucide="rotate-ccw" style="width: 16px; height: 16px;"></i>
+            <span>Reset BTEB Defaults</span>
+          </button>
+          <button type="button" class="btn-save-config" onclick="saveCGPAWeightsToFirestore()">
+            <i data-lucide="save" style="width: 18px; height: 18px;"></i>
+            <span>Save to Firestore</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Static Admin Credentials
+    const ADMIN_USER = "extentgamin6969";
+    const ADMIN_PASS = "masum@1020";
+
+    // Standard BTEB Prabidhan Default Percentages
+    const BTEB_DEFAULT_WEIGHTS = [5, 5, 5, 10, 15, 20, 25, 15];
+    const SEMESTER_NAMES = [
+      "1st Semester", "2nd Semester", "3rd Semester", "4th Semester",
+      "5th Semester", "6th Semester", "7th Semester", "8th Semester"
+    ];
+
+    let currentWeights = [...BTEB_DEFAULT_WEIGHTS];
+
+    // Firebase Initialization
+    let db;
+    try {
+      const firebaseConfig = {
+        apiKey: "AIzaSyD-EE4pIw9rD4tZmz9tKnzsd6VQzhC3ck0",
+        authDomain: "cngpi-edu.firebaseapp.com",
+        projectId: "cngpi-edu",
+        storageBucket: "cngpi-edu.firebasestorage.app",
+        messagingSenderId: "889275125335",
+        appId: "1:889275125335:web:a3e8a944d1a2d429501d12"
+      };
+
+      if (typeof firebase !== 'undefined') {
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.firestore();
+      }
+    } catch (e) {
+      console.log("Firebase setup notice:", e);
+    }
+
+    // Lifecycle On Load
+    document.addEventListener("DOMContentLoaded", () => {
+      checkAuth();
+    });
+
+    // Check Auth State
+    function checkAuth() {
+      const isLoggedIn = sessionStorage.getItem("adminLoggedIn") === "true";
+      const loginPanel = document.getElementById("login-panel");
+      const dashPanel = document.getElementById("dashboard-panel");
+      const btnLogout = document.getElementById("btn-logout");
+
+      if (isLoggedIn) {
+        loginPanel.style.display = "none";
+        dashPanel.classList.add("active");
+        btnLogout.style.display = "flex";
+        loadFirestoreWeights();
+      } else {
+        loginPanel.style.display = "block";
+        dashPanel.classList.remove("active");
+        btnLogout.style.display = "none";
+      }
+      lucide.createIcons();
+    }
+
+    // Handle Admin Login
+    function handleLogin(event) {
+      event.preventDefault();
+      const user = document.getElementById("username").value.trim();
+      const pass = document.getElementById("password").value.trim();
+
+      if (user === ADMIN_USER && pass === ADMIN_PASS) {
+        sessionStorage.setItem("adminLoggedIn", "true");
+        showToast("Login Successful! Welcome Admin.", "success");
+        checkAuth();
+      } else {
+        showToast("Invalid credentials. Access Denied.", "error");
+      }
+    }
+
+    // Handle Logout
+    function handleLogout() {
+      sessionStorage.removeItem("adminLoggedIn");
+      showToast("Logged out successfully.", "success");
+      checkAuth();
+    }
+
+    // Load Live Weights from Firestore
+    function loadFirestoreWeights() {
+      if (!db) {
+        renderInputGrid();
+        return;
+      }
+
+      db.collection("settings").doc("cgpa_weights").get().then((doc) => {
+        if (doc.exists && doc.data().weights && Array.isArray(doc.data().weights)) {
+          currentWeights = doc.data().weights;
+          showToast("Loaded percentage settings from Firestore!", "success");
+        } else {
+          currentWeights = [...BTEB_DEFAULT_WEIGHTS];
+        }
+        renderInputGrid();
+      }).catch((err) => {
+        console.error("Error loading settings:", err);
+        currentWeights = [...BTEB_DEFAULT_WEIGHTS];
+        renderInputGrid();
+      });
+    }
+
+    // Render Input Grid
+    function renderInputGrid() {
+      const container = document.getElementById("pct-inputs-container");
+      container.innerHTML = "";
+
+      SEMESTER_NAMES.forEach((name, idx) => {
+        const val = currentWeights[idx] !== undefined ? currentWeights[idx] : BTEB_DEFAULT_WEIGHTS[idx];
+        const card = document.createElement("div");
+        card.className = "sem-pct-card";
+
+        card.innerHTML = `
+          <div class="sem-info-group">
+            <div class="sem-num-badge">S${idx + 1}</div>
+            <span class="sem-name-label">${name}</span>
+          </div>
+          <div class="pct-input-wrapper">
+            <input 
+              type="number" 
+              min="0" 
+              max="100" 
+              step="1" 
+              class="pct-num-input" 
+              id="pct-input-${idx}" 
+              value="${val}" 
+              oninput="onWeightInputChanged(${idx}, this.value)"
+            >
+            <span class="pct-symbol">%</span>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+
+      updateTotalPill();
+      lucide.createIcons();
+    }
+
+    // On Input Weight Change
+    function onWeightInputChanged(idx, valStr) {
+      let val = parseFloat(valStr);
+      if (isNaN(val)) val = 0;
+      currentWeights[idx] = val;
+      updateTotalPill();
+    }
+
+    // Update Total Percentage Indicator Pill
+    function updateTotalPill() {
+      const total = currentWeights.reduce((acc, curr) => acc + (parseFloat(curr) || 0), 0);
+      const pill = document.getElementById("total-pct-pill");
+      const text = document.getElementById("total-pct-text");
+      const icon = document.getElementById("pct-status-icon");
+
+      text.textContent = `Total: ${total}%`;
+
+      if (Math.abs(total - 100) < 0.01) {
+        pill.className = "total-pct-pill";
+        icon.setAttribute("data-lucide", "check-circle");
+      } else {
+        pill.className = "total-pct-pill invalid";
+        icon.setAttribute("data-lucide", "alert-circle");
+      }
+      lucide.createIcons();
+    }
+
+    // Reset to Standard BTEB Defaults
+    function resetToBTEBDefaults() {
+      currentWeights = [...BTEB_DEFAULT_WEIGHTS];
+      renderInputGrid();
+      showToast("Reset to standard BTEB Prabidhan percentages (5%, 5%, 5%, 10%, 15%, 20%, 25%, 15%)", "success");
+    }
+
+    // Save CGPA Weights to Cloud Firestore
+    function saveCGPAWeightsToFirestore() {
+      const total = currentWeights.reduce((acc, curr) => acc + (parseFloat(curr) || 0), 0);
+      if (Math.abs(total - 100) >= 0.01) {
+        showToast(`Total percentage must equal 100% (Current: ${total}%)`, "error");
+        return;
+      }
+
+      if (!db) {
+        showToast("Database connection offline.", "error");
+        return;
+      }
+
+      const payload = {
+        weights: currentWeights,
+        regulationName: "Custom BTEB Prabidhan Weights",
+        updatedAt: new Date().toISOString(),
+        updatedBy: ADMIN_USER
+      };
+
+      db.collection("settings").doc("cgpa_weights").set(payload).then(() => {
+        showToast("Percentages saved successfully to Firestore!", "success");
+      }).catch((err) => {
+        console.error("Firestore save error:", err);
+        showToast("Failed to save settings to Firestore.", "error");
+      });
+    }
+
+    // Toast Function
+    function showToast(msg, type = "success") {
+      const toast = document.getElementById("toast");
+      const toastMsg = document.getElementById("toast-msg");
+      const toastIcon = document.getElementById("toast-icon");
+
+      toastMsg.textContent = msg;
+
+      if (type === "error") {
+        toast.className = "toast-popup error show";
+        toastIcon.setAttribute("data-lucide", "alert-circle");
+      } else {
+        toast.className = "toast-popup show";
+        toastIcon.setAttribute("data-lucide", "check-circle");
+      }
+      lucide.createIcons();
+
+      setTimeout(() => {
+        toast.classList.remove("show");
+      }, 3500);
+    }
+  </script>
+
+</body>
+</html>
