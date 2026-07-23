@@ -1222,8 +1222,7 @@
                 <th style="padding: 10px; width: 110px; text-align: left;">Code</th>
                 <th style="padding: 10px; width: 140px; text-align: left;">Exam Date</th>
                 <th style="padding: 10px; width: 100px; text-align: left;">Day</th>
-                <th style="padding: 10px; width: 160px; text-align: left;">Exam Time</th>
-                <th style="padding: 10px; width: 110px; text-align: left;">Room</th>
+                <th style="padding: 10px; width: 170px; text-align: left;">Exam Time</th>
                 <th style="padding: 10px; width: 60px; text-align: center;">Action</th>
               </tr>
             </thead>
@@ -2022,7 +2021,7 @@
       tbody.innerHTML = "";
 
       if (currentAdminExamSchedule.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 24px;">No exam subjects added yet. Click "+ Add Subject Schedule" above.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 24px;">No exam subjects added yet. Click "+ Add Subject Schedule" above.</td></tr>`;
         return;
       }
 
@@ -2046,9 +2045,6 @@
           <td style="padding: 6px;">
             <input type="text" class="form-input" style="padding: 6px 10px;" value="${item.time || ''}" onchange="updateExamItem(${index}, 'time', this.value)" placeholder="Time Range">
           </td>
-          <td style="padding: 6px;">
-            <input type="text" class="form-input" style="padding: 6px 10px; text-align: center;" value="${item.room || ''}" onchange="updateExamItem(${index}, 'room', this.value)" placeholder="Room/Lab">
-          </td>
           <td style="padding: 6px; text-align: center;">
             <button type="button" class="btn-action-icon btn-action-delete" title="Remove" onclick="removeAdminExamRow(${index})">
               <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
@@ -2067,8 +2063,7 @@
         day: "Wednesday",
         time: "10:00 AM - 1:00 PM",
         subject_name: "",
-        subject_code: "",
-        room: "S-418"
+        subject_code: ""
       });
       renderAdminExamRows();
     }
