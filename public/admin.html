@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CNGPI Admin Portal | Control Console</title>
+  <title>CNGPI Admin Portal | Class Routine & Management</title>
   
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -44,6 +44,7 @@
       --grad-primary: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
       --grad-emerald: linear-gradient(135deg, #10b981 0%, #059669 100%);
       --grad-cyan: linear-gradient(135deg, #06b6d4 0%, #0284c7 100%);
+      --grad-purple: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
     }
 
     * {
@@ -85,7 +86,7 @@
       width: 550px;
       height: 550px;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
+      background: radial-gradient(circle, rgba(168, 85, 247, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
       filter: blur(100px);
       z-index: 0;
       pointer-events: none;
@@ -180,7 +181,7 @@
     /* Main Container */
     main {
       flex: 1;
-      max-width: 900px;
+      max-width: 950px;
       width: 100%;
       margin: 0 auto;
       padding: 30px 20px;
@@ -387,6 +388,12 @@
       justify-content: center;
     }
 
+    .dash-icon-box.purple {
+      background: rgba(168, 85, 247, 0.15);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      color: #c084fc;
+    }
+
     .dash-icon-box.emerald {
       background: rgba(16, 185, 129, 0.15);
       border: 1px solid rgba(16, 185, 129, 0.3);
@@ -397,12 +404,6 @@
       background: rgba(6, 182, 212, 0.15);
       border: 1px solid rgba(6, 182, 212, 0.3);
       color: #22d3ee;
-    }
-
-    .dash-icon-box.amber {
-      background: rgba(245, 158, 11, 0.15);
-      border: 1px solid rgba(245, 158, 11, 0.3);
-      color: #fbbf24;
     }
 
     .dash-title {
@@ -417,195 +418,42 @@
       color: var(--text-muted);
     }
 
-    /* Total Percentage Indicator Pill */
-    .total-pct-pill {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 700;
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      color: #34d399;
-      transition: all 0.25s ease;
-    }
-
-    .total-pct-pill.invalid {
-      background: rgba(244, 63, 94, 0.15);
-      border-color: rgba(244, 63, 94, 0.3);
-      color: #fb7185;
-    }
-
-    /* Semesters Grid Inputs */
-    .pct-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-
-    @media (max-width: 580px) {
-      .pct-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .sem-pct-card {
-      background: rgba(10, 15, 26, 0.5);
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      transition: all 0.2s ease;
-    }
-
-    .sem-pct-card:focus-within {
-      border-color: var(--color-emerald);
-      background: rgba(10, 15, 26, 0.85);
-      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.1);
-    }
-
-    .sem-info-group {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .sem-num-badge {
-      width: 32px;
-      height: 32px;
-      border-radius: 10px;
-      background: rgba(99, 102, 241, 0.15);
-      color: #818cf8;
-      font-family: var(--font-display);
-      font-weight: 800;
-      font-size: 13px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .sem-name-label {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text-main);
-    }
-
-    .pct-input-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      width: 110px;
-    }
-
-    .pct-num-input {
-      width: 100%;
-      background: rgba(18, 26, 43, 0.9);
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      padding: 8px 12px;
-      font-family: var(--font-display);
-      font-size: 15px;
-      font-weight: 800;
-      color: #ffffff;
-      text-align: right;
-      outline: none;
-    }
-
-    .pct-num-input:focus {
-      border-color: var(--color-emerald);
-    }
-
-    .pct-symbol {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text-muted);
-    }
-
-    /* Actions Bar */
-    .admin-actions-bar {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      justify-content: flex-end;
-    }
-
-    .btn-save-config {
-      background: var(--grad-emerald);
-      border: none;
-      border-radius: 14px;
-      padding: 12px 24px;
-      color: #ffffff;
-      font-family: var(--font-display);
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
-      transition: all 0.2s ease;
-    }
-
-    .btn-save-config:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 26px rgba(16, 185, 129, 0.4);
-    }
-
-    .btn-reset-default {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--border-color);
-      border-radius: 14px;
-      padding: 12px 20px;
-      color: var(--text-main);
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.2s ease;
-    }
-
-    .btn-reset-default:hover {
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    /* Result PDF Upload Form Grid */
+    /* Form Grid 2 & 3 */
     .form-grid-2 {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 16px;
     }
 
-    @media (max-width: 600px) {
-      .form-grid-2 {
+    .form-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 650px) {
+      .form-grid-2, .form-grid-3 {
         grid-template-columns: 1fr;
       }
     }
 
     .file-drop-area {
-      border: 2px dashed rgba(6, 182, 212, 0.4);
+      border: 2px dashed rgba(168, 85, 247, 0.4);
       border-radius: 16px;
       padding: 20px;
       text-align: center;
-      background: rgba(6, 182, 212, 0.05);
+      background: rgba(168, 85, 247, 0.05);
       cursor: pointer;
       transition: all 0.2s ease;
     }
 
     .file-drop-area:hover {
-      background: rgba(6, 182, 212, 0.1);
-      border-color: rgba(6, 182, 212, 0.6);
+      background: rgba(168, 85, 247, 0.1);
+      border-color: rgba(168, 85, 247, 0.6);
     }
 
     .file-drop-icon {
-      color: #22d3ee;
+      color: #c084fc;
       margin-bottom: 8px;
     }
 
@@ -621,15 +469,15 @@
       margin-top: 4px;
     }
 
-    /* Results List Table */
-    .results-list-table {
+    /* Table Styling */
+    .data-list-table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
+      margin-top: 16px;
       font-size: 13px;
     }
 
-    .results-list-table th {
+    .data-list-table th {
       text-align: left;
       padding: 10px 14px;
       color: var(--text-muted);
@@ -638,7 +486,7 @@
       background: rgba(10, 15, 26, 0.6);
     }
 
-    .results-list-table td {
+    .data-list-table td {
       padding: 12px 14px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.04);
       color: var(--text-main);
@@ -657,13 +505,9 @@
     }
 
     .btn-action-view {
-      background: rgba(6, 182, 212, 0.15);
-      color: #22d3ee;
-      border: 1px solid rgba(6, 182, 212, 0.3);
-    }
-
-    .btn-action-view:hover {
-      background: rgba(6, 182, 212, 0.25);
+      background: rgba(168, 85, 247, 0.15);
+      color: #c084fc;
+      border: 1px solid rgba(168, 85, 247, 0.3);
     }
 
     .btn-action-delete {
@@ -671,10 +515,6 @@
       color: #fb7185;
       border: 1px solid rgba(244, 63, 94, 0.3);
       margin-left: 6px;
-    }
-
-    .btn-action-delete:hover {
-      background: rgba(244, 63, 94, 0.25);
     }
 
     /* Coming Soon Card Style */
@@ -727,6 +567,120 @@
       color: var(--text-muted);
       max-width: 480px;
       line-height: 1.6;
+    }
+
+    /* Total Percentage Indicator Pill */
+    .total-pct-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+      transition: all 0.25s ease;
+    }
+
+    .total-pct-pill.invalid {
+      background: rgba(244, 63, 94, 0.15);
+      border-color: rgba(244, 63, 94, 0.3);
+      color: #fb7185;
+    }
+
+    .pct-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .sem-pct-card {
+      background: rgba(10, 15, 26, 0.5);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .sem-info-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sem-num-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: rgba(99, 102, 241, 0.15);
+      color: #818cf8;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pct-input-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      width: 110px;
+    }
+
+    .pct-num-input {
+      width: 100%;
+      background: rgba(18, 26, 43, 0.9);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 800;
+      color: #ffffff;
+      text-align: right;
+      outline: none;
+    }
+
+    .admin-actions-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    .btn-save-config {
+      background: var(--grad-emerald);
+      border: none;
+      border-radius: 14px;
+      padding: 12px 24px;
+      color: #ffffff;
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-reset-default {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 12px 20px;
+      color: var(--text-main);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
     }
 
     /* Toast Notification */
@@ -789,13 +743,17 @@
       <div class="brand-title">Admin Console</div>
     </a>
     <div class="header-actions">
+      <a href="routine.html" class="btn-header-link" target="_blank">
+        <i data-lucide="calendar" style="width: 15px; height: 15px;"></i>
+        <span>Live Routine</span>
+      </a>
       <a href="calculator.html" class="btn-header-link" target="_blank">
         <i data-lucide="calculator" style="width: 15px; height: 15px;"></i>
         <span>CGPA Calculator</span>
       </a>
       <a href="index.html" class="btn-header-link">
         <i data-lucide="external-link" style="width: 15px; height: 15px;"></i>
-        <span>Student Portal</span>
+        <span>Portal Home</span>
       </a>
       <button class="btn-logout" id="btn-logout" style="display: none;" onclick="handleLogout()">
         <i data-lucide="log-out" style="width: 15px; height: 15px;"></i>
@@ -839,7 +797,12 @@
 
       <!-- Module Navigation Bar Tabs -->
       <div class="nav-tabs-bar">
-        <button class="module-tab-btn active" id="tab-btn-cgpa" onclick="switchModule('cgpa')">
+        <button class="module-tab-btn active" id="tab-btn-routine" onclick="switchModule('routine')">
+          <i data-lucide="calendar" style="width: 16px; height: 16px;"></i>
+          <span>Class Routine Manager</span>
+        </button>
+
+        <button class="module-tab-btn" id="tab-btn-cgpa" onclick="switchModule('cgpa')">
           <i data-lucide="percent" style="width: 16px; height: 16px;"></i>
           <span>CGPA Percentages</span>
         </button>
@@ -862,8 +825,77 @@
         </button>
       </div>
 
-      <!-- MODULE 1: CGPA PERCENTAGE CONFIGURATOR -->
-      <div class="glass-card module-content" id="module-cgpa">
+      <!-- MODULE 1: CLASS ROUTINE MANAGER -->
+      <div class="glass-card module-content" id="module-routine">
+        <div class="dash-section-header">
+          <div class="dash-title-group">
+            <div class="dash-icon-box purple">
+              <i data-lucide="calendar" style="width: 22px; height: 22px;"></i>
+            </div>
+            <div>
+              <h2 class="dash-title">Class Routine Manager & JSON Uploader</h2>
+              <p class="dash-subtitle">Upload routine JSON file, paste code, or edit routine schedules for CNGPI groups</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- JSON File Select / Paste Section -->
+        <form onsubmit="handleRoutineJsonUpload(event)" style="margin-bottom: 30px;">
+          <div class="form-group">
+            <label>Upload Routine JSON File</label>
+            <input type="file" id="routine-json-file" accept=".json,application/json" style="display: none;" onchange="onRoutineJsonFileSelect(event)">
+            <div class="file-drop-area" onclick="document.getElementById('routine-json-file').click()">
+              <i data-lucide="file-up" class="file-drop-icon" style="width: 32px; height: 32px;"></i>
+              <div class="file-drop-text" id="routine-file-label">Click or Drag to Select Routine JSON File</div>
+              <div class="file-drop-subtext">Automatic group code detection (e.g. CST 7/2 -> cst_7_2)</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="routine-json-input">Or Paste / Edit Routine JSON Code</label>
+            <textarea id="routine-json-input" class="form-textarea" rows="8" placeholder="Paste full routine JSON object here..." required></textarea>
+          </div>
+
+          <div class="admin-actions-bar">
+            <button type="button" class="btn-reset-default" onclick="loadSampleCstRoutineJson()">
+              <i data-lucide="sparkles" style="width: 15px; height: 15px;"></i>
+              <span>Load Sample CST 7/2 JSON</span>
+            </button>
+            <button type="submit" class="btn-save-config" style="background: var(--grad-purple); box-shadow: 0 6px 20px rgba(168, 85, 247, 0.3);">
+              <i data-lucide="cloud-upload" style="width: 18px; height: 18px;"></i>
+              <span>Publish Routine JSON to Firestore</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Published Routines List Table -->
+        <h3 style="font-family: var(--font-display); font-size: 16px; color: var(--text-main); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+          <i data-lucide="list" style="width: 18px; height: 18px; color: #c084fc;"></i>
+          <span>Published Class Routines in Firestore</span>
+        </h3>
+
+        <div style="overflow-x: auto;">
+          <table class="data-list-table">
+            <thead>
+              <tr>
+                <th>Group Code</th>
+                <th>Department</th>
+                <th>Semester</th>
+                <th>Weekly Load</th>
+                <th style="text-align: right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="routines-table-body">
+              <tr>
+                <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">Loading published routines...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- MODULE 2: CGPA PERCENTAGE CONFIGURATOR -->
+      <div class="glass-card module-content" id="module-cgpa" style="display: none;">
         <div class="dash-section-header">
           <div class="dash-title-group">
             <div class="dash-icon-box emerald">
@@ -882,12 +914,10 @@
           </div>
         </div>
 
-        <!-- 8 Semesters Percentage Input Grid -->
         <div class="pct-grid" id="pct-inputs-container">
           <!-- Rendered dynamically -->
         </div>
 
-        <!-- Action Buttons -->
         <div class="admin-actions-bar">
           <button type="button" class="btn-reset-default" onclick="resetToBTEBDefaults()">
             <i data-lucide="rotate-ccw" style="width: 16px; height: 16px;"></i>
@@ -900,7 +930,7 @@
         </div>
       </div>
 
-      <!-- MODULE 2: RESULT PDF UPLOAD & MANAGEMENT -->
+      <!-- MODULE 3: RESULT PDF UPLOAD & MANAGEMENT -->
       <div class="glass-card module-content" id="module-results" style="display: none;">
         <div class="dash-section-header">
           <div class="dash-title-group">
@@ -958,18 +988,13 @@
             <div class="file-drop-area" onclick="document.getElementById('pdf-file-input').click()">
               <i data-lucide="upload-cloud" class="file-drop-icon" style="width: 32px; height: 32px;"></i>
               <div class="file-drop-text" id="pdf-file-label">Click or Drag to Select Result PDF File</div>
-              <div class="file-drop-subtext">PDF files up to 10MB supported</div>
+              <div class="file-drop-subtext">PDF files supported</div>
             </div>
           </div>
 
           <div class="form-group">
             <label for="result-pdf-url">Or PDF Document Link (URL)</label>
             <input type="url" id="result-pdf-url" class="form-input" placeholder="https://example.com/results/cst_1st_sem.pdf">
-          </div>
-
-          <div class="form-group">
-            <label for="result-notes">Additional Notes / Information</label>
-            <textarea id="result-notes" class="form-textarea" rows="2" placeholder="e.g. Official BTEB Gazette Publication for CNGPI Exam Center 2026"></textarea>
           </div>
 
           <button type="submit" class="btn-submit" style="background: var(--grad-cyan); box-shadow: 0 8px 24px rgba(6, 182, 212, 0.3);">
@@ -985,7 +1010,7 @@
         </h3>
 
         <div style="overflow-x: auto;">
-          <table class="results-list-table">
+          <table class="data-list-table">
             <thead>
               <tr>
                 <th>Title / Exam Name</th>
@@ -1002,10 +1027,9 @@
             </tbody>
           </table>
         </div>
-
       </div>
 
-      <!-- MODULE 3: BOOK LIST MANAGEMENT (COMING SOON) -->
+      <!-- MODULE 4: BOOK LIST MANAGEMENT (COMING SOON) -->
       <div class="glass-card module-content" id="module-books" style="display: none;">
         <div class="coming-soon-card">
           <div class="coming-soon-icon">
@@ -1020,7 +1044,7 @@
         </div>
       </div>
 
-      <!-- MODULE 4: NOTICE BOARD MANAGEMENT (COMING SOON) -->
+      <!-- MODULE 5: NOTICE BOARD MANAGEMENT (COMING SOON) -->
       <div class="glass-card module-content" id="module-notices" style="display: none;">
         <div class="coming-soon-card">
           <div class="coming-soon-icon" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.15) 0%, rgba(99, 102, 241, 0.15) 100%); border-color: rgba(168, 85, 247, 0.3); color: #c084fc; box-shadow: 0 10px 30px rgba(168, 85, 247, 0.15);">
@@ -1047,12 +1071,69 @@
     const ADMIN_USER = "extentgamin6969";
     const ADMIN_PASS = "masum@1020";
 
-    // Standard BTEB Prabidhan Default Percentages
     const BTEB_DEFAULT_WEIGHTS = [5, 5, 5, 10, 15, 20, 25, 15];
     const SEMESTER_NAMES = [
       "1st Semester", "2nd Semester", "3rd Semester", "4th Semester",
       "5th Semester", "6th Semester", "7th Semester", "8th Semester"
     ];
+
+    const SAMPLE_CST_7_2_JSON = {
+      group_short_code: "CST 7/2",
+      institute: "Chapainawabganj Polytechnic Institute",
+      semester: "Seventh Semester Class Routine 2026",
+      department: "Computer Science & Technology (Second Shift)",
+      total_load: 26,
+      time_slots: {
+        "1st": "1:30PM-2:15PM",
+        "2nd": "2:15PM-3:00PM",
+        "3rd": "3:00PM-3:45PM",
+        "4th": "3:45PM-4:30PM",
+        "5th": "4:30PM-5:15PM",
+        "6th": "5:15PM-6:00PM",
+        "7th": "6:00PM-6:45PM"
+      },
+      weekly_schedule: {
+        "Sunday": [
+          { period: "1st & 2nd", time: "1:30PM-3:00PM", subject_name: "Project Work-II", subject_code: "28576", teacher_short_code: "AbM", room: "Hardware Lab" },
+          { period: "3rd & 4th", time: "3:00PM-4:30PM", subject_name: "Apps Development Project", subject_code: "28574", teacher_short_code: "IH", room: "ICT Lab" },
+          { period: "5th", time: "4:30PM-5:15PM", subject_name: "Digital Marketing Technique", subject_code: "28571", teacher_short_code: "KA", room: "S-418" },
+          { period: "6th", time: "5:15PM-6:00PM", subject_name: "Cyber Security & Ethics", subject_code: "28573", teacher_short_code: "AbM", room: "S-418" },
+          { period: "7th", time: "6:00PM-6:45PM", subject_name: null, subject_code: null, teacher_short_code: null, room: "-" }
+        ],
+        "Monday": [
+          { period: "1st", time: "1:30PM-2:15PM", subject_name: null, subject_code: null, teacher_short_code: null, room: "-" },
+          { period: "2nd", time: "2:15PM-3:00PM", subject_name: "Cyber Security & Ethics", subject_code: "28573", teacher_short_code: "AbM", room: "S-418" },
+          { period: "3rd", time: "3:00PM-3:45PM", subject_name: "Network Administration & Services", subject_code: "28572", teacher_short_code: "JR", room: "S-418" },
+          { period: "4th & 5th", time: "3:45PM-5:15PM", subject_name: "Digital Marketing Technique", subject_code: "28571", teacher_short_code: "KA", room: "ICT Lab" },
+          { period: "6th", time: "5:15PM-6:00PM", subject_name: "Multimedia & Animation", subject_code: "28575", teacher_short_code: "ZI", room: "S-418" }
+        ],
+        "Tuesday": [
+          { period: "2nd", time: "2:15PM-3:00PM", subject_name: "Innovation & Entrepreneurship", subject_code: "25853", teacher_short_code: "HA", room: "S-418" },
+          { period: "3rd & 4th", time: "3:00PM-4:30PM", subject_name: "Cyber Security & Ethics", subject_code: "28573", teacher_short_code: "AbM", room: "Software Lab" },
+          { period: "5th", time: "4:30PM-5:15PM", subject_name: "Network Administration & Services", subject_code: "28572", teacher_short_code: "JR", room: "S-418" }
+        ],
+        "Wednesday": [
+          { period: "1st", time: "1:30PM-2:15PM", subject_name: "Network Administration & Services", subject_code: "28572", teacher_short_code: "JR", room: "S-418" },
+          { period: "2nd & 3rd", time: "2:15PM-3:45PM", subject_name: "Project Work-II", subject_code: "28576", teacher_short_code: "AbM", room: "Hardware Lab" },
+          { period: "4th", time: "3:45PM-4:30PM", subject_name: "Innovation & Entrepreneurship", subject_code: "25853", teacher_short_code: "HA", room: "S-418" },
+          { period: "5th, 6th & 7th", time: "4:30PM-6:45PM", subject_name: "Multimedia & Animation", subject_code: "28575", teacher_short_code: "ZI", room: "ICT Lab" }
+        ],
+        "Thursday": [
+          { period: "1st", time: "1:30PM-2:15PM", subject_name: "Digital Marketing Technique", subject_code: "28571", teacher_short_code: "KA", room: "S-418" },
+          { period: "2nd & 3rd", time: "2:15PM-3:45PM", subject_name: "Network Administration & Services", subject_code: "28572", teacher_short_code: "JR", room: "Hardware Lab" },
+          { period: "4th", time: "3:45PM-4:30PM", subject_name: "Apps Development Project", subject_code: "28574", teacher_short_code: "IH", room: "S-418" },
+          { period: "5th", time: "4:30PM-5:15PM", subject_name: "Multimedia & Animation", subject_code: "28575", teacher_short_code: "ZI", room: "S-418" }
+        ]
+      },
+      teachers_details: [
+        { short_code: "JR", name: "Md. Jewel Rana", designation: "Instructor (Tech/Computer)", phone_no: "01732755176", role: "Class Teacher" },
+        { short_code: "HA", name: "Hakimin Ahmed", designation: "Part-Time Teacher (Electronics)", phone_no: "01759731841", role: null },
+        { short_code: "AbM", name: "Md. Abdul Malek", designation: "Instructor (Tech/Computer)", phone_no: "01314851894", role: null },
+        { short_code: "IH", name: "Md. Idul Hasan Jony", designation: "Part-Time Teacher (Computer)", phone_no: "01791008770", role: null },
+        { short_code: "KA", name: "Md. Kausar Ali", designation: "Jr. Instructor (Tech/Computer)", phone_no: "01753038380", role: null },
+        { short_code: "ZI", name: "ZAHIDUL ISLAM", designation: "Jr. Instructor (Tech/Computer)", phone_no: "01738628365", role: null }
+      ]
+    };
 
     let currentWeights = [...BTEB_DEFAULT_WEIGHTS];
     let selectedPdfDataUrl = "";
@@ -1093,6 +1174,7 @@
         loginPanel.style.display = "none";
         dashPanel.classList.add("active");
         btnLogout.style.display = "flex";
+        loadFirestoreRoutines();
         loadFirestoreWeights();
         loadFirestoreResults();
       } else {
@@ -1137,6 +1219,140 @@
       if (targetCard) targetCard.style.display = "block";
 
       lucide.createIcons();
+    }
+
+    // Load Sample CST 7/2 Routine JSON into Textarea
+    function loadSampleCstRoutineJson() {
+      document.getElementById("routine-json-input").value = JSON.stringify(SAMPLE_CST_7_2_JSON, null, 2);
+      showToast("Loaded Sample CST 7/2 Routine JSON!", "success");
+    }
+
+    // Handle Routine JSON File Select
+    function onRoutineJsonFileSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById("routine-json-input").value = e.target.result;
+        document.getElementById("routine-file-label").textContent = `Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+        showToast("Routine JSON file loaded into editor!", "success");
+      };
+      reader.readAsText(file);
+    }
+
+    // Publish / Upload Routine JSON to Cloud Firestore
+    function handleRoutineJsonUpload(event) {
+      event.preventDefault();
+      const jsonText = document.getElementById("routine-json-input").value.trim();
+
+      if (!jsonText) {
+        showToast("Please select a JSON file or paste JSON code.", "error");
+        return;
+      }
+
+      let parsedRoutine;
+      try {
+        parsedRoutine = JSON.parse(jsonText);
+      } catch (err) {
+        showToast("Invalid JSON syntax: " + err.message, "error");
+        return;
+      }
+
+      // Determine Document ID / Group Code Key
+      let docId = parsedRoutine.id;
+      if (!docId && parsedRoutine.group_short_code) {
+        docId = parsedRoutine.group_short_code
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, '_')
+          .replace(/_+/g, '_')
+          .replace(/^_|_$/g, '');
+      }
+
+      if (!docId) {
+        docId = "routine_" + Date.now();
+      }
+
+      parsedRoutine.id = docId;
+      parsedRoutine.updatedAt = new Date().toISOString();
+
+      if (db) {
+        db.collection("routines").doc(docId).set(parsedRoutine).then(() => {
+          showToast(`Routine '${parsedRoutine.group_short_code || docId}' published to Firestore!`, "success");
+          loadFirestoreRoutines();
+        }).catch((err) => {
+          console.error("Routine upload error:", err);
+          showToast("Failed to save routine: " + err.message, "error");
+        });
+      } else {
+        showToast("Database offline. Routine validated successfully!", "success");
+      }
+    }
+
+    // Load Published Routines List from Firestore
+    function loadFirestoreRoutines() {
+      if (!db) return;
+
+      db.collection("routines").get().then((snapshot) => {
+        const tbody = document.getElementById("routines-table-body");
+        tbody.innerHTML = "";
+
+        if (snapshot.empty) {
+          tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">No published routines found. Upload your first routine JSON above.</td></tr>`;
+          return;
+        }
+
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          const tr = document.createElement("tr");
+
+          tr.innerHTML = `
+            <td style="font-weight: 800; color: #c084fc;">${data.group_short_code || doc.id}</td>
+            <td>${data.department || 'Polytechnic Department'}</td>
+            <td>${data.semester || 'Semester Routine'}</td>
+            <td><span class="total-pct-pill" style="font-size: 11px; padding: 3px 8px;">${data.total_load || 26} Periods</span></td>
+            <td style="text-align: right;">
+              <button type="button" class="btn-action-icon btn-action-view" title="Load JSON to Editor" onclick="loadRoutineIntoEditor('${doc.id}')">
+                <i data-lucide="edit-3" style="width: 15px; height: 15px;"></i>
+              </button>
+              <button type="button" class="btn-action-icon btn-action-delete" title="Delete Routine" onclick="deleteRoutineDoc('${doc.id}')">
+                <i data-lucide="trash-2" style="width: 15px; height: 15px;"></i>
+              </button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+        lucide.createIcons();
+      }).catch((err) => {
+        console.error("Error loading routines:", err);
+      });
+    }
+
+    // Load specific routine doc into JSON editor
+    function loadRoutineIntoEditor(docId) {
+      if (!db) return;
+      db.collection("routines").doc(docId).get().then((doc) => {
+        if (doc.exists) {
+          document.getElementById("routine-json-input").value = JSON.stringify(doc.data(), null, 2);
+          showToast(`Loaded routine '${doc.data().group_short_code || docId}' into editor!`, "success");
+          window.scrollTo({ top: 100, behavior: 'smooth' });
+        }
+      });
+    }
+
+    // Delete Routine Document
+    function deleteRoutineDoc(docId) {
+      if (!confirm(`Are you sure you want to delete routine '${docId}'?`)) return;
+
+      if (db) {
+        db.collection("routines").doc(docId).delete().then(() => {
+          showToast("Routine deleted successfully.", "success");
+          loadFirestoreRoutines();
+        }).catch((err) => {
+          console.error("Delete error:", err);
+          showToast("Failed to delete routine.", "error");
+        });
+      }
     }
 
     // Load Live CGPA Weights from Firestore
@@ -1286,7 +1502,6 @@
       const department = document.getElementById("result-dept").value;
       const semester = document.getElementById("result-semester").value;
       const urlInput = document.getElementById("result-pdf-url").value.trim();
-      const notes = document.getElementById("result-notes").value.trim();
 
       const pdfUrl = selectedPdfDataUrl || urlInput;
 
@@ -1300,7 +1515,6 @@
         department,
         semester,
         pdfUrl,
-        notes,
         createdAt: new Date().toISOString(),
         publishedBy: ADMIN_USER
       };
@@ -1310,7 +1524,6 @@
           showToast("Result PDF published successfully to Firestore!", "success");
           document.getElementById("result-title").value = "";
           document.getElementById("result-pdf-url").value = "";
-          document.getElementById("result-notes").value = "";
           document.getElementById("pdf-file-label").textContent = "Click or Drag to Select Result PDF File";
           selectedPdfDataUrl = "";
           loadFirestoreResults();

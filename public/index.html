@@ -2000,14 +2000,12 @@
       if (target === 'home') {
         document.getElementById('screen-home').classList.add('active');
       } else if (target === 'routine') {
-        document.getElementById('screen-routine').classList.add('active');
-        fetchFirestoreRoutine();
+        window.location.href = 'routine.html';
       } else if (target === 'result') {
         document.getElementById('screen-home').classList.add('active');
         openComingSoon('Result', 'award');
       } else if (target === 'cgpa') {
-        document.getElementById('screen-home').classList.add('active');
-        openComingSoon('CGPA Calculator', 'calculator');
+        window.location.href = 'calculator.html';
       } else if (target === 'books') {
         document.getElementById('screen-home').classList.add('active');
         openComingSoon('Book List', 'book-open');
