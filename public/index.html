@@ -2047,24 +2047,10 @@
       document.getElementById("coming-soon-modal").classList.remove("active");
     }
 
-    // Bottom Navigation Bar Switch
-    function selectNav(target) {
-      document.querySelectorAll(".nav-item").forEach(item => item.classList.remove("active"));
-      
-      const activeNav = document.getElementById(`nav-${target}`);
-      if (activeNav) activeNav.classList.add("active");
-
-      if (target === 'routine') openComingSoon('Routine', 'calendar-days');
-      else if (target === 'result') openComingSoon('Result', 'award');
-      else if (target === 'cgpa') window.location.href = 'calculator.html';
-      else if (target === 'books') openComingSoon('Book List', 'book-open');
-    }
-
     // Admin Panel Logic
     function openAdminModal() {
       document.getElementById('admin-modal').classList.add('active');
       lucide.createIcons();
-    }
     }
 
     function closeAdminModal() {
