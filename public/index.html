@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>CNGPI Mobile Portal</title>
-  <meta name="description" content="CNGPI Mobile App Student Portal">
+  <title>CNGPI Portal</title>
+  <meta name="description" content="CNGPI Mobile Responsive Student Portal">
   
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,7 +27,7 @@
       --bg-dark: #090d16;
       --bg-card: rgba(18, 26, 43, 0.75);
       --bg-card-hover: rgba(30, 41, 65, 0.85);
-      --bg-nav: rgba(13, 19, 33, 0.88);
+      --bg-nav: rgba(13, 19, 33, 0.92);
       
       --border-color: rgba(255, 255, 255, 0.08);
       --border-accent: rgba(99, 102, 241, 0.3);
@@ -61,27 +61,23 @@
 
     html, body {
       width: 100%;
-      height: 100%;
+      min-height: 100vh;
       font-family: var(--font-primary);
       background: var(--bg-dark);
       color: var(--text-main);
-      overflow: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
     }
 
-    /* Ambient Background Elements */
+    /* Ambient Background Glows */
     .bg-glow-top {
       position: fixed;
       top: -15%;
       left: 50%;
       transform: translateX(-50%);
-      width: 500px;
-      height: 500px;
+      width: 600px;
+      height: 600px;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(99, 102, 241, 0.18) 0%, rgba(0, 0, 0, 0) 70%);
-      filter: blur(80px);
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+      filter: blur(90px);
       z-index: 0;
       pointer-events: none;
     }
@@ -90,67 +86,41 @@
       position: fixed;
       bottom: -15%;
       right: 10%;
-      width: 450px;
-      height: 450px;
+      width: 500px;
+      height: 500px;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(236, 72, 153, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
-      filter: blur(90px);
+      background: radial-gradient(circle, rgba(236, 72, 153, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
+      filter: blur(100px);
       z-index: 0;
       pointer-events: none;
     }
 
-    /* Smartphone Frame Container */
-    .mobile-frame {
+    /* Responsive Main Web Container */
+    .web-app-container {
       width: 100%;
-      max-width: 420px;
-      height: 100vh;
-      max-height: 880px;
-      background: #0d1322;
-      position: relative;
-      overflow: hidden;
+      max-width: 600px;
+      margin: 0 auto;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
+      position: relative;
       z-index: 1;
-      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.7);
+      padding-bottom: 90px;
     }
 
-    @media (min-width: 450px) {
-      .mobile-frame {
-        height: 860px;
-        border-radius: 44px;
-        border: 8px solid rgba(255, 255, 255, 0.07);
-      }
-    }
-
-    /* Status Bar Area */
-    .status-bar {
-      height: 44px;
-      padding: 12px 24px 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 12px;
-      font-weight: 700;
-      color: #94a3b8;
-      letter-spacing: 0.5px;
-      shrink: 0;
-      z-index: 10;
-    }
-
-    .status-icons {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    /* App Header */
+    /* App Top Header */
     .app-header {
-      padding: 16px 20px 12px;
+      padding: 20px 20px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      shrink: 0;
-      z-index: 10;
+      position: sticky;
+      top: 0;
+      background: rgba(9, 13, 22, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      z-index: 50;
+      border-bottom: 1px solid var(--border-color);
     }
 
     .user-profile {
@@ -211,21 +181,18 @@
     }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
-    /* Scrollable Content Body */
+    /* Content Area */
     .app-content {
+      padding: 20px;
       flex: 1;
-      overflow-y: auto;
-      padding: 12px 20px 100px 20px;
-      scrollbar-width: none;
     }
-    .app-content::-webkit-scrollbar { display: none; }
 
-    /* Banner Banner Card */
+    /* Hero Banner */
     .hero-banner {
       background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(168, 85, 247, 0.15) 100%);
       border: 1px solid var(--border-accent);
       border-radius: 24px;
-      padding: 20px;
+      padding: 22px 20px;
       margin-bottom: 24px;
       position: relative;
       overflow: hidden;
@@ -237,10 +204,10 @@
       position: absolute;
       top: -30%;
       right: -20%;
-      width: 180px;
-      height: 180px;
+      width: 200px;
+      height: 200px;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(236, 72, 153, 0.25) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(236, 72, 153, 0.22) 0%, transparent 70%);
       pointer-events: none;
     }
 
@@ -259,22 +226,22 @@
 
     .hero-banner h3 {
       font-family: var(--font-display);
-      font-size: 20px;
+      font-size: 22px;
       font-weight: 800;
       color: #ffffff;
       margin-bottom: 6px;
     }
 
     .hero-banner p {
-      font-size: 12px;
+      font-size: 13px;
       color: #cbd5e1;
-      line-height: 1.4;
+      line-height: 1.5;
     }
 
     /* Section Title */
     .section-title {
       font-family: var(--font-display);
-      font-size: 16px;
+      font-size: 17px;
       font-weight: 800;
       color: #f1f5f9;
       margin-bottom: 16px;
@@ -289,7 +256,7 @@
       color: var(--text-muted);
     }
 
-    /* App Icons Grid */
+    /* Responsive App Icons Grid */
     .app-icons-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -297,11 +264,18 @@
       margin-bottom: 24px;
     }
 
+    @media (min-width: 500px) {
+      .app-icons-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+      }
+    }
+
     .app-icon-card {
       background: var(--grad-card);
       border: 1px solid var(--border-color);
       border-radius: 24px;
-      padding: 20px 16px;
+      padding: 22px 18px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -326,15 +300,14 @@
 
     /* Icon Shapes */
     .icon-shape {
-      width: 58px;
-      height: 58px;
+      width: 60px;
+      height: 60px;
       border-radius: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
       box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-      position: relative;
       transition: transform 0.25s ease;
     }
 
@@ -379,11 +352,13 @@
 
     /* Fixed Bottom Navigation Bar */
     .bottom-nav {
-      position: absolute;
+      position: fixed;
       bottom: 0;
-      left: 0;
+      left: 50%;
+      transform: translateX(-50%);
       width: 100%;
-      height: 80px;
+      max-width: 600px;
+      height: 76px;
       background: var(--bg-nav);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
@@ -391,7 +366,7 @@
       display: flex;
       align-items: center;
       justify-content: space-around;
-      padding: 0 8px 12px;
+      padding: 0 8px;
       z-index: 100;
     }
 
@@ -405,7 +380,6 @@
       padding: 8px 12px;
       border-radius: 16px;
       transition: all 0.2s ease;
-      position: relative;
     }
 
     .nav-item.active {
@@ -435,7 +409,7 @@
 
     /* Coming Soon Modal Overlay */
     .modal-overlay {
-      position: absolute;
+      position: fixed;
       top: 0;
       left: 0;
       width: 100%;
@@ -460,6 +434,7 @@
 
     .modal-card {
       width: 100%;
+      max-width: 400px;
       background: var(--grad-card);
       border: 1px solid var(--border-accent);
       border-radius: 32px;
@@ -544,19 +519,10 @@
   <div class="bg-glow-top"></div>
   <div class="bg-glow-bottom"></div>
 
-  <!-- Mobile Frame Container -->
-  <main class="mobile-frame">
+  <!-- Web App Main Container -->
+  <main class="web-app-container">
 
-    <!-- Status Bar -->
-    <div class="status-bar">
-      <span>9:41</span>
-      <div class="status-icons">
-        <i data-lucide="wifi" style="width: 14px; height: 14px;"></i>
-        <i data-lucide="battery-charging" style="width: 16px; height: 16px;"></i>
-      </div>
-    </div>
-
-    <!-- App Header -->
+    <!-- App Top Header -->
     <header class="app-header">
       <div class="user-profile">
         <div class="avatar">C</div>
@@ -578,7 +544,7 @@
       <div class="hero-banner">
         <span class="banner-tag">Welcome</span>
         <h3>Digital Campus Hub</h3>
-        <p>Access routine schedules, exam results, CGPA tools, and syllabus book lists directly from your phone.</p>
+        <p>Access routine schedules, exam results, CGPA tools, and syllabus book lists directly from your device.</p>
       </div>
 
       <!-- App Section Title -->
