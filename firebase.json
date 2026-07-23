@@ -13,22 +13,6 @@
     ],
     "rewrites": [
       {
-        "source": "/admin",
-        "destination": "/admin.html"
-      },
-      {
-        "source": "/calculator",
-        "destination": "/calculator.html"
-      },
-      {
-        "source": "/books",
-        "destination": "/books.html"
-      },
-      {
-        "source": "/routine",
-        "destination": "/routine.html"
-      },
-      {
         "source": "**",
         "destination": "/index.html"
       }
