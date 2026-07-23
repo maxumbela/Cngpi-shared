@@ -390,72 +390,6 @@
   <script>
     lucide.createIcons();
 
-    // BTEB Books Database (Semester wise)
-    const BTEB_BOOKS_DATABASE = {
-      "CST": {
-        "1st": [
-          { name: "Engineering Drawing", code: "21011", credits: "2", type: "Practical" },
-          { name: "Basic Electronics", code: "26811", credits: "3", type: "Theory & Practical" },
-          { name: "Computer Application", code: "28511", credits: "3", type: "Theory & Practical" },
-          { name: "Mathematics-1", code: "25911", credits: "3", type: "Theory" },
-          { name: "Physics-1", code: "25912", credits: "3", type: "Theory & Practical" },
-          { name: "Bangla", code: "25711", credits: "2", type: "Theory" },
-          { name: "English-1", code: "25712", credits: "2", type: "Theory" }
-        ],
-        "2nd": [
-          { name: "Python Programming", code: "28521", credits: "3", type: "Theory & Practical" },
-          { name: "IT Support Services", code: "28522", credits: "2", type: "Practical" },
-          { name: "Electrical Engineering Fundamentals", code: "26711", credits: "3", type: "Theory & Practical" },
-          { name: "Mathematics-2", code: "25921", credits: "3", type: "Theory" },
-          { name: "Physics-2", code: "25922", credits: "3", type: "Theory & Practical" },
-          { name: "Communicative English", code: "25722", credits: "2", type: "Theory" }
-        ],
-        "3rd": [
-          { name: "Data Structure & Algorithm", code: "28531", credits: "3", type: "Theory & Practical" },
-          { name: "Object Oriented Programming (Java)", code: "28532", credits: "3", type: "Theory & Practical" },
-          { name: "Web Design & Development", code: "28533", credits: "3", type: "Theory & Practical" },
-          { name: "Digital Electronics", code: "26831", credits: "3", type: "Theory & Practical" },
-          { name: "Mathematics-3", code: "25931", credits: "3", type: "Theory" },
-          { name: "Social Science", code: "25811", credits: "2", type: "Theory" }
-        ],
-        "4th": [
-          { name: "Database Management System", code: "28541", credits: "3", type: "Theory & Practical" },
-          { name: "Object Oriented Development (C#/.NET)", code: "28542", credits: "3", type: "Theory & Practical" },
-          { name: "Computer Peripherals & Interfacing", code: "28543", credits: "3", type: "Theory & Practical" },
-          { name: "Data Communication", code: "28544", credits: "3", type: "Theory" },
-          { name: "Principles of Accounting", code: "25841", credits: "2", type: "Theory" },
-          { name: "Business Communication", code: "25842", credits: "2", type: "Theory" }
-        ],
-        "5th": [
-          { name: "Operating System", code: "28551", credits: "3", type: "Theory & Practical" },
-          { name: "Computer Network", code: "28552", credits: "3", type: "Theory & Practical" },
-          { name: "Web Application Project", code: "28553", credits: "3", type: "Theory & Practical" },
-          { name: "Software Engineering", code: "28554", credits: "3", type: "Theory" },
-          { name: "Microprocessor & Microcontroller", code: "26851", credits: "3", type: "Theory & Practical" },
-          { name: "Industrial Management", code: "25851", credits: "2", type: "Theory" }
-        ],
-        "6th": [
-          { name: "Network Security & Cyber Law", code: "28561", credits: "3", type: "Theory & Practical" },
-          { name: "Mobile App Development", code: "28562", credits: "3", type: "Theory & Practical" },
-          { name: "System Analysis & Design", code: "28563", credits: "3", type: "Theory" },
-          { name: "Cloud Computing", code: "28564", credits: "3", type: "Theory & Practical" },
-          { name: "E-Commerce", code: "28565", credits: "2", type: "Theory & Practical" }
-        ],
-        "7th": [
-          { name: "Digital Marketing Technique", code: "28571", credits: "3", type: "Theory & Practical" },
-          { name: "Network Administration & Services", code: "28572", credits: "3", type: "Theory & Practical" },
-          { name: "Cyber Security & Ethics", code: "28573", credits: "3", type: "Theory & Practical" },
-          { name: "Apps Development Project", code: "28574", credits: "3", type: "Theory & Practical" },
-          { name: "Multimedia & Animation", code: "28575", credits: "3", type: "Theory & Practical" },
-          { name: "Project Work-II", code: "28576", credits: "4", type: "Practical / Project" },
-          { name: "Innovation & Entrepreneurship", code: "25853", credits: "2", type: "Theory" }
-        ],
-        "8th": [
-          { name: "Industrial Training / Attachment", code: "28581", credits: "6", type: "Field Training" }
-        ]
-      }
-    };
-
     let activeSem = "7th";
 
     let db;
@@ -504,34 +438,42 @@
           let list = [];
           if (doc.exists && doc.data().list) {
             list = doc.data().list;
-          } else {
-            list = (BTEB_BOOKS_DATABASE[dept] && BTEB_BOOKS_DATABASE[dept][activeSem]) ? BTEB_BOOKS_DATABASE[dept][activeSem] : (BTEB_BOOKS_DATABASE["CST"][activeSem] || []);
           }
-          renderBooksGrid(list, searchQuery);
+          renderBooksGrid(list, searchQuery, dept);
         }).catch((err) => {
           console.error("Firestore books fetch error:", err);
-          const list = (BTEB_BOOKS_DATABASE[dept] && BTEB_BOOKS_DATABASE[dept][activeSem]) ? BTEB_BOOKS_DATABASE[dept][activeSem] : (BTEB_BOOKS_DATABASE["CST"][activeSem] || []);
-          renderBooksGrid(list, searchQuery);
+          renderBooksGrid([], searchQuery, dept);
         });
       } else {
-        const list = (BTEB_BOOKS_DATABASE[dept] && BTEB_BOOKS_DATABASE[dept][activeSem]) ? BTEB_BOOKS_DATABASE[dept][activeSem] : (BTEB_BOOKS_DATABASE["CST"][activeSem] || []);
-        renderBooksGrid(list, searchQuery);
+        renderBooksGrid([], searchQuery, dept);
       }
     }
 
-    function renderBooksGrid(deptBooks, searchQuery) {
+    function renderBooksGrid(deptBooks, searchQuery, dept) {
       const container = document.getElementById("books-list-container");
 
+      if (!deptBooks || deptBooks.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 40px 20px; background: var(--grad-card); border-radius: 20px; border: 1px solid var(--border-color);">
+            <i data-lucide="book-x" style="width: 42px; height: 42px; color: var(--color-amber); margin-bottom: 12px;"></i>
+            <h4 style="color: white; font-family: var(--font-display); font-size: 16px;">Book List Not Available</h4>
+            <p style="font-size: 12px; color: var(--text-muted); margin-top: 6px; line-height: 1.5;">No books have been published by the admin for <strong>${dept} (${activeSem} Semester)</strong> yet.</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
       const filtered = deptBooks.filter(b => 
-        b.name.toLowerCase().includes(searchQuery) || (b.code && b.code.includes(searchQuery))
+        (b.name && b.name.toLowerCase().includes(searchQuery)) || (b.code && b.code.includes(searchQuery))
       );
 
       if (filtered.length === 0) {
         container.innerHTML = `
-          <div style="text-align: center; padding: 40px; background: var(--grad-card); border-radius: 20px; border: 1px solid var(--border-color);">
-            <i data-lucide="book-x" style="width: 36px; height: 36px; color: var(--color-amber); margin-bottom: 10px;"></i>
-            <h4 style="color: white; font-family: var(--font-display);">No Books Found</h4>
-            <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">No books matched your criteria for ${activeSem} Semester.</p>
+          <div style="text-align: center; padding: 40px 20px; background: var(--grad-card); border-radius: 20px; border: 1px solid var(--border-color);">
+            <i data-lucide="search-x" style="width: 42px; height: 42px; color: var(--color-amber); margin-bottom: 12px;"></i>
+            <h4 style="color: white; font-family: var(--font-display); font-size: 16px;">No Search Matches</h4>
+            <p style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">No books matched your search query for ${dept} (${activeSem} Semester).</p>
           </div>
         `;
         lucide.createIcons();
