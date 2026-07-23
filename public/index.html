@@ -2405,10 +2405,32 @@
       const container = document.getElementById("exam-schedule-container");
       if (!container) return;
 
-      const key = `${activeExamDept}_${activeExamSem}`;
-      const list = SAMPLE_EXAM_SCHEDULES[key] || [];
+      const docId = `${activeExamDept}_${activeExamSem}`;
 
-      if (list.length === 0) {
+      container.innerHTML = `<div style="text-align: center; padding: 24px; color: var(--text-muted);"><i data-lucide="loader-2" class="spin" style="width: 20px; height: 20px;"></i><div style="margin-top: 6px; font-size: 11px;">Loading Exam Schedule...</div></div>`;
+      lucide.createIcons();
+
+      if (db) {
+        db.collection("exam_routines").doc(docId).get().then(doc => {
+          if (doc.exists && doc.data().schedule && doc.data().schedule.length > 0) {
+            displayExamScheduleList(doc.data().schedule, container);
+          } else {
+            const fallback = SAMPLE_EXAM_SCHEDULES[docId] || [];
+            displayExamScheduleList(fallback, container);
+          }
+        }).catch(err => {
+          console.error("Firestore exam fetch error:", err);
+          const fallback = SAMPLE_EXAM_SCHEDULES[docId] || [];
+          displayExamScheduleList(fallback, container);
+        });
+      } else {
+        const fallback = SAMPLE_EXAM_SCHEDULES[docId] || [];
+        displayExamScheduleList(fallback, container);
+      }
+    }
+
+    function displayExamScheduleList(list, container) {
+      if (!list || list.length === 0) {
         container.innerHTML = `
           <div style="text-align: center; padding: 28px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 16px;">
             <i data-lucide="calendar-x" style="width: 32px; height: 32px; color: var(--text-muted); margin-bottom: 8px;"></i>
