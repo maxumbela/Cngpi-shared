@@ -628,6 +628,10 @@
 
       <!-- Weekly Schedule Day Tabs -->
       <div class="day-tabs" id="day-tabs-container">
+        <button class="day-tab-btn" id="day-btn-FullWeek" onclick="switchDayTab('FullWeek')" style="background: rgba(168, 85, 247, 0.15); border-color: rgba(168, 85, 247, 0.35); color: #c084fc;">
+          <i data-lucide="calendar-range" style="width: 13px; height: 13px; display: inline-block; vertical-align: middle;"></i>
+          <span>Full Week</span>
+        </button>
         <button class="day-tab-btn active" id="day-btn-Sunday" onclick="switchDayTab('Sunday')">Sunday</button>
         <button class="day-tab-btn" id="day-btn-Monday" onclick="switchDayTab('Monday')">Monday</button>
         <button class="day-tab-btn" id="day-btn-Tuesday" onclick="switchDayTab('Tuesday')">Tuesday</button>
@@ -953,11 +957,68 @@
       renderTeacherDirectory(routine.teachers_details || []);
     }
 
-    // Render Schedule Cards for Active Day
+    // Render Schedule Cards for Active Day or Full Week
     function renderScheduleCards() {
       const routine = loadedRoutines[activeGroupCode] || SAMPLE_CST_7_2;
       const container = document.getElementById("period-cards-container");
       container.innerHTML = "";
+
+      if (activeDay === "FullWeek") {
+        const weekDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"];
+        
+        weekDays.forEach(day => {
+          const daySchedule = (routine.weekly_schedule && routine.weekly_schedule[day]) ? routine.weekly_schedule[day] : [];
+          
+          const dayHeader = document.createElement("div");
+          dayHeader.style.cssText = "display:flex; align-items:center; gap:8px; margin: 18px 0 10px; font-family: var(--font-display); font-weight:800; font-size:15px; color: var(--color-primary);";
+          dayHeader.innerHTML = `<i data-lucide="calendar" style="width:16px; height:16px;"></i><span>${day} Schedule</span>`;
+          container.appendChild(dayHeader);
+
+          if (!daySchedule || daySchedule.length === 0) {
+            const emptyCard = document.createElement("div");
+            emptyCard.className = "period-card off-period";
+            emptyCard.style.padding = "14px";
+            emptyCard.innerHTML = `<div style="font-size:12px; color: var(--text-muted);">☕ No classes scheduled for ${day}</div>`;
+            container.appendChild(emptyCard);
+            return;
+          }
+
+          daySchedule.forEach(slot => {
+            const isOff = !slot.subject_name;
+            const card = document.createElement("div");
+            card.className = `period-card ${isOff ? 'off-period' : ''}`;
+            const teacherInfo = getTeacherByShortCode(routine.teachers_details, slot.teacher_short_code);
+
+            card.innerHTML = `
+              <div class="period-card-top">
+                <div class="period-time-badge">
+                  <i data-lucide="clock" style="width: 13px; height: 13px;"></i>
+                  <span>${slot.period || 'Period'} • ${slot.time || ''}</span>
+                </div>
+                <div class="room-badge">
+                  <i data-lucide="map-pin" style="width: 13px; height: 13px;"></i>
+                  <span>Room: ${slot.room || '-'}</span>
+                </div>
+              </div>
+              <div class="subject-title">${slot.subject_name ? slot.subject_name : 'No Class / Off Period'}</div>
+              ${slot.subject_code ? `<div class="subject-code-tag">Subject Code: ${slot.subject_code}</div>` : ''}
+              ${!isOff ? `
+                <div class="period-teacher-row">
+                  <div class="teacher-code-name">
+                    <div class="teacher-avatar-mini">${slot.teacher_short_code || 'T'}</div>
+                    <span>${teacherInfo ? teacherInfo.name : (slot.teacher_short_code || 'Instructor')}</span>
+                  </div>
+                  <span style="color: var(--text-muted); font-size: 11px;">${teacherInfo ? teacherInfo.designation : ''}</span>
+                </div>
+              ` : ''}
+            `;
+            container.appendChild(card);
+          });
+        });
+
+        lucide.createIcons();
+        return;
+      }
 
       const daySchedule = (routine.weekly_schedule && routine.weekly_schedule[activeDay]) ? routine.weekly_schedule[activeDay] : [];
 
