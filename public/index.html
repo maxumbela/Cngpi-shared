@@ -338,6 +338,15 @@
       box-shadow: 0 15px 35px rgba(0, 0, 0, 0.45), 0 0 26px rgba(245, 158, 11, 0.65);
     }
 
+    .app-icon-card:nth-child(5) {
+      border: 1.5px solid rgba(239, 68, 68, 0.65);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 16px rgba(239, 68, 68, 0.35);
+    }
+    .app-icon-card:nth-child(5):hover {
+      border-color: rgba(239, 68, 68, 0.95);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.45), 0 0 26px rgba(239, 68, 68, 0.65);
+    }
+
     .app-icon-card:hover {
       transform: translateY(-4px) scale(1.02);
     }
@@ -366,6 +375,7 @@
     .icon-result { background: var(--grad-result); box-shadow: 0 8px 20px rgba(6, 182, 212, 0.35); }
     .icon-cgpa { background: var(--grad-cgpa); box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35); }
     .icon-books { background: var(--grad-books); box-shadow: 0 8px 20px rgba(245, 158, 11, 0.35); }
+    .icon-exam { background: linear-gradient(135deg, #ef4444 0%, #f43f5e 100%); box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35); }
 
     .app-icon-card h4 {
       font-family: var(--font-display);
@@ -1149,6 +1159,16 @@
             <p>Syllabus & Books</p>
           </div>
 
+          <!-- Exam Routine App Icon -->
+          <div class="app-icon-card" onclick="openExamRoutineModal()">
+            <span class="status-pill pill-active">Available</span>
+            <div class="icon-shape icon-exam">
+              <i data-lucide="file-text" style="width: 28px; height: 28px;"></i>
+            </div>
+            <h4>Exam Routine</h4>
+            <p>Exam Schedule</p>
+          </div>
+
         </div>
       </section>
 
@@ -1370,6 +1390,54 @@
 
           <button type="submit" class="btn-submit-form">Save Profile</button>
         </form>
+      </div>
+    </div>
+
+    <!-- Exam Routine Modal -->
+    <div class="modal-overlay" id="exam-routine-modal">
+      <div class="modal-card" style="max-width: 520px; border: 1.5px solid rgba(239, 68, 68, 0.65); box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 25px rgba(239, 68, 68, 0.35);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="icon-shape icon-exam" style="width: 44px; height: 44px; border-radius: 16px;">
+              <i data-lucide="file-text" style="width: 24px; height: 24px;"></i>
+            </div>
+            <div>
+              <h3 style="font-family: var(--font-display); font-size: 19px; font-weight: 800; color: #fff; margin: 0;">Exam Routine</h3>
+              <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Mid-Term & Semester Final Timetable</p>
+            </div>
+          </div>
+          <button type="button" class="btn-secondary-action" onclick="closeExamRoutineModal()" style="border: none; background: rgba(255,255,255,0.08); width: 32px; height: 32px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center; color: white; cursor: pointer;">&times;</button>
+        </div>
+
+        <div style="padding-top: 4px;">
+          <div style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 16px; padding: 14px; margin-bottom: 18px; display: flex; align-items: center; gap: 12px;">
+            <i data-lucide="bell" style="width: 24px; height: 24px; color: #ef4444; flex-shrink: 0;"></i>
+            <div>
+              <h4 style="font-size: 13px; font-weight: 800; color: #ffffff; margin: 0;">Exam Schedule Update</h4>
+              <p style="font-size: 11px; color: #cbd5e1; margin-top: 3px; line-height: 1.4;">Official Board exam schedules and seat plans will be updated automatically upon publication by BTEB / Academic Board.</p>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); border-radius: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h5 style="font-weight: 800; color: #fff; font-size: 14px; margin: 0;">Internal Mid-Term Examination</h5>
+                <p style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">Departmental Routine</p>
+              </div>
+              <span class="status-pill pill-active">Available</span>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); border-radius: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h5 style="font-weight: 800; color: #fff; font-size: 14px; margin: 0;">BTEB Semester Final 2026</h5>
+                <p style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">Board Examination Schedule</p>
+              </div>
+              <span class="status-pill pill-soon">Upcoming</span>
+            </div>
+          </div>
+
+          <button type="button" class="btn-primary-action" onclick="closeExamRoutineModal()" style="margin-top: 20px; width: 100%; padding: 12px; font-weight: 800; border-radius: 14px;">Close Panel</button>
+        </div>
       </div>
     </div>
 
@@ -2231,6 +2299,16 @@
 
     function closeComingSoon() {
       document.getElementById("coming-soon-modal").classList.remove("active");
+    }
+
+    // Exam Routine Modal Handlers
+    function openExamRoutineModal() {
+      document.getElementById('exam-routine-modal').classList.add('active');
+      lucide.createIcons();
+    }
+
+    function closeExamRoutineModal() {
+      document.getElementById('exam-routine-modal').classList.remove('active');
     }
 
     // Admin Panel Logic
