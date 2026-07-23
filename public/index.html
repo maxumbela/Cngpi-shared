@@ -2007,53 +2007,119 @@
       lucide.createIcons();
     }
 
-    // Render Full Week Table
+    // Render Full Week Table (Grid Mode with merged colspans and glowing highlights)
     function renderFullWeekTable() {
       const container = document.getElementById('full-week-table-box');
       if (!container || !currentRoutineData) return;
 
-      const schedule = currentRoutineData.weekly_schedule;
-      const days = Object.keys(schedule);
+      const routine = currentRoutineData;
+      const weekDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"];
+      const timeSlots = [
+        { name: "1st Period", time: "1:30PM-2:15PM" },
+        { name: "2nd Period", time: "2:15PM-3:00PM" },
+        { name: "3rd Period", time: "3:00PM-3:45PM" },
+        { name: "4th Period", time: "3:45PM-4:30PM" },
+        { name: "5th Period", time: "4:30PM-5:15PM" },
+        { name: "6th Period", time: "5:15PM-6:00PM" },
+        { name: "7th Period", time: "6:00PM-6:45PM" }
+      ];
 
       let tableHTML = `
-        <table class="week-table">
+        <table class="week-table" style="width: 100%; border-collapse: collapse; min-width: 850px;">
           <thead>
             <tr>
-              <th style="width: 90px;">Day</th>
-              <th>Classes & Period Schedule</th>
+              <th style="width: 90px; background: rgba(99, 102, 241, 0.25);">Day \\ Period</th>
+      `;
+
+      timeSlots.forEach((ts) => {
+        tableHTML += `
+          <th style="padding: 10px 8px; text-align: center;">
+            <div>${ts.name}</div>
+            <div style="font-size: 9px; opacity: 0.75; font-weight: 500;">${ts.time}</div>
+          </th>
+        `;
+      });
+
+      tableHTML += `
             </tr>
           </thead>
           <tbody>
       `;
 
-      days.forEach(day => {
-        const classes = schedule[day] || [];
+      weekDays.forEach(day => {
+        const daySchedule = (routine.weekly_schedule && routine.weekly_schedule[day]) ? routine.weekly_schedule[day] : [];
+
         tableHTML += `
           <tr>
-            <td style="font-weight: 800; color: var(--color-primary); font-family: var(--font-display);">${day}</td>
-            <td>
-              <div style="display: flex; flex-direction: column; gap: 8px;">
+            <td style="font-weight: 800; color: var(--color-primary); font-family: var(--font-display); text-align: center; background: rgba(99, 102, 241, 0.1); vertical-align: middle;">${day}</td>
         `;
 
-        classes.forEach(c => {
-          if (!c.subject_name) return;
-          const teacher = getTeacherInfo(c.teacher_short_code);
-          tableHTML += `
-            <div style="background: rgba(255,255,255,0.03); padding: 8px 10px; border-radius: 10px; border-left: 3px solid var(--color-primary);">
-              <div class="table-cell-content">
-                <span class="table-sub-name">${c.subject_name} <span style="font-weight: normal; color: var(--text-muted);">(${c.period})</span></span>
-                <span class="table-sub-code">Code: ${c.subject_code} • ${c.time} • Room: ${c.room}</span>
-                <span class="table-room">Teacher: ${teacher ? teacher.name : c.teacher_short_code}</span>
-              </div>
-            </div>
-          `;
-        });
+        if (!daySchedule || daySchedule.length === 0) {
+          tableHTML += `<td colspan="7" style="text-align: center; color: var(--text-muted); font-size: 11px; padding: 16px;">Day Off (No Classes)</td>`;
+        } else {
+          let skipUntilPeriod = 0;
 
-        tableHTML += `
-              </div>
-            </td>
-          </tr>
-        `;
+          for (let p = 1; p <= 7; p++) {
+            if (p <= skipUntilPeriod) continue;
+
+            const slot = daySchedule.find(s => {
+              if (!s.period) return false;
+              const pStr = s.period.toLowerCase();
+              if (p === 1 && pStr.includes("1st")) return true;
+              if (p === 2 && pStr.includes("2nd") && !pStr.includes("1st & 2nd")) return true;
+              if (p === 3 && pStr.includes("3rd") && !pStr.includes("2nd & 3rd")) return true;
+              if (p === 4 && pStr.includes("4th") && !pStr.includes("3rd & 4th")) return true;
+              if (p === 5 && pStr.includes("5th") && !pStr.includes("4th & 5th")) return true;
+              if (p === 6 && pStr.includes("6th") && !pStr.includes("5th,")) return true;
+              if (p === 7 && pStr.includes("7th") && !pStr.includes("6th & 7th")) return true;
+              return false;
+            });
+
+            if (slot && slot.subject_name) {
+              const teacher = getTeacherInfo(slot.teacher_short_code);
+              const pStr = (slot.period || "").toLowerCase();
+
+              let spanCount = 1;
+              if (pStr.includes("5th, 6th & 7th") || pStr.includes("5th,6th,7th")) spanCount = 3;
+              else if (pStr.includes("&") || pStr.includes(",")) spanCount = 2;
+
+              if (spanCount > 1) {
+                skipUntilPeriod = p + spanCount - 1;
+                tableHTML += `
+                  <td colspan="${spanCount}" style="padding: 6px; vertical-align: top;">
+                    <div style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.25) 0%, rgba(99, 102, 241, 0.25) 100%); border: 1px solid rgba(168, 85, 247, 0.5); border-left: 4px solid var(--color-purple); border-radius: 10px; padding: 8px; box-shadow: 0 4px 15px rgba(168, 85, 247, 0.25);">
+                      <div style="display: inline-flex; align-items: center; gap: 4px; font-size: 9px; font-weight: 800; color: #e9d5ff; background: rgba(168, 85, 247, 0.3); padding: 2px 6px; border-radius: 6px; margin-bottom: 4px;">
+                        <i data-lucide="layers" style="width: 10px; height: 10px;"></i>
+                        <span>${spanCount}-Period Class (${slot.period})</span>
+                      </div>
+                      <div style="font-weight: 800; color: #ffffff; font-size: 11px;">${slot.subject_name}</div>
+                      <div style="font-size: 9px; color: var(--color-pink); font-weight: 600;">Code: ${slot.subject_code || '-'} • Room: ${slot.room || '-'}</div>
+                      <div style="font-size: 9px; color: var(--text-muted);">${teacher ? teacher.name : (slot.teacher_short_code || '-')}</div>
+                    </div>
+                  </td>
+                `;
+              } else {
+                tableHTML += `
+                  <td style="padding: 6px; vertical-align: top;">
+                    <div style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); border-left: 3px solid var(--color-primary); border-radius: 10px; padding: 8px;">
+                      <div style="font-weight: 800; color: #ffffff; font-size: 11px;">${slot.subject_name}</div>
+                      <div style="font-size: 9px; color: var(--color-pink); font-weight: 600;">Code: ${slot.subject_code || '-'} • Room: ${slot.room || '-'}</div>
+                      <div style="font-size: 9px; color: var(--text-muted);">${teacher ? teacher.name : (slot.teacher_short_code || '-')}</div>
+                    </div>
+                  </td>
+                `;
+              }
+            } else {
+              tableHTML += `
+                <td style="text-align: center; color: rgba(255,255,255,0.2); font-size: 10px; vertical-align: middle;">
+                  -
+                </td>
+              `;
+            }
+          }
+        }
+
+        tableHTML += `</tr>`;
       });
 
       tableHTML += `
