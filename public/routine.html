@@ -878,6 +878,24 @@
         </div>
       </div>
 
+      <!-- Next Class Countdown Banner -->
+      <div class="next-class-card" id="next-class-countdown-banner" style="background: rgba(18, 26, 43, 0.85); border: 1.5px solid rgba(99, 102, 241, 0.65); box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(99, 102, 241, 0.3); border-radius: 20px; padding: 16px 20px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; transition: all 0.3s ease;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div id="next-class-icon-bg" style="width: 46px; height: 46px; border-radius: 16px; background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.4); color: #818cf8; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.3s ease;">
+            <i data-lucide="timer" style="width: 24px; height: 24px;"></i>
+          </div>
+          <div>
+            <div id="next-class-badge" style="font-size: 11px; font-weight: 800; color: #a5b4fc; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">⏳ NEXT CLASS COUNTDOWN</div>
+            <div id="next-class-title" style="font-size: 15px; font-weight: 800; color: #ffffff;">Calculating Schedule...</div>
+            <div id="next-class-details" style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Checking period timetable for today</div>
+          </div>
+        </div>
+        <div id="next-class-timer-box" style="background: rgba(10, 15, 26, 0.8); border: 1px solid rgba(99, 102, 241, 0.4); padding: 8px 16px; border-radius: 14px; text-align: center; flex-shrink: 0; min-width: 120px;">
+          <div id="next-class-timer-text" style="font-family: var(--font-display); font-size: 18px; font-weight: 900; color: #6366f1; letter-spacing: 0.5px;">--h --m --s</div>
+          <div id="next-class-timer-label" style="font-size: 9px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">REMAINING</div>
+        </div>
+      </div>
+
       <!-- Weekly Schedule Day Tabs -->
       <div class="day-tabs" id="day-tabs-container">
         <button class="day-tab-btn" id="day-btn-FullWeek" onclick="switchDayTab('FullWeek')" style="background: rgba(168, 85, 247, 0.15); border-color: rgba(168, 85, 247, 0.35); color: #c084fc;">
@@ -1037,9 +1055,130 @@
       const dhakaTime = new Date(utcMs + (6 * 3600000));
       const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
       const dayName = dayNames[dhakaTime.getDay()];
-      const currentMinutes = dhakaTime.getHours() * 60 + dhakaTime.getMinutes();
-      return { dhakaTime, dayName, currentMinutes };
+      const hour24 = dhakaTime.getHours();
+      const minute = dhakaTime.getMinutes();
+      const second = dhakaTime.getSeconds();
+      const currentMinutes = hour24 * 60 + minute;
+      return { dhakaTime, dayName, currentMinutes, hour24, minute, second };
     }
+
+    function updateNextClassCountdown() {
+      const banner = document.getElementById("next-class-countdown-banner");
+      const iconBg = document.getElementById("next-class-icon-bg");
+      const badge = document.getElementById("next-class-badge");
+      const title = document.getElementById("next-class-title");
+      const details = document.getElementById("next-class-details");
+      const timerText = document.getElementById("next-class-timer-text");
+      const timerLabel = document.getElementById("next-class-timer-label");
+
+      const routineData = loadedRoutines[activeGroupCode] || SAMPLE_CST_7_2;
+      if (!banner || !routineData) return;
+
+      const { dayName, currentMinutes, second } = getDhakaCurrentTimeInfo();
+      const currentSec = currentMinutes * 60 + second;
+
+      const todaySchedule = (routineData.weekly_schedule && routineData.weekly_schedule[dayName]) ? routineData.weekly_schedule[dayName] : [];
+
+      if (!todaySchedule || todaySchedule.length === 0) {
+        banner.style.borderColor = "rgba(148, 163, 184, 0.4)";
+        banner.style.boxShadow = "0 10px 30px rgba(0,0,0,0.5), 0 0 15px rgba(148, 163, 184, 0.2)";
+        if (iconBg) {
+          iconBg.style.background = "rgba(148, 163, 184, 0.15)";
+          iconBg.style.borderColor = "rgba(148, 163, 184, 0.3)";
+          iconBg.style.color = "#94a3b8";
+        }
+        if (badge) { badge.textContent = "💤 NO CLASSES TODAY"; badge.style.color = "#94a3b8"; }
+        if (title) title.textContent = `No Classes Scheduled for ${dayName}`;
+        if (details) details.textContent = "Enjoy your weekend/holiday break!";
+        if (timerText) { timerText.textContent = "00h 00m 00s"; timerText.style.color = "#94a3b8"; }
+        if (timerLabel) timerLabel.textContent = "OFF DAY";
+        return;
+      }
+
+      let liveItem = null;
+      let liveRange = null;
+      let nextItem = null;
+      let nextRange = null;
+
+      for (let item of todaySchedule) {
+        if (!item.subject_name) continue;
+        const range = parseTimeStringToMinutes(item.time);
+        if (!range) continue;
+
+        if (currentMinutes >= range.start && currentMinutes < range.end) {
+          liveItem = item;
+          liveRange = range;
+          break;
+        } else if (currentMinutes < range.start) {
+          if (!nextRange || range.start < nextRange.start) {
+            nextItem = item;
+            nextRange = range;
+          }
+        }
+      }
+
+      if (liveItem && liveRange) {
+        const endSec = liveRange.end * 60;
+        const diffSec = Math.max(0, endSec - currentSec);
+        const mins = Math.floor(diffSec / 60);
+        const secs = diffSec % 60;
+
+        banner.style.borderColor = "rgba(239, 68, 68, 0.75)";
+        banner.style.boxShadow = "0 10px 30px rgba(0,0,0,0.5), 0 0 25px rgba(239, 68, 68, 0.4)";
+        if (iconBg) {
+          iconBg.style.background = "rgba(239, 68, 68, 0.2)";
+          iconBg.style.borderColor = "rgba(239, 68, 68, 0.5)";
+          iconBg.style.color = "#f87171";
+        }
+        if (badge) { badge.textContent = "🔴 CLASS IN PROGRESS"; badge.style.color = "#f87171"; }
+        if (title) title.textContent = `🔴 Live: ${liveItem.subject_name}`;
+        if (details) details.textContent = `${liveItem.teacher_short_code || 'Teacher'} • ${liveItem.room || ''} (Period ${liveItem.period})`;
+        if (timerText) {
+          timerText.textContent = `${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`;
+          timerText.style.color = "#ef4444";
+        }
+        if (timerLabel) timerLabel.textContent = "ENDS IN";
+
+      } else if (nextItem && nextRange) {
+        const startSec = nextRange.start * 60;
+        const diffSec = Math.max(0, startSec - currentSec);
+        const hrs = Math.floor(diffSec / 3600);
+        const mins = Math.floor((diffSec % 3600) / 60);
+        const secs = diffSec % 60;
+
+        banner.style.borderColor = "rgba(99, 102, 241, 0.65)";
+        banner.style.boxShadow = "0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(99, 102, 241, 0.3)";
+        if (iconBg) {
+          iconBg.style.background = "rgba(99, 102, 241, 0.2)";
+          iconBg.style.borderColor = "rgba(99, 102, 241, 0.4)";
+          iconBg.style.color = "#818cf8";
+        }
+        if (badge) { badge.textContent = "⏳ NEXT CLASS COUNTDOWN"; badge.style.color = "#a5b4fc"; }
+        if (title) title.textContent = nextItem.subject_name;
+        if (details) details.textContent = `${nextItem.teacher_short_code || 'Teacher'} • ${nextItem.room || ''} (Period ${nextItem.period})`;
+        if (timerText) {
+          timerText.textContent = `${hrs > 0 ? hrs + 'h ' : ''}${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`;
+          timerText.style.color = "#6366f1";
+        }
+        if (timerLabel) timerLabel.textContent = "STARTS IN";
+
+      } else {
+        banner.style.borderColor = "rgba(16, 185, 129, 0.5)";
+        banner.style.boxShadow = "0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(16, 185, 129, 0.3)";
+        if (iconBg) {
+          iconBg.style.background = "rgba(16, 185, 129, 0.2)";
+          iconBg.style.borderColor = "rgba(16, 185, 129, 0.4)";
+          iconBg.style.color = "#34d399";
+        }
+        if (badge) { badge.textContent = "🌙 CLASSES COMPLETED"; badge.style.color = "#34d399"; }
+        if (title) title.textContent = "🎉 All Classes Finished for Today!";
+        if (details) details.textContent = "Great job! Rest well and check schedule for tomorrow.";
+        if (timerText) { timerText.textContent = "00h 00m 00s"; timerText.style.color = "#34d399"; }
+        if (timerLabel) timerLabel.textContent = "COMPLETED";
+      }
+    }
+
+    setInterval(updateNextClassCountdown, 1000);
 
     function parseTimeStringToMinutes(timeStr) {
       if (!timeStr) return null;
