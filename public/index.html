@@ -545,6 +545,67 @@
       color: var(--text-muted);
     }
 
+    /* Live Pinned Notice Marquee Ticker */
+    @keyframes marqueeScroll {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+
+    .notice-marquee-ticker {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.18) 0%, rgba(217, 119, 6, 0.12) 100%);
+      border: 1.5px solid rgba(245, 158, 11, 0.5);
+      box-shadow: 0 4px 20px rgba(245, 158, 11, 0.25), 0 0 15px rgba(245, 158, 11, 0.2);
+      border-radius: 16px;
+      padding: 8px 14px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .notice-marquee-ticker:hover {
+      border-color: rgba(245, 158, 11, 0.85);
+      box-shadow: 0 6px 25px rgba(245, 158, 11, 0.4);
+    }
+
+    .marquee-tag {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: #ffffff;
+      padding: 4px 10px;
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-shrink: 0;
+      letter-spacing: 0.5px;
+      box-shadow: 0 2px 10px rgba(245, 158, 11, 0.4);
+    }
+
+    .marquee-content-wrap {
+      flex: 1;
+      overflow: hidden;
+      white-space: nowrap;
+      position: relative;
+    }
+
+    .marquee-text-scroll {
+      display: inline-block;
+      white-space: nowrap;
+      animation: marqueeScroll 18s linear infinite;
+      font-size: 12px;
+      font-weight: 700;
+      color: #fbbf24;
+    }
+
+    .notice-marquee-ticker:hover .marquee-text-scroll {
+      animation-play-state: paused;
+    }
+
     /* Skeleton Loading Animation Shimmer */
     @keyframes skeletonShimmer {
       0% { background-position: -200% 0; }
@@ -1168,6 +1229,19 @@
       <!-- ================= HOME SCREEN ================= -->
       <section class="screen-view active" id="screen-home">
         
+        <!-- Live Pinned Notice Marquee Ticker Bar -->
+        <div id="home-live-marquee-bar" class="notice-marquee-ticker" style="display: none;" onclick="window.location.href='notice.html'">
+          <div class="marquee-tag">
+            <i data-lucide="megaphone" style="width: 14px; height: 14px;"></i>
+            <span>PINNED NOTICE</span>
+          </div>
+          <div class="marquee-content-wrap">
+            <div id="marquee-text-content" class="marquee-text-scroll">
+              📢 Loading pinned announcements...
+            </div>
+          </div>
+        </div>
+
         <!-- Hero Announcement Banner -->
         <div class="hero-banner">
           <span class="banner-tag">Welcome</span>
@@ -3240,11 +3314,45 @@
       }
     }
 
+    function listenToPinnedNoticesMarquee() {
+      if (!db) return;
+      db.collection("notices").where("isPinned", "==", true).onSnapshot(snapshot => {
+        const marqueeBar = document.getElementById("home-live-marquee-bar");
+        const marqueeText = document.getElementById("marquee-text-content");
+        if (!marqueeBar || !marqueeText) return;
+
+        if (snapshot.empty) {
+          marqueeBar.style.display = "none";
+          return;
+        }
+
+        const pinnedTitles = [];
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          if (data.title) {
+            pinnedTitles.push(`📌 ${data.title}`);
+          }
+        });
+
+        if (pinnedTitles.length > 0) {
+          const combinedStr = pinnedTitles.join(" &nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp; ");
+          marqueeText.innerHTML = `📢 PINNED ANNOUNCEMENT: ${combinedStr} &nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp; 📢 PINNED ANNOUNCEMENT: ${combinedStr}`;
+          marqueeBar.style.display = "flex";
+          lucide.createIcons();
+        } else {
+          marqueeBar.style.display = "none";
+        }
+      }, err => {
+        console.error("Marquee notice listener error:", err);
+      });
+    }
+
     // App Initialization
     window.addEventListener('DOMContentLoaded', () => {
       startDhakaClock();
       seedDefaultFirestoreRoutine();
       fetchFirestoreHolidayConfig();
+      listenToPinnedNoticesMarquee();
       loadProfileAndRoutine();
     });
   </script>
