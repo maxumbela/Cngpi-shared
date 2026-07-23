@@ -822,29 +822,112 @@
       });
     }
 
-    // Populate Group Code Dropdown
+    // Cookie Storage Helper Utilities
+    function getCookie(name) {
+      const cname = name + "=";
+      const decodedCookie = decodeURIComponent(document.cookie);
+      const ca = decodedCookie.split(';');
+      for (let i = 0; i < ca.length; i++) {
+        let c = ca[i].trim();
+        if (c.indexOf(cname) === 0) {
+          return c.substring(cname.length, c.length);
+        }
+      }
+      return "";
+    }
+
+    function getSavedUserProfile() {
+      const cookieVal = getCookie('cngpi_user_profile');
+      if (cookieVal) {
+        try {
+          const parsed = JSON.parse(cookieVal);
+          if (parsed && parsed.department && parsed.semester && parsed.shift) return parsed;
+        } catch (e) {}
+      }
+      const localVal = localStorage.getItem('cngpi_user_profile');
+      if (localVal) {
+        try {
+          const parsed = JSON.parse(localVal);
+          if (parsed && parsed.department && parsed.semester && parsed.shift) return parsed;
+        } catch (e) {}
+      }
+      return null;
+    }
+
+    function getDepartmentShortCode(deptString) {
+      if (!deptString) return "cst";
+      const str = deptString.toLowerCase();
+      if (str.includes("computer") || str.includes("cst")) return "cst";
+      if (str.includes("civil") || str.includes("ct")) return "ct";
+      if (str.includes("electrical") || str.includes("et")) return "et";
+      if (str.includes("electronics") || str.includes("ent")) return "ent";
+      if (str.includes("mechanical") || str.includes("mt")) return "mt";
+      if (str.includes("architecture") || str.includes("at")) return "at";
+      if (str.includes("telecommunication") || str.includes("tnt")) return "tnt";
+
+      const match = deptString.match(/\(([^)]+)\)/);
+      if (match) return match[1].toLowerCase();
+      return deptString.substring(0, 3).toLowerCase();
+    }
+
+    function getProfileRoutineKey(profile) {
+      if (!profile) return "cst_7_2";
+      const deptShort = getDepartmentShortCode(profile.department);
+      const semNum = (profile.semester || "").replace(/[^0-9]/g, "") || "1";
+      const shiftNum = (profile.shift || "").replace(/[^0-9]/g, "") || "1";
+      return `${deptShort}_${semNum}_${shiftNum}`;
+    }
+
+    // Populate Group Code Dropdown & Auto Sync with Student Profile
     function populateGroupDropdown() {
       const dropdown = document.getElementById("group-select-dropdown");
       dropdown.innerHTML = "";
 
+      // Auto-detect group code from student profile
+      const userProfile = getSavedUserProfile();
+      const savedGroupCode = getCookie('cngpi_active_group_code') || localStorage.getItem('cngpi_active_group_code');
+      
+      if (savedGroupCode) {
+        activeGroupCode = savedGroupCode;
+      } else if (userProfile) {
+        activeGroupCode = getProfileRoutineKey(userProfile);
+      }
+
+      // If activeGroupCode is not in loadedRoutines, create placeholder option
+      if (!loadedRoutines[activeGroupCode] && userProfile) {
+        const deptShort = getDepartmentShortCode(userProfile.department).toUpperCase();
+        const semNum = userProfile.semester.replace(/[^0-9]/g, '');
+        const shiftNum = userProfile.shift.replace(/[^0-9]/g, '');
+        const formattedLabel = `${deptShort} ${semNum}/${shiftNum}`;
+
+        const opt = document.createElement("option");
+        opt.value = activeGroupCode;
+        opt.textContent = formattedLabel;
+        dropdown.appendChild(opt);
+      }
+
       Object.keys(loadedRoutines).forEach((key) => {
+        if (dropdown.querySelector(`option[value="${key}"]`)) return;
         const item = loadedRoutines[key];
-        const codeName = item.group_short_code || key.toUpperCase();
+        const codeName = item ? (item.group_short_code || key.toUpperCase()) : key.toUpperCase();
         const opt = document.createElement("option");
         opt.value = key;
         opt.textContent = codeName;
         dropdown.appendChild(opt);
       });
 
-      if (!loadedRoutines[activeGroupCode]) {
-        activeGroupCode = Object.keys(loadedRoutines)[0];
+      if (!dropdown.querySelector(`option[value="${activeGroupCode}"]`)) {
+        const keys = Object.keys(loadedRoutines);
+        if (keys.length > 0) activeGroupCode = keys[0];
       }
+
       dropdown.value = activeGroupCode;
     }
 
     // Handle Group Selection
     function onGroupSelected(val) {
       activeGroupCode = val;
+      localStorage.setItem('cngpi_active_group_code', val);
       renderActiveRoutine();
     }
 

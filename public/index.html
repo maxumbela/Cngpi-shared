@@ -1670,10 +1670,13 @@
 
       currentProfile = { name, department, semester, shift };
       const jsonStr = JSON.stringify(currentProfile);
+      const groupCode = getProfileRoutineKey(currentProfile);
 
       // Save to BOTH Cookie (1 year) and LocalStorage
       setCookie('cngpi_user_profile', jsonStr, 365);
+      setCookie('cngpi_active_group_code', groupCode, 365);
       localStorage.setItem('cngpi_user_profile', jsonStr);
+      localStorage.setItem('cngpi_active_group_code', groupCode);
 
       applyUserProfileHeader(currentProfile);
       closeUserSelectModal();
