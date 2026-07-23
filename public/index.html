@@ -1096,8 +1096,8 @@
           </div>
 
           <!-- Book List App Icon -->
-          <div class="app-icon-card" onclick="openComingSoon('Book List', 'book-open')">
-            <span class="status-pill pill-soon">Soon</span>
+          <div class="app-icon-card" onclick="window.location.href='books.html'">
+            <span class="status-pill pill-active">Available</span>
             <div class="icon-shape icon-books">
               <i data-lucide="book-open" style="width: 28px; height: 28px;"></i>
             </div>
@@ -2010,8 +2010,7 @@
       } else if (target === 'cgpa') {
         window.location.href = 'calculator.html';
       } else if (target === 'books') {
-        document.getElementById('screen-home').classList.add('active');
-        openComingSoon('Book List', 'book-open');
+        window.location.href = 'books.html';
       }
     }
 

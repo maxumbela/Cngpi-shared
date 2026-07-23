@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>CNGPI Syllabus & Book List</title>
+  <meta name="description" content="Semester-wise BTEB Polytechnic Books and Subject Code List">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.344.0/dist/umd/lucide.min.js"></script>
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    :root {
+      --font-primary: 'Inter', sans-serif;
+      --font-display: 'Outfit', sans-serif;
+      
+      --bg-dark: #090d16;
+      --bg-card: rgba(18, 26, 43, 0.85);
+      --bg-nav: rgba(13, 19, 33, 0.94);
+      
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(245, 158, 11, 0.35);
+      
+      --color-primary: #6366f1;
+      --color-amber: #f59e0b;
+      --color-emerald: #10b981;
+      --color-pink: #ec4899;
+      --color-cyan: #06b6d4;
+      
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      
+      --grad-primary: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+      --grad-books: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      --grad-card: linear-gradient(145deg, rgba(22, 30, 48, 0.85) 0%, rgba(13, 18, 30, 0.95) 100%);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      font-family: var(--font-primary);
+      background: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+    }
+
+    .bg-glow-top {
+      position: fixed;
+      top: -15%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(245, 158, 11, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+      filter: blur(90px);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .web-app-container {
+      width: 100%;
+      max-width: 640px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 1;
+      padding-bottom: 95px;
+    }
+
+    .app-header {
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      background: rgba(9, 13, 22, 0.88);
+      backdrop-filter: blur(18px);
+      z-index: 50;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-back {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .header-title-group h1 {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 800;
+      color: #ffffff;
+    }
+
+    .header-title-group p {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .content-wrapper {
+      padding: 20px;
+      flex: 1;
+    }
+
+    .search-box-card {
+      background: var(--grad-card);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .search-input-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(13, 19, 33, 0.85);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 10px 14px;
+    }
+
+    .search-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: white;
+      font-size: 13px;
+      font-family: var(--font-primary);
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .filter-select {
+      flex: 1;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(13, 19, 33, 0.85);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      font-size: 12px;
+      outline: none;
+    }
+
+    .sem-tabs-scroll {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 16px;
+      scrollbar-width: none;
+    }
+    .sem-tabs-scroll::-webkit-scrollbar { display: none; }
+
+    .sem-tab-btn {
+      padding: 8px 16px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .sem-tab-btn.active {
+      background: rgba(245, 158, 11, 0.2);
+      border-color: var(--color-amber);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
+    }
+
+    .books-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .book-card {
+      background: var(--grad-card);
+      border: 1px solid var(--border-color);
+      border-radius: 18px;
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .book-card:hover {
+      border-color: var(--border-accent);
+      transform: translateY(-2px);
+    }
+
+    .book-info-box h4 {
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 6px;
+    }
+
+    .book-meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .code-pill {
+      font-weight: 800;
+      color: var(--color-amber);
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      padding: 3px 8px;
+      border-radius: 8px;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 640px;
+      height: 76px;
+      background: var(--bg-nav);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 8px;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 16px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .nav-item.active {
+      color: var(--color-amber);
+    }
+
+    .nav-item.active .nav-icon-wrapper {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--color-amber);
+    }
+
+    .nav-icon-wrapper {
+      width: 38px;
+      height: 38px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-label {
+      font-size: 10px;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-glow-top"></div>
+
+  <main class="web-app-container">
+    <header class="app-header">
+      <div class="header-left">
+        <a href="index.html" class="btn-back" title="Back to Home">
+          <i data-lucide="arrow-left" style="width: 20px; height: 20px;"></i>
+        </a>
+        <div class="header-title-group">
+          <h1>Syllabus & Book List</h1>
+          <p>Polytechnic Semester-wise Books</p>
+        </div>
+      </div>
+    </header>
+
+    <div class="content-wrapper">
+
+      <div class="search-box-card">
+        <div class="search-input-wrapper">
+          <i data-lucide="search" style="width: 18px; height: 18px; color: var(--text-muted);"></i>
+          <input type="text" id="search-book-input" class="search-input" placeholder="Search book name or subject code..." oninput="filterBooks()">
+        </div>
+
+        <div class="filter-row">
+          <select id="dept-filter-select" class="filter-select" onchange="filterBooks()">
+            <option value="CST">Computer Science & Technology (CST)</option>
+            <option value="CT">Civil Technology (CT)</option>
+            <option value="ET">Electrical Technology (ET)</option>
+            <option value="ENT">Electronics Technology (ENT)</option>
+            <option value="MT">Mechanical Technology (MT)</option>
+            <option value="AT">Architecture Technology (AT)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="sem-tabs-scroll" id="sem-tabs-box">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <div class="books-grid" id="books-list-container">
+        <!-- Books cards rendered dynamically -->
+      </div>
+
+    </div>
+
+    <nav class="bottom-nav">
+      <a href="index.html" class="nav-item">
+        <div class="nav-icon-wrapper"><i data-lucide="home" style="width: 20px; height: 20px;"></i></div>
+        <span class="nav-label">Home</span>
+      </a>
+      <a href="routine.html" class="nav-item">
+        <div class="nav-icon-wrapper"><i data-lucide="calendar-days" style="width: 20px; height: 20px;"></i></div>
+        <span class="nav-label">Routine</span>
+      </a>
+      <a href="index.html" class="nav-item">
+        <div class="nav-icon-wrapper"><i data-lucide="award" style="width: 20px; height: 20px;"></i></div>
+        <span class="nav-label">Result</span>
+      </a>
+      <a href="calculator.html" class="nav-item">
+        <div class="nav-icon-wrapper"><i data-lucide="calculator" style="width: 20px; height: 20px;"></i></div>
+        <span class="nav-label">CGPA</span>
+      </a>
+      <a href="books.html" class="nav-item active">
+        <div class="nav-icon-wrapper"><i data-lucide="book-open" style="width: 20px; height: 20px;"></i></div>
+        <span class="nav-label">Book List</span>
+      </a>
+    </nav>
+  </main>
+
+  <script>
+    lucide.createIcons();
+
+    // BTEB Books Database (Semester wise)
+    const BTEB_BOOKS_DATABASE = {
+      "CST": {
+        "1st": [
+          { name: "Engineering Drawing", code: "21011", credits: "2", type: "Practical" },
+          { name: "Basic Electronics", code: "26811", credits: "3", type: "Theory & Practical" },
+          { name: "Computer Application", code: "28511", credits: "3", type: "Theory & Practical" },
+          { name: "Mathematics-1", code: "25911", credits: "3", type: "Theory" },
+          { name: "Physics-1", code: "25912", credits: "3", type: "Theory & Practical" },
+          { name: "Bangla", code: "25711", credits: "2", type: "Theory" },
+          { name: "English-1", code: "25712", credits: "2", type: "Theory" }
+        ],
+        "2nd": [
+          { name: "Python Programming", code: "28521", credits: "3", type: "Theory & Practical" },
+          { name: "IT Support Services", code: "28522", credits: "2", type: "Practical" },
+          { name: "Electrical Engineering Fundamentals", code: "26711", credits: "3", type: "Theory & Practical" },
+          { name: "Mathematics-2", code: "25921", credits: "3", type: "Theory" },
+          { name: "Physics-2", code: "25922", credits: "3", type: "Theory & Practical" },
+          { name: "Communicative English", code: "25722", credits: "2", type: "Theory" }
+        ],
+        "3rd": [
+          { name: "Data Structure & Algorithm", code: "28531", credits: "3", type: "Theory & Practical" },
+          { name: "Object Oriented Programming (Java)", code: "28532", credits: "3", type: "Theory & Practical" },
+          { name: "Web Design & Development", code: "28533", credits: "3", type: "Theory & Practical" },
+          { name: "Digital Electronics", code: "26831", credits: "3", type: "Theory & Practical" },
+          { name: "Mathematics-3", code: "25931", credits: "3", type: "Theory" },
+          { name: "Social Science", code: "25811", credits: "2", type: "Theory" }
+        ],
+        "4th": [
+          { name: "Database Management System", code: "28541", credits: "3", type: "Theory & Practical" },
+          { name: "Object Oriented Development (C#/.NET)", code: "28542", credits: "3", type: "Theory & Practical" },
+          { name: "Computer Peripherals & Interfacing", code: "28543", credits: "3", type: "Theory & Practical" },
+          { name: "Data Communication", code: "28544", credits: "3", type: "Theory" },
+          { name: "Principles of Accounting", code: "25841", credits: "2", type: "Theory" },
+          { name: "Business Communication", code: "25842", credits: "2", type: "Theory" }
+        ],
+        "5th": [
+          { name: "Operating System", code: "28551", credits: "3", type: "Theory & Practical" },
+          { name: "Computer Network", code: "28552", credits: "3", type: "Theory & Practical" },
+          { name: "Web Application Project", code: "28553", credits: "3", type: "Theory & Practical" },
+          { name: "Software Engineering", code: "28554", credits: "3", type: "Theory" },
+          { name: "Microprocessor & Microcontroller", code: "26851", credits: "3", type: "Theory & Practical" },
+          { name: "Industrial Management", code: "25851", credits: "2", type: "Theory" }
+        ],
+        "6th": [
+          { name: "Network Security & Cyber Law", code: "28561", credits: "3", type: "Theory & Practical" },
+          { name: "Mobile App Development", code: "28562", credits: "3", type: "Theory & Practical" },
+          { name: "System Analysis & Design", code: "28563", credits: "3", type: "Theory" },
+          { name: "Cloud Computing", code: "28564", credits: "3", type: "Theory & Practical" },
+          { name: "E-Commerce", code: "28565", credits: "2", type: "Theory & Practical" }
+        ],
+        "7th": [
+          { name: "Digital Marketing Technique", code: "28571", credits: "3", type: "Theory & Practical" },
+          { name: "Network Administration & Services", code: "28572", credits: "3", type: "Theory & Practical" },
+          { name: "Cyber Security & Ethics", code: "28573", credits: "3", type: "Theory & Practical" },
+          { name: "Apps Development Project", code: "28574", credits: "3", type: "Theory & Practical" },
+          { name: "Multimedia & Animation", code: "28575", credits: "3", type: "Theory & Practical" },
+          { name: "Project Work-II", code: "28576", credits: "4", type: "Practical / Project" },
+          { name: "Innovation & Entrepreneurship", code: "25853", credits: "2", type: "Theory" }
+        ],
+        "8th": [
+          { name: "Industrial Training / Attachment", code: "28581", credits: "6", type: "Field Training" }
+        ]
+      }
+    };
+
+    let activeSem = "7th";
+
+    function initSemTabs() {
+      const sems = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"];
+      const container = document.getElementById("sem-tabs-box");
+      container.innerHTML = sems.map(s => `
+        <button class="sem-tab-btn ${s === activeSem ? 'active' : ''}" onclick="selectSem('${s}')">
+          ${s} Semester
+        </button>
+      `).join('');
+    }
+
+    function selectSem(sem) {
+      activeSem = sem;
+      initSemTabs();
+      filterBooks();
+    }
+
+    function filterBooks() {
+      const dept = document.getElementById("dept-filter-select").value;
+      const searchQuery = document.getElementById("search-book-input").value.trim().toLowerCase();
+      const container = document.getElementById("books-list-container");
+      
+      const deptBooks = (BTEB_BOOKS_DATABASE[dept] && BTEB_BOOKS_DATABASE[dept][activeSem]) ? BTEB_BOOKS_DATABASE[dept][activeSem] : (BTEB_BOOKS_DATABASE["CST"][activeSem] || []);
+
+      const filtered = deptBooks.filter(b => 
+        b.name.toLowerCase().includes(searchQuery) || b.code.includes(searchQuery)
+      );
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 40px; background: var(--grad-card); border-radius: 20px; border: 1px solid var(--border-color);">
+            <i data-lucide="book-x" style="width: 36px; height: 36px; color: var(--color-amber); margin-bottom: 10px;"></i>
+            <h4 style="color: white; font-family: var(--font-display);">No Books Found</h4>
+            <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">No books matched your criteria for ${activeSem} Semester.</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      container.innerHTML = filtered.map(b => `
+        <div class="book-card">
+          <div class="book-info-box">
+            <h4>${b.name}</h4>
+            <div class="book-meta-row">
+              <span class="code-pill">Subject Code: ${b.code}</span>
+              <span>• ${b.credits} Credits</span>
+              <span>• ${b.type}</span>
+            </div>
+          </div>
+          <div style="width: 36px; height: 36px; border-radius: 12px; background: rgba(245, 158, 11, 0.15); color: var(--color-amber); display: flex; align-items: center; justify-content: center;">
+            <i data-lucide="book-marked" style="width: 18px; height: 18px;"></i>
+          </div>
+        </div>
+      `).join('');
+
+      lucide.createIcons();
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      initSemTabs();
+      filterBooks();
+    });
+  </script>
+</body>
+</html>
