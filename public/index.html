@@ -356,6 +356,15 @@
       box-shadow: 0 15px 35px rgba(0, 0, 0, 0.45), 0 0 26px rgba(168, 85, 247, 0.65);
     }
 
+    .app-icon-card:nth-child(7) {
+      border: 1.5px solid rgba(6, 182, 212, 0.65);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 16px rgba(6, 182, 212, 0.35);
+    }
+    .app-icon-card:nth-child(7):hover {
+      border-color: rgba(6, 182, 212, 0.95);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.45), 0 0 26px rgba(6, 182, 212, 0.65);
+    }
+
     .app-icon-card:hover {
       transform: translateY(-4px) scale(1.02);
     }
@@ -386,6 +395,7 @@
     .icon-books { background: var(--grad-books); box-shadow: 0 8px 20px rgba(245, 158, 11, 0.35); }
     .icon-exam { background: linear-gradient(135deg, #ef4444 0%, #f43f5e 100%); box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35); }
     .icon-teacher { background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%); box-shadow: 0 8px 20px rgba(168, 85, 247, 0.35); }
+    .icon-notice { background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%); box-shadow: 0 8px 20px rgba(6, 182, 212, 0.35); }
 
     .app-icon-card h4 {
       font-family: var(--font-display);
@@ -1221,7 +1231,7 @@
           <!-- Notice Board App Icon -->
           <div class="app-icon-card" onclick="window.location.href='notice.html'">
             <span class="status-pill pill-active">Available</span>
-            <div class="icon-shape icon-notice" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(217, 119, 6, 0.2) 100%); border: 1px solid rgba(245, 158, 11, 0.35); color: #fbbf24;">
+            <div class="icon-shape icon-notice">
               <i data-lucide="bell" style="width: 28px; height: 28px;"></i>
             </div>
             <h4>Notice Board</h4>
