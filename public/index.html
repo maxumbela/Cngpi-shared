@@ -347,6 +347,15 @@
       box-shadow: 0 15px 35px rgba(0, 0, 0, 0.45), 0 0 26px rgba(239, 68, 68, 0.65);
     }
 
+    .app-icon-card:nth-child(6) {
+      border: 1.5px solid rgba(168, 85, 247, 0.65);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 16px rgba(168, 85, 247, 0.35);
+    }
+    .app-icon-card:nth-child(6):hover {
+      border-color: rgba(168, 85, 247, 0.95);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.45), 0 0 26px rgba(168, 85, 247, 0.65);
+    }
+
     .app-icon-card:hover {
       transform: translateY(-4px) scale(1.02);
     }
@@ -376,6 +385,7 @@
     .icon-cgpa { background: var(--grad-cgpa); box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35); }
     .icon-books { background: var(--grad-books); box-shadow: 0 8px 20px rgba(245, 158, 11, 0.35); }
     .icon-exam { background: linear-gradient(135deg, #ef4444 0%, #f43f5e 100%); box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35); }
+    .icon-teacher { background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%); box-shadow: 0 8px 20px rgba(168, 85, 247, 0.35); }
 
     .app-icon-card h4 {
       font-family: var(--font-display);
@@ -1198,6 +1208,16 @@
             <p>Exam Schedule</p>
           </div>
 
+          <!-- Teacher Contact App Icon -->
+          <div class="app-icon-card" onclick="openTeacherContactModal()">
+            <span class="status-pill pill-active">Available</span>
+            <div class="icon-shape icon-teacher">
+              <i data-lucide="phone-call" style="width: 28px; height: 28px;"></i>
+            </div>
+            <h4>Teacher Contact</h4>
+            <p>Faculty Directory</p>
+          </div>
+
         </div>
       </section>
 
@@ -1474,6 +1494,50 @@
           </div>
 
           <button type="button" class="btn-primary-action" onclick="closeExamRoutineModal()" style="margin-top: 18px; width: 100%; padding: 12px; font-weight: 800; border-radius: 14px;">Close Schedule</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Teacher Contact Modal -->
+    <div class="modal-overlay" id="teacher-contact-modal">
+      <div class="modal-card" style="max-width: 640px; width: 95%; border: 1.5px solid rgba(168, 85, 247, 0.65); box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 25px rgba(168, 85, 247, 0.35);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="icon-shape icon-teacher" style="width: 44px; height: 44px; border-radius: 16px;">
+              <i data-lucide="phone-call" style="width: 24px; height: 24px;"></i>
+            </div>
+            <div>
+              <h3 style="font-family: var(--font-display); font-size: 19px; font-weight: 800; color: #fff; margin: 0;">Teacher Contact Directory</h3>
+              <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Faculty Members Phone & Contact Info</p>
+            </div>
+          </div>
+          <button type="button" class="btn-secondary-action" onclick="closeTeacherContactModal()" style="border: none; background: rgba(255,255,255,0.08); width: 32px; height: 32px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center; color: white; cursor: pointer;">&times;</button>
+        </div>
+
+        <div style="padding-top: 4px;">
+          <!-- Department Filter Tabs -->
+          <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">Filter Department:</div>
+          <div class="exam-dept-bar">
+            <button class="exam-dept-btn active" id="teacher-dept-ALL" onclick="filterTeacherDept('ALL')" style="background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%); border-color: #a855f7;">All Depts</button>
+            <button class="exam-dept-btn" id="teacher-dept-CST" onclick="filterTeacherDept('CST')">CST</button>
+            <button class="exam-dept-btn" id="teacher-dept-CT" onclick="filterTeacherDept('CT')">Civil (CT)</button>
+            <button class="exam-dept-btn" id="teacher-dept-ET" onclick="filterTeacherDept('ET')">Electrical (ET)</button>
+            <button class="exam-dept-btn" id="teacher-dept-ENT" onclick="filterTeacherDept('ENT')">Electronics (ENT)</button>
+            <button class="exam-dept-btn" id="teacher-dept-MT" onclick="filterTeacherDept('MT')">Mechanical (MT)</button>
+            <button class="exam-dept-btn" id="teacher-dept-AT" onclick="filterTeacherDept('AT')">Automobile (AT)</button>
+          </div>
+
+          <!-- Search Bar -->
+          <div style="margin-bottom: 14px; position: relative;">
+            <input type="text" id="teacher-search-input" onkeyup="searchTeacherDirectory()" class="form-input" placeholder="🔍 Search teacher name or designation..." style="width: 100%; padding: 10px 14px; border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: white; outline: none; font-size: 12px;">
+          </div>
+
+          <!-- Directory Cards Grid -->
+          <div id="teacher-directory-container" style="display: flex; flex-direction: column; gap: 10px; max-height: 380px; overflow-y: auto; padding-right: 4px;">
+            <!-- Rendered dynamically via JS -->
+          </div>
+
+          <button type="button" class="btn-primary-action" onclick="closeTeacherContactModal()" style="margin-top: 16px; width: 100%; padding: 12px; font-weight: 800; border-radius: 14px; background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%); border: none;">Close Directory</button>
         </div>
       </div>
     </div>
@@ -2481,6 +2545,110 @@
           </table>
         </div>
       `;
+
+      container.innerHTML = html;
+      lucide.createIcons();
+    }
+
+    // ================= TEACHER CONTACT DIRECTORY LOGIC =================
+    const TEACHERS_DIRECTORY_DATABASE = [
+      { short_code: "JR", name: "Md. Jewel Rana", designation: "Instructor (Tech/Computer)", dept: "CST", phone: "01732755176", role: "Class Teacher" },
+      { short_code: "HA", name: "Hakimin Ahmed", designation: "Part-Time Teacher (Electronics)", dept: "ENT", phone: "01759731841", role: null },
+      { short_code: "AbM", name: "Md. Abdul Malek", designation: "Instructor (Tech/Computer)", dept: "CST", phone: "01314851894", role: null },
+      { short_code: "IH", name: "Md. Idul Hasan Jony", designation: "Part-Time Teacher (Computer)", dept: "CST", phone: "01791008770", role: null },
+      { short_code: "KA", name: "Md. Kausar Ali", designation: "Jr. Instructor (Tech/Computer)", dept: "CST", phone: "01753038380", role: null },
+      { short_code: "ZI", name: "Zahidul Islam", designation: "Jr. Instructor (Tech/Computer)", dept: "CST", phone: "01738628365", role: null }
+    ];
+
+    let activeTeacherDept = "ALL";
+
+    function openTeacherContactModal() {
+      // Auto sync user's department if available
+      const profile = getSavedUserProfile();
+      if (profile) {
+        const deptShort = getDepartmentShortCode(profile.department).toUpperCase();
+        if (["CST", "CT", "ET", "ENT", "MT", "AT"].includes(deptShort)) {
+          activeTeacherDept = deptShort;
+        }
+      }
+
+      document.querySelectorAll("#teacher-contact-modal .exam-dept-btn").forEach(b => b.classList.remove("active"));
+      const btn = document.getElementById(`teacher-dept-${activeTeacherDept}`);
+      if (btn) btn.classList.add("active");
+
+      document.getElementById("teacher-search-input").value = "";
+      renderTeacherDirectoryList();
+      document.getElementById('teacher-contact-modal').classList.add('active');
+      lucide.createIcons();
+    }
+
+    function closeTeacherContactModal() {
+      document.getElementById('teacher-contact-modal').classList.remove('active');
+    }
+
+    function filterTeacherDept(dept) {
+      activeTeacherDept = dept;
+      document.querySelectorAll("#teacher-contact-modal .exam-dept-btn").forEach(b => b.classList.remove("active"));
+      const btn = document.getElementById(`teacher-dept-${dept}`);
+      if (btn) btn.classList.add("active");
+      renderTeacherDirectoryList();
+    }
+
+    function searchTeacherDirectory() {
+      renderTeacherDirectoryList();
+    }
+
+    function renderTeacherDirectoryList() {
+      const container = document.getElementById("teacher-directory-container");
+      if (!container) return;
+
+      const searchQuery = (document.getElementById("teacher-search-input").value || "").toLowerCase().trim();
+
+      let list = TEACHERS_DIRECTORY_DATABASE.filter(t => {
+        const matchDept = (activeTeacherDept === "ALL") || (t.dept === activeTeacherDept);
+        const matchSearch = !searchQuery || 
+          t.name.toLowerCase().includes(searchQuery) || 
+          t.short_code.toLowerCase().includes(searchQuery) ||
+          t.designation.toLowerCase().includes(searchQuery);
+        return matchDept && matchSearch;
+      });
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 24px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 16px;">
+            <i data-lucide="user-x" style="width: 32px; height: 32px; color: var(--text-muted); margin-bottom: 8px;"></i>
+            <div style="font-weight: 700; color: #fff; font-size: 14px;">No Teachers Found</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">No teacher details available for ${activeTeacherDept === 'ALL' ? 'this query' : activeTeacherDept + ' department'}.</div>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      let html = "";
+      list.forEach(item => {
+        html += `
+          <div style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); border-radius: 16px; padding: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 42px; height: 42px; border-radius: 14px; background: linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(99, 102, 241, 0.2) 100%); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; font-weight: 900; font-size: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                ${item.short_code}
+              </div>
+              <div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <h4 style="font-weight: 800; color: #ffffff; font-size: 14px; margin: 0;">${item.name}</h4>
+                  ${item.role ? `<span style="font-size: 9px; font-weight: 800; color: #34d399; background: rgba(16, 185, 129, 0.15); padding: 2px 6px; border-radius: 6px;">${item.role}</span>` : ''}
+                </div>
+                <p style="font-size: 11px; color: var(--text-muted); margin-top: 3px; line-height: 1.3;">${item.designation}</p>
+                <div style="font-size: 11px; color: #a5b4fc; font-weight: 700; margin-top: 4px;">📱 ${item.phone}</div>
+              </div>
+            </div>
+            <a href="tel:${item.phone}" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 8px 14px; border-radius: 12px; font-weight: 800; font-size: 11px; text-decoration: none; display: flex; align-items: center; gap: 6px; flex-shrink: 0; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+              <i data-lucide="phone" style="width: 14px; height: 14px;"></i>
+              <span>Call</span>
+            </a>
+          </div>
+        `;
+      });
 
       container.innerHTML = html;
       lucide.createIcons();
