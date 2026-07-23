@@ -1782,6 +1782,22 @@
       }
     }
 
+    let activeHolidayConfig = null;
+
+    function fetchFirestoreHolidayConfig() {
+      if (!db) return;
+      db.collection("settings").doc("holiday_config").onSnapshot(doc => {
+        if (doc.exists) {
+          activeHolidayConfig = doc.data();
+        } else {
+          activeHolidayConfig = null;
+        }
+        checkOngoingClass(new Date());
+      }, err => {
+        console.error("Holiday listener notice:", err);
+      });
+    }
+
     // Get current Dhaka day and time in minutes
     function getDhakaCurrentTimeInfo(nowDate = new Date()) {
       const dhakaDateStr = nowDate.toLocaleString("en-US", { timeZone: "Asia/Dhaka" });
@@ -1808,6 +1824,23 @@
       const timerLabel = document.getElementById("next-class-timer-label");
 
       if (!banner || !currentRoutineData) return;
+
+      // Check Holiday Status First
+      if (activeHolidayConfig && activeHolidayConfig.is_holiday) {
+        banner.style.borderColor = "rgba(245, 158, 11, 0.75)";
+        banner.style.boxShadow = "0 10px 30px rgba(0,0,0,0.5), 0 0 25px rgba(245, 158, 11, 0.4)";
+        if (iconBg) {
+          iconBg.style.background = "rgba(245, 158, 11, 0.2)";
+          iconBg.style.borderColor = "rgba(245, 158, 11, 0.5)";
+          iconBg.style.color = "#fbbf24";
+        }
+        if (badge) { badge.textContent = "🌴 HOLIDAY ANNOUNCEMENT"; badge.style.color = "#fbbf24"; }
+        if (title) title.textContent = activeHolidayConfig.title || "🌴 CAMPUS HOLIDAY TODAY";
+        if (details) details.textContent = activeHolidayConfig.description || "Classes suspended for today.";
+        if (timerText) { timerText.textContent = "00h 00m 00s"; timerText.style.color = "#fbbf24"; }
+        if (timerLabel) timerLabel.textContent = "HOLIDAY";
+        return;
+      }
 
       const now = new Date();
       const { dayName, currentMinutes, second } = getDhakaCurrentTimeInfo(now);
@@ -1940,14 +1973,32 @@
       // Update Home Screen alert box
       const homeAlert = document.getElementById("home-current-class-box");
       if (homeAlert) {
-        if (ongoingClassInfo) {
+        if (activeHolidayConfig && activeHolidayConfig.is_holiday) {
           homeAlert.className = "current-class-alert";
+          homeAlert.style.background = "linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(217, 119, 6, 0.15) 100%)";
+          homeAlert.style.borderColor = "#f59e0b";
+          homeAlert.style.color = "#fbbf24";
+          homeAlert.style.boxShadow = "0 0 20px rgba(245, 158, 11, 0.35)";
+          homeAlert.innerHTML = `
+            <span>${activeHolidayConfig.title || '🌴 CAMPUS HOLIDAY TODAY'}</span>
+            <span>${activeHolidayConfig.description || 'Institute Closed'}</span>
+          `;
+        } else if (ongoingClassInfo) {
+          homeAlert.className = "current-class-alert";
+          homeAlert.style.background = "";
+          homeAlert.style.borderColor = "";
+          homeAlert.style.color = "";
+          homeAlert.style.boxShadow = "";
           homeAlert.innerHTML = `
             <span>🔴 Live Class Now: <strong>${ongoingClassInfo.subject_name}</strong> (${ongoingClassInfo.room})</span>
             <span>${ongoingClassInfo.time}</span>
           `;
         } else {
           homeAlert.className = "current-class-alert no-class";
+          homeAlert.style.background = "";
+          homeAlert.style.borderColor = "";
+          homeAlert.style.color = "";
+          homeAlert.style.boxShadow = "";
           homeAlert.innerHTML = `
             <span>☕ No active class currently in progress</span>
             <span>${dayName}</span>
@@ -2883,6 +2934,7 @@
     window.addEventListener('DOMContentLoaded', () => {
       startDhakaClock();
       seedDefaultFirestoreRoutine();
+      fetchFirestoreHolidayConfig();
       loadProfileAndRoutine();
     });
   </script>

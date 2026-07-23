@@ -822,6 +822,11 @@
           <span>Exam Routine Manager</span>
         </button>
 
+        <button class="module-tab-btn" id="tab-btn-holiday" onclick="switchModule('holiday')">
+          <i data-lucide="sun" style="width: 16px; height: 16px;"></i>
+          <span>Holiday Manager</span>
+        </button>
+
         <button class="module-tab-btn" id="tab-btn-notices" onclick="switchModule('notices')">
           <i data-lucide="bell" style="width: 16px; height: 16px;"></i>
           <span>Notice Board</span>
@@ -1242,6 +1247,58 @@
         </div>
       </div>
 
+      <!-- MODULE 7: HOLIDAY & CAMPUS STATUS MANAGER -->
+      <div class="glass-card module-content" id="module-holiday" style="display: none;">
+        <div class="dash-section-header">
+          <div class="dash-title-group">
+            <div class="dash-icon-box amber" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.15) 100%); border-color: rgba(245, 158, 11, 0.3); color: #fbbf24;">
+              <i data-lucide="sun" style="width: 22px; height: 22px;"></i>
+            </div>
+            <div>
+              <h2 class="dash-title">Campus Holiday & Announcement Manager</h2>
+              <p class="dash-subtitle">Set institute holiday status to reflect directly on students' Home Screen clock card</p>
+            </div>
+          </div>
+        </div>
+
+        <form onsubmit="handleSaveHolidayStatus(event)">
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 20px; border-radius: 18px; margin-bottom: 24px;">
+            <div class="form-group" style="margin-bottom: 18px;">
+              <label style="font-size: 13px; font-weight: 800; color: #fff; margin-bottom: 8px; display: block;">Holiday Status Toggle</label>
+              <select id="admin-holiday-status" class="form-input" style="padding: 10px 14px; font-weight: 800; font-size: 14px;" onchange="toggleHolidayFormFields(this.value)">
+                <option value="false">🔴 Normal Academic Day (Classes Active)</option>
+                <option value="true">🌴 Holiday Active (Show Holiday Notice on Home Screen)</option>
+              </select>
+            </div>
+
+            <div id="holiday-fields-group" style="display: flex; flex-direction: column; gap: 16px;">
+              <div class="form-group">
+                <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Holiday Banner Title</label>
+                <input type="text" id="admin-holiday-title" class="form-input" placeholder="e.g. 🌴 EID-UL-FITR VACATION" value="🌴 EID-UL-FITR VACATION">
+              </div>
+
+              <div class="form-group">
+                <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Holiday Description / Notice</label>
+                <textarea id="admin-holiday-desc" class="form-textarea" placeholder="Enter notice details for students..." style="min-height: 80px;">Campus & all departmental classes will remain closed today. Enjoy your holiday!</textarea>
+              </div>
+
+              <div class="form-group">
+                <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Effective Date / Duration</label>
+                <input type="text" id="admin-holiday-date" class="form-input" placeholder="e.g. Today / 23 July 2026" value="Today">
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 18px;">
+            <button type="button" class="btn-reset-default" onclick="clearHolidayStatus()">Clear / Reset to Normal</button>
+            <button type="submit" class="btn-save-config" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35);">
+              <i data-lucide="cloud-upload" style="width: 16px; height: 16px;"></i>
+              <span>Publish Holiday Status to Home Screen</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
     </div>
 
   </main>
@@ -1405,6 +1462,8 @@
         loadAdminBooksList();
       } else if (modKey === 'exam') {
         loadAdminExamSchedule();
+      } else if (modKey === 'holiday') {
+        loadAdminHolidayStatus();
       }
 
       lucide.createIcons();
@@ -2110,6 +2169,66 @@
       } else {
         showToast("Database offline. Exam routine saved locally!", "success");
       }
+    }
+
+    // ================= HOLIDAY MANAGER JS LOGIC =================
+    function toggleHolidayFormFields(statusVal) {
+      const isHoliday = statusVal === "true";
+      const fieldsGroup = document.getElementById("holiday-fields-group");
+      if (fieldsGroup) {
+        fieldsGroup.style.opacity = isHoliday ? "1" : "0.5";
+      }
+    }
+
+    function loadAdminHolidayStatus() {
+      if (!db) return;
+      db.collection("settings").doc("holiday_config").get().then(doc => {
+        if (doc.exists) {
+          const data = doc.data();
+          const isHoliday = data.is_holiday ? "true" : "false";
+          document.getElementById("admin-holiday-status").value = isHoliday;
+          document.getElementById("admin-holiday-title").value = data.title || "🌴 EID-UL-FITR VACATION";
+          document.getElementById("admin-holiday-desc").value = data.description || "Campus & all departmental classes will remain closed today. Enjoy your holiday!";
+          document.getElementById("admin-holiday-date").value = data.date || "Today";
+          toggleHolidayFormFields(isHoliday);
+        }
+      }).catch(err => {
+        console.error("Error loading holiday status:", err);
+      });
+    }
+
+    function handleSaveHolidayStatus(event) {
+      event.preventDefault();
+      const isHoliday = document.getElementById("admin-holiday-status").value === "true";
+      const title = document.getElementById("admin-holiday-title").value.trim() || "🌴 CAMPUS HOLIDAY";
+      const description = document.getElementById("admin-holiday-desc").value.trim() || "Classes are suspended for today.";
+      const dateStr = document.getElementById("admin-holiday-date").value.trim() || "Today";
+
+      const payload = {
+        is_holiday: isHoliday,
+        title: title,
+        description: description,
+        date: dateStr,
+        updatedAt: new Date().toISOString(),
+        updatedBy: ADMIN_USER
+      };
+
+      if (db) {
+        db.collection("settings").doc("holiday_config").set(payload).then(() => {
+          showToast(`Holiday status updated to '${isHoliday ? 'HOLIDAY ACTIVE' : 'NORMAL CLASS DAY'}' on Home Screen!`, "success");
+        }).catch(err => {
+          console.error("Holiday save error:", err);
+          showToast("Failed to publish holiday status: " + err.message, "error");
+        });
+      } else {
+        showToast("Database offline. Holiday status saved locally!", "success");
+      }
+    }
+
+    function clearHolidayStatus() {
+      document.getElementById("admin-holiday-status").value = "false";
+      toggleHolidayFormFields("false");
+      handleSaveHolidayStatus(new Event('submit'));
     }
 
     // Toast Notification Display
