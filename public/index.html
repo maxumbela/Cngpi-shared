@@ -1596,25 +1596,66 @@
       renderDailyRoutineCards();
     }
 
-    // Load & Match Student Profile with Routine
-    function loadProfileAndRoutine() {
-      const saved = localStorage.getItem('cngpi_user_profile');
-      if (saved) {
+    // Cookie Storage Utilities (Persistent across visits)
+    function setCookie(name, value, days = 365) {
+      const d = new Date();
+      d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+      const expires = "expires=" + d.toUTCString();
+      document.cookie = name + "=" + encodeURIComponent(value) + ";" + expires + ";path=/;SameSite=Lax";
+    }
+
+    function getCookie(name) {
+      const cname = name + "=";
+      const decodedCookie = decodeURIComponent(document.cookie);
+      const ca = decodedCookie.split(';');
+      for (let i = 0; i < ca.length; i++) {
+        let c = ca[i].trim();
+        if (c.indexOf(cname) === 0) {
+          return c.substring(cname.length, c.length);
+        }
+      }
+      return "";
+    }
+
+    function getSavedUserProfile() {
+      // 1. Try Cookie
+      const cookieVal = getCookie('cngpi_user_profile');
+      if (cookieVal) {
         try {
-          currentProfile = JSON.parse(saved);
-          applyUserProfileHeader(currentProfile);
+          const parsed = JSON.parse(cookieVal);
+          if (parsed && parsed.name && parsed.department && parsed.semester && parsed.shift) {
+            return parsed;
+          }
         } catch (e) {}
       }
 
-      if (!currentProfile) {
-        openUserSelectModal();
-        return;
+      // 2. Try LocalStorage fallback
+      const localVal = localStorage.getItem('cngpi_user_profile');
+      if (localVal) {
+        try {
+          const parsed = JSON.parse(localVal);
+          if (parsed && parsed.name && parsed.department && parsed.semester && parsed.shift) {
+            return parsed;
+          }
+        } catch (e) {}
       }
 
-      fetchFirestoreRoutine();
+      return null;
     }
 
-    // Save Student Profile
+    // Load & Match Student Profile with Routine
+    function loadProfileAndRoutine() {
+      currentProfile = getSavedUserProfile();
+
+      if (currentProfile) {
+        applyUserProfileHeader(currentProfile);
+        fetchFirestoreRoutine();
+      } else {
+        openUserSelectModal();
+      }
+    }
+
+    // Save Student Profile to Cookie & LocalStorage
     function saveUserProfile(event) {
       event.preventDefault();
       const name = document.getElementById('input-user-name').value.trim();
@@ -1628,7 +1669,12 @@
       }
 
       currentProfile = { name, department, semester, shift };
-      localStorage.setItem('cngpi_user_profile', JSON.stringify(currentProfile));
+      const jsonStr = JSON.stringify(currentProfile);
+
+      // Save to BOTH Cookie (1 year) and LocalStorage
+      setCookie('cngpi_user_profile', jsonStr, 365);
+      localStorage.setItem('cngpi_user_profile', jsonStr);
+
       applyUserProfileHeader(currentProfile);
       closeUserSelectModal();
       fetchFirestoreRoutine();
@@ -1642,33 +1688,45 @@
 
       if (nameElem) nameElem.textContent = profile.name;
       if (detailsElem) {
-        let deptShort = profile.department.split(' ')[0];
+        let deptShort = getDepartmentShortCode(profile.department).toUpperCase();
         detailsElem.textContent = `${deptShort} • ${profile.semester.replace(' Semester', ' Sem')} • ${profile.shift}`;
       }
       if (avatarElem && profile.name) {
         avatarElem.textContent = profile.name.charAt(0).toUpperCase();
       }
       if (routineBadge) {
-        routineBadge.textContent = `${profile.department.split(' ')[0]} • ${profile.semester} • ${profile.shift}`;
+        let deptShort = getDepartmentShortCode(profile.department).toUpperCase();
+        routineBadge.textContent = `${deptShort} • ${profile.semester} • ${profile.shift}`;
       }
     }
 
-    // Helper: Map profile parameters to routine key (e.g. CST 7/2 -> cst_7_2)
+    // Helper: Map Department Name to Short Code (e.g. Computer Science -> cst)
+    function getDepartmentShortCode(deptString) {
+      if (!deptString) return "cst";
+      const str = deptString.toLowerCase();
+      if (str.includes("computer") || str.includes("cst")) return "cst";
+      if (str.includes("civil") || str.includes("ct")) return "ct";
+      if (str.includes("electrical") || str.includes("et")) return "et";
+      if (str.includes("electronics") || str.includes("ent")) return "ent";
+      if (str.includes("mechanical") || str.includes("mt")) return "mt";
+      if (str.includes("architecture") || str.includes("at")) return "at";
+      if (str.includes("telecommunication") || str.includes("tnt")) return "tnt";
+
+      const match = deptString.match(/\(([^)]+)\)/);
+      if (match) return match[1].toLowerCase();
+      return deptString.substring(0, 3).toLowerCase();
+    }
+
+    // Helper: Map profile parameters to routine key (e.g. CST + 7th Sem + 2nd Shift -> cst_7_2)
     function getProfileRoutineKey(profile) {
       if (!profile) return "cst_7_2";
-      const isCST = profile.department.includes("Computer") || profile.department.includes("CST");
-      const is7th = profile.semester.includes("7th");
-      const is2ndShift = profile.shift.includes("2nd");
 
-      if (isCST && is7th && is2ndShift) {
-        return "cst_7_2";
-      }
+      const deptShort = getDepartmentShortCode(profile.department);
+      const semNum = (profile.semester || "").replace(/[^0-9]/g, "") || "1";
+      const shiftNum = (profile.shift || "").replace(/[^0-9]/g, "") || "1";
 
-      // Generate a normalized document key
-      const deptCode = profile.department.match(/\(([^)]+)\)/)?.[1] || profile.department.substring(0, 3).toUpperCase();
-      const semNum = profile.semester.replace(/[^0-9]/g, '');
-      const shiftNum = profile.shift.replace(/[^0-9]/g, '');
-      return `${deptCode.toLowerCase()}_${semNum}_${shiftNum}`;
+      // Formats as: cst_7_2, ct_3_1, et_5_2, etc.
+      return `${deptShort}_${semNum}_${shiftNum}`;
     }
 
     // Fetch Routine from Firebase Firestore or fallback cache
