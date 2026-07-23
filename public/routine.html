@@ -1163,7 +1163,7 @@
           `;
 
           if (!daySchedule || daySchedule.length === 0) {
-            tableHTML += `<td colspan="7" style="text-align: center; color: var(--text-muted); font-size: 11px; padding: 16px;">☕ Day Off (No Classes Scheduled)</td>`;
+            tableHTML += `<td colspan="7" style="text-align: center; color: var(--text-muted); font-size: 11px; padding: 16px;">Day Off (No Classes)</td>`;
           } else {
             for (let p = 1; p <= 7; p++) {
               const slot = daySchedule.find(s => {
@@ -1179,7 +1179,7 @@
                     <div class="table-class-box">
                       <div class="table-sub-title">${slot.subject_name}</div>
                       <div class="table-sub-info">Code: ${slot.subject_code || '-'} • Room: ${slot.room || '-'}</div>
-                      <div class="table-teacher-tag">👨‍🏫 ${teacherInfo ? teacherInfo.name : (slot.teacher_short_code || '-')}</div>
+                      <div class="table-teacher-tag">${teacherInfo ? teacherInfo.name : (slot.teacher_short_code || '-')}</div>
                     </div>
                   </td>
                 `;
@@ -1304,14 +1304,71 @@
       lucide.createIcons();
     }
 
-    // Export / Download Full Week Routine
+    // Export / Download High-Resolution Full Week Routine PNG Image
     function exportFullWeekRoutine() {
-      // 1. Switch to Full Week Grid Table mode
+      // 1. Switch to Full Week Grid Table view
       switchDayTab('FullWeek');
 
-      // 2. Trigger browser print / PDF download
+      const btn = document.querySelector('.btn-export-routine');
+      if (btn) btn.innerHTML = `<span>Exporting PNG...</span>`;
+
       setTimeout(() => {
-        window.print();
+        const gridTable = document.querySelector(".routine-week-table-container");
+        const groupTitle = document.getElementById('info-group-title').textContent || 'CST';
+        const deptSem = document.getElementById('info-dept-sem').textContent || 'Class Routine';
+
+        if (!gridTable) {
+          if (btn) btn.innerHTML = `<i data-lucide="download" style="width: 14px; height: 14px;"></i><span>Export PNG</span>`;
+          lucide.createIcons();
+          return;
+        }
+
+        // Build temporary container for high-res PNG capture
+        const tempContainer = document.createElement("div");
+        tempContainer.style.cssText = "position: absolute; top: -9999px; left: -9999px; width: 1100px; padding: 32px; background: #090d16; color: #ffffff; font-family: 'Inter', sans-serif; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.6);";
+        
+        tempContainer.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid rgba(99, 102, 241, 0.4); padding-bottom: 20px; margin-bottom: 24px;">
+            <div>
+              <div style="font-size: 11px; font-weight: 800; color: #818cf8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Chapainawabganj Polytechnic Institute</div>
+              <h1 style="font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 900; color: #ffffff; margin: 0;">${groupTitle} Class Routine</h1>
+              <div style="font-size: 13px; color: #94a3b8; margin-top: 4px;">${deptSem}</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: #ffffff; padding: 8px 18px; border-radius: 14px; font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 800;">CNGPI Official Routine 2026</div>
+            </div>
+          </div>
+          ${gridTable.outerHTML}
+          <div style="margin-top: 20px; display: flex; justify-content: space-between; font-size: 11px; color: #64748b; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px;">
+            <span>Generated from CNGPI Academic Portal</span>
+            <span>https://cngpi-edu.web.app</span>
+          </div>
+        `;
+
+        document.body.appendChild(tempContainer);
+
+        html2canvas(tempContainer, {
+          scale: 3, // Ultra High-Resolution 3x HD Render
+          backgroundColor: "#090d16",
+          useCORS: true,
+          logging: false
+        }).then(canvas => {
+          const imgData = canvas.toDataURL("image/png", 1.0);
+          const downloadLink = document.createElement("a");
+          const safeName = groupTitle.replace(/[^a-z0-9]/gi, '_');
+          downloadLink.download = `CNGPI_Routine_${safeName}_FullWeek.png`;
+          downloadLink.href = imgData;
+          downloadLink.click();
+
+          document.body.removeChild(tempContainer);
+          if (btn) btn.innerHTML = `<i data-lucide="download" style="width: 14px; height: 14px;"></i><span>Export PNG</span>`;
+          lucide.createIcons();
+        }).catch(err => {
+          console.error("Export error:", err);
+          document.body.removeChild(tempContainer);
+          if (btn) btn.innerHTML = `<i data-lucide="download" style="width: 14px; height: 14px;"></i><span>Export PNG</span>`;
+          lucide.createIcons();
+        });
       }, 350);
     }
   </script>

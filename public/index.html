@@ -14,6 +14,9 @@
   <!-- Lucide Icons -->
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.344.0/dist/umd/lucide.min.js"></script>
   
+  <!-- HTML2Canvas for exporting image -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -1825,8 +1828,54 @@
 
     function exportFullWeekRoutineFromIndex() {
       switchRoutineView('week');
+
       setTimeout(() => {
-        window.print();
+        const tableContainer = document.getElementById("full-week-table-box");
+        const profileText = document.getElementById("routine-profile-text") ? document.getElementById("routine-profile-text").textContent : "CNGPI Routine";
+
+        if (!tableContainer) return;
+
+        const tempContainer = document.createElement("div");
+        tempContainer.style.cssText = "position: absolute; top: -9999px; left: -9999px; width: 1100px; padding: 32px; background: #090d16; color: #ffffff; font-family: 'Inter', sans-serif; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.6);";
+
+        tempContainer.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid rgba(99, 102, 241, 0.4); padding-bottom: 20px; margin-bottom: 24px;">
+            <div>
+              <div style="font-size: 11px; font-weight: 800; color: #818cf8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Chapainawabganj Polytechnic Institute</div>
+              <h1 style="font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 900; color: #ffffff; margin: 0;">Class Routine</h1>
+              <div style="font-size: 13px; color: #94a3b8; margin-top: 4px;">${profileText}</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: #ffffff; padding: 8px 18px; border-radius: 14px; font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 800;">CNGPI Official Routine 2026</div>
+            </div>
+          </div>
+          ${tableContainer.outerHTML}
+          <div style="margin-top: 20px; display: flex; justify-content: space-between; font-size: 11px; color: #64748b; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px;">
+            <span>Generated from CNGPI Academic Portal</span>
+            <span>https://cngpi-edu.web.app</span>
+          </div>
+        `;
+
+        document.body.appendChild(tempContainer);
+
+        html2canvas(tempContainer, {
+          scale: 3, // High-Resolution 3x HD Render
+          backgroundColor: "#090d16",
+          useCORS: true,
+          logging: false
+        }).then(canvas => {
+          const imgData = canvas.toDataURL("image/png", 1.0);
+          const downloadLink = document.createElement("a");
+          const safeName = profileText.replace(/[^a-z0-9]/gi, '_');
+          downloadLink.download = `CNGPI_Routine_${safeName}_FullWeek.png`;
+          downloadLink.href = imgData;
+          downloadLink.click();
+
+          document.body.removeChild(tempContainer);
+        }).catch(err => {
+          console.error("PNG export error:", err);
+          document.body.removeChild(tempContainer);
+        });
       }, 350);
     }
 
