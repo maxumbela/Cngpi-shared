@@ -1310,8 +1310,15 @@
           </div>
         </div>
 
-        <!-- Publish Notice Form -->
+        <!-- Publish / Edit Notice Form -->
         <form onsubmit="handleNoticePublish(event)" style="margin-bottom: 30px;">
+          <input type="hidden" id="notice-edit-id" value="">
+
+          <h3 style="font-family: var(--font-display); font-size: 16px; color: var(--text-main); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="edit-3" style="width: 18px; height: 18px; color: #fbbf24;"></i>
+            <span id="notice-form-heading">Publish New Notice</span>
+          </h3>
+
           <div class="form-group">
             <label for="notice-title">Notice Title / Headline</label>
             <input type="text" id="notice-title" class="form-input" placeholder="e.g. 1st Semester Midterm Examination Schedule 2026" required>
@@ -1346,10 +1353,16 @@
             </label>
           </div>
 
-          <button type="submit" class="btn-submit" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);">
-            <i data-lucide="send" style="width: 18px; height: 18px;"></i>
-            <span>Publish Notice to Portal</span>
-          </button>
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <button type="submit" id="notice-submit-btn" class="btn-submit" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3); flex: 1;">
+              <i data-lucide="send" style="width: 18px; height: 18px;"></i>
+              <span id="notice-submit-btn-text">Publish Notice to Portal</span>
+            </button>
+            <button type="button" id="notice-cancel-edit-btn" class="btn-reset-default" style="display: none;" onclick="cancelNoticeEdit()">
+              <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+              <span>Cancel Edit</span>
+            </button>
+          </div>
         </form>
 
         <!-- Published Notices List Table -->
@@ -2312,9 +2325,12 @@
     }
 
     // ================= NOTICE BOARD MANAGEMENT =================
+    let currentAdminNotices = [];
+
     function handleNoticePublish(event) {
       event.preventDefault();
 
+      const editId = document.getElementById("notice-edit-id").value.trim();
       const title = document.getElementById("notice-title").value.trim();
       const category = document.getElementById("notice-category").value;
       const description = document.getElementById("notice-desc").value.trim();
@@ -2332,24 +2348,39 @@
         description,
         attachmentUrl,
         isPinned,
-        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
         publishedBy: ADMIN_USER
       };
 
+      if (!editId) {
+        payload.createdAt = new Date().toISOString();
+      }
+
       if (db) {
-        db.collection("notices").add(payload).then(() => {
-          showToast("Notice published successfully to Portal!", "success");
-          document.getElementById("notice-title").value = "";
-          document.getElementById("notice-desc").value = "";
-          document.getElementById("notice-attachment-url").value = "";
-          document.getElementById("notice-pin-check").checked = false;
-          loadFirestoreNotices();
-        }).catch((err) => {
-          console.error("Notice save error:", err);
-          showToast("Failed to publish notice: " + err.message, "error");
-        });
+        if (editId) {
+          // UPDATE existing notice
+          db.collection("notices").doc(editId).update(payload).then(() => {
+            showToast("Notice updated and saved successfully!", "success");
+            cancelNoticeEdit();
+            loadFirestoreNotices();
+          }).catch((err) => {
+            console.error("Notice update error:", err);
+            showToast("Failed to update notice: " + err.message, "error");
+          });
+        } else {
+          // CREATE new notice
+          db.collection("notices").add(payload).then(() => {
+            showToast("Notice published successfully to Portal!", "success");
+            cancelNoticeEdit();
+            loadFirestoreNotices();
+          }).catch((err) => {
+            console.error("Notice save error:", err);
+            showToast("Failed to publish notice: " + err.message, "error");
+          });
+        }
       } else {
         showToast("Database offline. Notice validated!", "success");
+        cancelNoticeEdit();
       }
     }
 
@@ -2364,23 +2395,24 @@
 
         if (snapshot.empty) {
           tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">No published notices found. Create your first notice above.</td></tr>`;
+          currentAdminNotices = [];
           return;
         }
 
-        let noticesList = [];
+        currentAdminNotices = [];
         snapshot.forEach((doc) => {
-          noticesList.push({ id: doc.id, ...doc.data() });
+          currentAdminNotices.push({ id: doc.id, ...doc.data() });
         });
 
         // Sort: Pinned items FIRST, then newest createdAt
-        noticesList.sort((a, b) => {
+        currentAdminNotices.sort((a, b) => {
           const aPinned = a.isPinned ? 1 : 0;
           const bPinned = b.isPinned ? 1 : 0;
           if (aPinned !== bPinned) return bPinned - aPinned;
           return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
         });
 
-        noticesList.forEach((notice) => {
+        currentAdminNotices.forEach((notice) => {
           const tr = document.createElement("tr");
           const dateStr = notice.createdAt ? new Date(notice.createdAt).toLocaleDateString() : 'Recently';
 
@@ -2404,7 +2436,10 @@
             </td>
             <td style="font-size: 12px; color: var(--text-muted);">${dateStr}</td>
             <td style="text-align: right;">
-              <button type="button" class="btn-action-icon" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3);" title="${notice.isPinned ? 'Unpin Notice' : 'Pin Notice to Top'}" onclick="toggleNoticePin('${notice.id}', ${notice.isPinned === true})">
+              <button type="button" class="btn-action-icon btn-action-view" style="background: rgba(99, 102, 241, 0.15); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3);" title="Edit / Change Notice" onclick="editNoticeDoc('${notice.id}')">
+                <i data-lucide="edit-3" style="width: 15px; height: 15px;"></i>
+              </button>
+              <button type="button" class="btn-action-icon" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); margin-left: 4px;" title="${notice.isPinned ? 'Unpin Notice' : 'Pin Notice to Top'}" onclick="toggleNoticePin('${notice.id}', ${notice.isPinned === true})">
                 <i data-lucide="${notice.isPinned ? 'pin-off' : 'pin'}" style="width: 15px; height: 15px;"></i>
               </button>
               <button type="button" class="btn-action-icon btn-action-delete" title="Delete Notice" onclick="deleteNoticeDoc('${notice.id}')">
@@ -2418,6 +2453,39 @@
       }, (err) => {
         console.error("Firestore notices error:", err);
       });
+    }
+
+    // Edit Notice Pre-fill Form
+    function editNoticeDoc(docId) {
+      const notice = currentAdminNotices.find(n => n.id === docId);
+      if (!notice) return;
+
+      document.getElementById("notice-edit-id").value = notice.id;
+      document.getElementById("notice-title").value = notice.title || "";
+      document.getElementById("notice-category").value = notice.category || "Academic";
+      document.getElementById("notice-desc").value = notice.description || "";
+      document.getElementById("notice-attachment-url").value = notice.attachmentUrl || "";
+      document.getElementById("notice-pin-check").checked = notice.isPinned === true;
+
+      document.getElementById("notice-form-heading").textContent = `Edit Notice: ${notice.title}`;
+      document.getElementById("notice-submit-btn-text").textContent = "Update & Save Notice Changes";
+      document.getElementById("notice-cancel-edit-btn").style.display = "inline-flex";
+
+      window.scrollTo({ top: 400, behavior: 'smooth' });
+      showToast("Notice loaded into form. Modify and click Update!", "success");
+    }
+
+    // Cancel Notice Edit Mode
+    function cancelNoticeEdit() {
+      document.getElementById("notice-edit-id").value = "";
+      document.getElementById("notice-title").value = "";
+      document.getElementById("notice-desc").value = "";
+      document.getElementById("notice-attachment-url").value = "";
+      document.getElementById("notice-pin-check").checked = false;
+
+      document.getElementById("notice-form-heading").textContent = "Publish New Notice";
+      document.getElementById("notice-submit-btn-text").textContent = "Publish Notice to Portal";
+      document.getElementById("notice-cancel-edit-btn").style.display = "none";
     }
 
     // Toggle Pin / Unpin Notice
@@ -2436,7 +2504,7 @@
       });
     }
 
-    // Delete Notice Document
+    // Delete / Remove Notice Document
     function deleteNoticeDoc(docId) {
       if (!confirm("Are you sure you want to delete this notice?")) return;
 
