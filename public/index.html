@@ -720,6 +720,35 @@
       color: #f1f5f9;
     }
 
+    /* Exam Routine Department Tabs */
+    .exam-dept-bar {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      margin-bottom: 12px;
+    }
+
+    .exam-dept-btn {
+      padding: 6px 14px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .exam-dept-btn.active {
+      background: linear-gradient(135deg, #ef4444 0%, #f43f5e 100%);
+      border-color: #ef4444;
+      color: #ffffff;
+      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.35);
+    }
+
     .teacher-info-text p {
       font-size: 11px;
       color: var(--text-muted);
@@ -1395,48 +1424,56 @@
 
     <!-- Exam Routine Modal -->
     <div class="modal-overlay" id="exam-routine-modal">
-      <div class="modal-card" style="max-width: 520px; border: 1.5px solid rgba(239, 68, 68, 0.65); box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 25px rgba(239, 68, 68, 0.35);">
+      <div class="modal-card" style="max-width: 680px; width: 95%; border: 1.5px solid rgba(239, 68, 68, 0.65); box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 25px rgba(239, 68, 68, 0.35);">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
           <div style="display: flex; align-items: center; gap: 12px;">
             <div class="icon-shape icon-exam" style="width: 44px; height: 44px; border-radius: 16px;">
               <i data-lucide="file-text" style="width: 24px; height: 24px;"></i>
             </div>
             <div>
-              <h3 style="font-family: var(--font-display); font-size: 19px; font-weight: 800; color: #fff; margin: 0;">Exam Routine</h3>
-              <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Mid-Term & Semester Final Timetable</p>
+              <h3 style="font-family: var(--font-display); font-size: 19px; font-weight: 800; color: #fff; margin: 0;">Exam Routine & Schedule</h3>
+              <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Subject Name, Code, Exam Date & Time Schedule</p>
             </div>
           </div>
           <button type="button" class="btn-secondary-action" onclick="closeExamRoutineModal()" style="border: none; background: rgba(255,255,255,0.08); width: 32px; height: 32px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center; color: white; cursor: pointer;">&times;</button>
         </div>
 
         <div style="padding-top: 4px;">
-          <div style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 16px; padding: 14px; margin-bottom: 18px; display: flex; align-items: center; gap: 12px;">
-            <i data-lucide="bell" style="width: 24px; height: 24px; color: #ef4444; flex-shrink: 0;"></i>
-            <div>
-              <h4 style="font-size: 13px; font-weight: 800; color: #ffffff; margin: 0;">Exam Schedule Update</h4>
-              <p style="font-size: 11px; color: #cbd5e1; margin-top: 3px; line-height: 1.4;">Official Board exam schedules and seat plans will be updated automatically upon publication by BTEB / Academic Board.</p>
-            </div>
+          <!-- Department Selector Bar -->
+          <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">Select Department:</div>
+          <div class="exam-dept-bar">
+            <button class="exam-dept-btn active" id="exam-dept-CST" onclick="setExamDept('CST')">CST</button>
+            <button class="exam-dept-btn" id="exam-dept-CT" onclick="setExamDept('CT')">Civil (CT)</button>
+            <button class="exam-dept-btn" id="exam-dept-ET" onclick="setExamDept('ET')">Electrical (ET)</button>
+            <button class="exam-dept-btn" id="exam-dept-ENT" onclick="setExamDept('ENT')">Electronics (ENT)</button>
+            <button class="exam-dept-btn" id="exam-dept-MT" onclick="setExamDept('MT')">Mechanical (MT)</button>
+            <button class="exam-dept-btn" id="exam-dept-AT" onclick="setExamDept('AT')">Automobile (AT)</button>
           </div>
 
-          <div style="display: flex; flex-direction: column; gap: 12px;">
-            <div style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); border-radius: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center;">
-              <div>
-                <h5 style="font-weight: 800; color: #fff; font-size: 14px; margin: 0;">Internal Mid-Term Examination</h5>
-                <p style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">Departmental Routine</p>
-              </div>
-              <span class="status-pill pill-active">Available</span>
+          <!-- Semester Selector Bar -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 8px 14px; border-radius: 14px;">
+            <div style="font-size: 12px; font-weight: 800; color: #ffffff; display: flex; align-items: center; gap: 6px;">
+              <i data-lucide="layers" style="width: 14px; height: 14px; color: #ef4444;"></i>
+              <span>Select Semester:</span>
             </div>
-
-            <div style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); border-radius: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center;">
-              <div>
-                <h5 style="font-weight: 800; color: #fff; font-size: 14px; margin: 0;">BTEB Semester Final 2026</h5>
-                <p style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">Board Examination Schedule</p>
-              </div>
-              <span class="status-pill pill-soon">Upcoming</span>
-            </div>
+            <select id="select-exam-sem" onchange="setExamSem(this.value)" style="background: rgba(22, 30, 48, 0.9); border: 1px solid rgba(239, 68, 68, 0.4); color: white; padding: 6px 12px; border-radius: 10px; font-weight: 700; font-size: 12px; outline: none;">
+              <option value="1st">1st Semester</option>
+              <option value="2nd">2nd Semester</option>
+              <option value="3rd">3rd Semester</option>
+              <option value="4th">4th Semester</option>
+              <option value="5th">5th Semester</option>
+              <option value="6th">6th Semester</option>
+              <option value="7th" selected>7th Semester</option>
+              <option value="8th">8th Semester</option>
+            </select>
           </div>
 
-          <button type="button" class="btn-primary-action" onclick="closeExamRoutineModal()" style="margin-top: 20px; width: 100%; padding: 12px; font-weight: 800; border-radius: 14px;">Close Panel</button>
+          <!-- Schedule Container -->
+          <div id="exam-schedule-container">
+            <!-- Dynamic Exam Table Rendered via JS -->
+          </div>
+
+          <button type="button" class="btn-primary-action" onclick="closeExamRoutineModal()" style="margin-top: 18px; width: 100%; padding: 12px; font-weight: 800; border-radius: 14px;">Close Schedule</button>
         </div>
       </div>
     </div>
@@ -2301,14 +2338,134 @@
       document.getElementById("coming-soon-modal").classList.remove("active");
     }
 
-    // Exam Routine Modal Handlers
+    // Exam Routine Data & Interactive Schedule Renderer
+    const SAMPLE_EXAM_SCHEDULES = {
+      "CST_7th": [
+        { date: "12 Aug 2026", day: "Wednesday", time: "10:00 AM - 1:00 PM", subject_name: "Apps Development Project", subject_code: "28574", room: "ICT Lab" },
+        { date: "14 Aug 2026", day: "Friday", time: "10:00 AM - 1:00 PM", subject_name: "Cyber Security & Ethics", subject_code: "28573", room: "S-418" },
+        { date: "17 Aug 2026", day: "Monday", time: "10:00 AM - 1:00 PM", subject_name: "Network Administration & Services", subject_code: "28572", room: "S-418" },
+        { date: "19 Aug 2026", day: "Wednesday", time: "02:00 PM - 5:00 PM", subject_name: "Project Work-II", subject_code: "28576", room: "Hardware Lab" },
+        { date: "21 Aug 2026", day: "Friday", time: "10:00 AM - 1:00 PM", subject_name: "Multimedia & Animation", subject_code: "28575", room: "ICT Lab" },
+        { date: "24 Aug 2026", day: "Monday", time: "10:00 AM - 1:00 PM", subject_name: "Digital Marketing Technique", subject_code: "28571", room: "S-418" },
+        { date: "26 Aug 2026", day: "Wednesday", time: "10:00 AM - 1:00 PM", subject_name: "Innovation & Entrepreneurship", subject_code: "25853", room: "S-418" }
+      ],
+      "CST_5th": [
+        { date: "12 Aug 2026", day: "Wednesday", time: "10:00 AM - 1:00 PM", subject_name: "Programming in Python", subject_code: "28551", room: "Software Lab" },
+        { date: "14 Aug 2026", day: "Friday", time: "10:00 AM - 1:00 PM", subject_name: "Web Development Project", subject_code: "28552", room: "ICT Lab" },
+        { date: "17 Aug 2026", day: "Monday", time: "10:00 AM - 1:00 PM", subject_name: "Operating System Application", subject_code: "28553", room: "S-312" }
+      ]
+    };
+
+    let activeExamDept = "CST";
+    let activeExamSem = "7th";
+
     function openExamRoutineModal() {
+      // Auto sync user's department and semester if available
+      const profile = getSavedUserProfile();
+      if (profile) {
+        const deptShort = getDepartmentShortCode(profile.department).toUpperCase();
+        const semClean = profile.semester.split(' ')[0] || "7th";
+        if (["CST", "CT", "ET", "ENT", "MT", "AT"].includes(deptShort)) {
+          activeExamDept = deptShort;
+        }
+        activeExamSem = semClean;
+      }
+
+      // Sync UI tabs & dropdown
+      document.querySelectorAll(".exam-dept-btn").forEach(b => b.classList.remove("active"));
+      const btn = document.getElementById(`exam-dept-${activeExamDept}`);
+      if (btn) btn.classList.add("active");
+
+      const selectSem = document.getElementById("select-exam-sem");
+      if (selectSem) selectSem.value = activeExamSem;
+
+      renderExamScheduleTable();
       document.getElementById('exam-routine-modal').classList.add('active');
       lucide.createIcons();
     }
 
     function closeExamRoutineModal() {
       document.getElementById('exam-routine-modal').classList.remove('active');
+    }
+
+    function setExamDept(dept) {
+      activeExamDept = dept;
+      document.querySelectorAll(".exam-dept-btn").forEach(b => b.classList.remove("active"));
+      const btn = document.getElementById(`exam-dept-${dept}`);
+      if (btn) btn.classList.add("active");
+      renderExamScheduleTable();
+    }
+
+    function setExamSem(sem) {
+      activeExamSem = sem;
+      renderExamScheduleTable();
+    }
+
+    function renderExamScheduleTable() {
+      const container = document.getElementById("exam-schedule-container");
+      if (!container) return;
+
+      const key = `${activeExamDept}_${activeExamSem}`;
+      const list = SAMPLE_EXAM_SCHEDULES[key] || [];
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 28px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 16px;">
+            <i data-lucide="calendar-x" style="width: 32px; height: 32px; color: var(--text-muted); margin-bottom: 8px;"></i>
+            <div style="font-weight: 700; color: #fff; font-size: 14px;">No Schedule Published</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Exam routine for ${activeExamDept} ${activeExamSem} Semester will be updated upon official BTEB publication.</div>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      let html = `
+        <div style="overflow-x: auto; max-height: 360px;">
+          <table class="week-table" style="width: 100%; border-collapse: collapse; min-width: 540px;">
+            <thead>
+              <tr style="background: rgba(239, 68, 68, 0.2); border-bottom: 1px solid rgba(239, 68, 68, 0.4);">
+                <th style="padding: 10px; text-align: left;">Date & Day</th>
+                <th style="padding: 10px; text-align: left;">Exam Time</th>
+                <th style="padding: 10px; text-align: left;">Subject Name</th>
+                <th style="padding: 10px; text-align: center;">Code</th>
+                <th style="padding: 10px; text-align: center;">Room</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+
+      list.forEach(item => {
+        html += `
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+            <td style="padding: 10px; vertical-align: middle;">
+              <div style="font-weight: 800; color: #ffffff; font-size: 12px;">${item.date}</div>
+              <div style="font-size: 10px; color: #ef4444; font-weight: 700;">${item.day}</div>
+            </td>
+            <td style="padding: 10px; vertical-align: middle;">
+              <div style="font-size: 10px; font-weight: 800; color: #a5b4fc; background: rgba(99, 102, 241, 0.15); padding: 4px 8px; border-radius: 8px; width: fit-content;">${item.time}</div>
+            </td>
+            <td style="padding: 10px; vertical-align: middle;">
+              <div style="font-weight: 800; color: #ffffff; font-size: 12px;">${item.subject_name}</div>
+            </td>
+            <td style="padding: 10px; text-align: center; vertical-align: middle;">
+              <span style="font-size: 10px; font-weight: 800; color: #f472b6; background: rgba(244, 114, 182, 0.15); padding: 4px 8px; border-radius: 8px;">${item.subject_code}</span>
+            </td>
+            <td style="padding: 10px; text-align: center; vertical-align: middle;">
+              <span style="font-size: 10px; color: var(--text-muted); font-weight: 600;">${item.room}</span>
+            </td>
+          </tr>
+        `;
+      });
+
+      html += `
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      container.innerHTML = html;
+      lucide.createIcons();
     }
 
     // Admin Panel Logic
