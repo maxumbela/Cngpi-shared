@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CNGPI Admin Console | CGPA Weight Configuration</title>
+  <title>CNGPI Admin Portal | Control Console</title>
   
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -36,12 +36,14 @@
       --color-amber: #f59e0b;
       --color-rose: #f43f5e;
       --color-cyan: #06b6d4;
+      --color-purple: #a855f7;
       
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
       
       --grad-primary: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
       --grad-emerald: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      --grad-cyan: linear-gradient(135deg, #06b6d4 0%, #0284c7 100%);
     }
 
     * {
@@ -61,17 +63,17 @@
       position: relative;
     }
 
-    /* Ambient Background Glows */
+    /* Ambient Glow Backgrounds */
     .bg-glow-top {
       position: fixed;
       top: -10%;
       left: 50%;
       transform: translateX(-50%);
-      width: 600px;
-      height: 600px;
+      width: 650px;
+      height: 650px;
       border-radius: 50%;
       background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
-      filter: blur(90px);
+      filter: blur(95px);
       z-index: 0;
       pointer-events: none;
     }
@@ -80,8 +82,8 @@
       position: fixed;
       bottom: -10%;
       right: 10%;
-      width: 500px;
-      height: 500px;
+      width: 550px;
+      height: 550px;
       border-radius: 50%;
       background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
       filter: blur(100px);
@@ -89,9 +91,9 @@
       pointer-events: none;
     }
 
-    /* Top Navigation Header */
+    /* Header Navbar */
     header {
-      background: rgba(9, 13, 22, 0.9);
+      background: rgba(9, 13, 22, 0.92);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border-color);
@@ -178,7 +180,7 @@
     /* Main Container */
     main {
       flex: 1;
-      max-width: 800px;
+      max-width: 900px;
       width: 100%;
       margin: 0 auto;
       padding: 30px 20px;
@@ -198,7 +200,7 @@
       margin-bottom: 24px;
     }
 
-    /* Login Panel */
+    /* Login Box */
     .login-container {
       max-width: 420px;
       margin: 40px auto;
@@ -250,7 +252,7 @@
       letter-spacing: 0.5px;
     }
 
-    .form-input {
+    .form-input, .form-select, .form-textarea {
       width: 100%;
       background: var(--bg-input);
       border: 1px solid var(--border-color);
@@ -260,11 +262,17 @@
       color: var(--text-main);
       outline: none;
       transition: all 0.2s ease;
+      font-family: var(--font-primary);
     }
 
-    .form-input:focus {
+    .form-select option {
+      background: #090d16;
+      color: #ffffff;
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
       border-color: var(--color-primary);
-      box-shadow: 0 0 0 3px var(--color-primary-glow);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
     }
 
     .btn-submit {
@@ -292,7 +300,7 @@
       box-shadow: 0 12px 28px rgba(99, 102, 241, 0.4);
     }
 
-    /* Admin Dashboard Panel */
+    /* Dashboard Navigation Module Tabs */
     .dashboard-panel {
       display: none;
     }
@@ -301,11 +309,65 @@
       display: block;
     }
 
+    .nav-tabs-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+
+    .nav-tabs-bar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .module-tab-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: 16px;
+      background: rgba(18, 26, 43, 0.6);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.25s ease;
+    }
+
+    .module-tab-btn:hover {
+      background: rgba(30, 41, 65, 0.8);
+      color: var(--text-main);
+    }
+
+    .module-tab-btn.active {
+      background: var(--grad-primary);
+      color: #ffffff;
+      border-color: rgba(99, 102, 241, 0.4);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+    }
+
+    .tab-badge-soon {
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: rgba(245, 158, 11, 0.2);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fbbf24;
+      text-transform: uppercase;
+    }
+
+    /* Section Header */
     .dash-section-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
       padding-bottom: 16px;
       border-bottom: 1px solid var(--border-color);
     }
@@ -317,15 +379,30 @@
     }
 
     .dash-icon-box {
-      width: 42px;
-      height: 42px;
+      width: 44px;
+      height: 44px;
       border-radius: 14px;
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      color: #34d399;
       display: flex;
       align-items: center;
       justify-content: center;
+    }
+
+    .dash-icon-box.emerald {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+    }
+
+    .dash-icon-box.cyan {
+      background: rgba(6, 182, 212, 0.15);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      color: #22d3ee;
+    }
+
+    .dash-icon-box.amber {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fbbf24;
     }
 
     .dash-title {
@@ -389,7 +466,7 @@
 
     .sem-pct-card:focus-within {
       border-color: var(--color-emerald);
-      background: rgba(10, 15, 26, 0.8);
+      background: rgba(10, 15, 26, 0.85);
       box-shadow: 0 4px 16px rgba(16, 185, 129, 0.1);
     }
 
@@ -499,6 +576,159 @@
       background: rgba(255, 255, 255, 0.1);
     }
 
+    /* Result PDF Upload Form Grid */
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 600px) {
+      .form-grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .file-drop-area {
+      border: 2px dashed rgba(6, 182, 212, 0.4);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      background: rgba(6, 182, 212, 0.05);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .file-drop-area:hover {
+      background: rgba(6, 182, 212, 0.1);
+      border-color: rgba(6, 182, 212, 0.6);
+    }
+
+    .file-drop-icon {
+      color: #22d3ee;
+      margin-bottom: 8px;
+    }
+
+    .file-drop-text {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .file-drop-subtext {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Results List Table */
+    .results-list-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      font-size: 13px;
+    }
+
+    .results-list-table th {
+      text-align: left;
+      padding: 10px 14px;
+      color: var(--text-muted);
+      font-weight: 600;
+      border-bottom: 1px solid var(--border-color);
+      background: rgba(10, 15, 26, 0.6);
+    }
+
+    .results-list-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+    }
+
+    .btn-action-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-action-view {
+      background: rgba(6, 182, 212, 0.15);
+      color: #22d3ee;
+      border: 1px solid rgba(6, 182, 212, 0.3);
+    }
+
+    .btn-action-view:hover {
+      background: rgba(6, 182, 212, 0.25);
+    }
+
+    .btn-action-delete {
+      background: rgba(244, 63, 94, 0.15);
+      color: #fb7185;
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      margin-left: 6px;
+    }
+
+    .btn-action-delete:hover {
+      background: rgba(244, 63, 94, 0.25);
+    }
+
+    /* Coming Soon Card Style */
+    .coming-soon-card {
+      text-align: center;
+      padding: 50px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .coming-soon-icon {
+      width: 70px;
+      height: 70px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.15) 100%);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fbbf24;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 30px rgba(245, 158, 11, 0.15);
+    }
+
+    .cs-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fbbf24;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .cs-title {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .cs-desc {
+      font-size: 14px;
+      color: var(--text-muted);
+      max-width: 480px;
+      line-height: 1.6;
+    }
+
     /* Toast Notification */
     .toast-popup {
       position: fixed;
@@ -552,7 +782,7 @@
     <span id="toast-msg">Settings saved!</span>
   </div>
 
-  <!-- Header -->
+  <!-- Header Navigation -->
   <header>
     <a href="index.html" class="brand-logo">
       <div class="logo-badge">CNGPI</div>
@@ -563,6 +793,10 @@
         <i data-lucide="calculator" style="width: 15px; height: 15px;"></i>
         <span>CGPA Calculator</span>
       </a>
+      <a href="index.html" class="btn-header-link">
+        <i data-lucide="external-link" style="width: 15px; height: 15px;"></i>
+        <span>Student Portal</span>
+      </a>
       <button class="btn-logout" id="btn-logout" style="display: none;" onclick="handleLogout()">
         <i data-lucide="log-out" style="width: 15px; height: 15px;"></i>
         <span>Logout</span>
@@ -572,14 +806,14 @@
 
   <main>
 
-    <!-- LOGIN PANEL -->
+    <!-- ADMIN LOGIN PANEL -->
     <div class="glass-card login-container" id="login-panel">
       <div class="login-header">
         <div class="login-icon-box">
           <i data-lucide="shield-check" style="width: 28px; height: 28px;"></i>
         </div>
-        <h2 class="login-title">Admin Login</h2>
-        <p class="login-desc">Sign in to manage BTEB CGPA Percentage Weightings</p>
+        <h2 class="login-title">Admin Portal Sign In</h2>
+        <p class="login-desc">Enter admin credentials to access the management console</p>
       </div>
 
       <form onsubmit="handleLogin(event)">
@@ -600,18 +834,43 @@
       </form>
     </div>
 
-    <!-- DASHBOARD PANEL -->
+    <!-- MAIN DASHBOARD PANEL -->
     <div class="dashboard-panel" id="dashboard-panel">
 
-      <!-- CGPA Weightings Config Card -->
-      <div class="glass-card">
+      <!-- Module Navigation Bar Tabs -->
+      <div class="nav-tabs-bar">
+        <button class="module-tab-btn active" id="tab-btn-cgpa" onclick="switchModule('cgpa')">
+          <i data-lucide="percent" style="width: 16px; height: 16px;"></i>
+          <span>CGPA Percentages</span>
+        </button>
+
+        <button class="module-tab-btn" id="tab-btn-results" onclick="switchModule('results')">
+          <i data-lucide="file-text" style="width: 16px; height: 16px;"></i>
+          <span>Result PDFs Upload</span>
+        </button>
+
+        <button class="module-tab-btn" id="tab-btn-books" onclick="switchModule('books')">
+          <i data-lucide="book-open" style="width: 16px; height: 16px;"></i>
+          <span>Book List</span>
+          <span class="tab-badge-soon">Soon</span>
+        </button>
+
+        <button class="module-tab-btn" id="tab-btn-notices" onclick="switchModule('notices')">
+          <i data-lucide="bell" style="width: 16px; height: 16px;"></i>
+          <span>Notice Board</span>
+          <span class="tab-badge-soon">Soon</span>
+        </button>
+      </div>
+
+      <!-- MODULE 1: CGPA PERCENTAGE CONFIGURATOR -->
+      <div class="glass-card module-content" id="module-cgpa">
         <div class="dash-section-header">
           <div class="dash-title-group">
-            <div class="dash-icon-box">
+            <div class="dash-icon-box emerald">
               <i data-lucide="percent" style="width: 22px; height: 22px;"></i>
             </div>
             <div>
-              <h2 class="dash-title">BTEB CGPA Percentage Weighting</h2>
+              <h2 class="dash-title">BTEB CGPA Percentage Configuration</h2>
               <p class="dash-subtitle">Configure 8-semester percentage weights for Student CGPA calculation</p>
             </div>
           </div>
@@ -641,46 +900,138 @@
         </div>
       </div>
 
-      <!-- Class Routine JSON Upload Card -->
-      <div class="glass-card">
+      <!-- MODULE 2: RESULT PDF UPLOAD & MANAGEMENT -->
+      <div class="glass-card module-content" id="module-results" style="display: none;">
         <div class="dash-section-header">
           <div class="dash-title-group">
-            <div class="dash-icon-box" style="background: rgba(99, 102, 241, 0.15); border-color: rgba(99, 102, 241, 0.3); color: #818cf8;">
-              <i data-lucide="calendar-days" style="width: 22px; height: 22px;"></i>
+            <div class="dash-icon-box cyan">
+              <i data-lucide="file-up" style="width: 22px; height: 22px;"></i>
             </div>
             <div>
-              <h2 class="dash-title">Class Routine Upload (JSON Format)</h2>
-              <p class="dash-subtitle">Upload JSON routine files or paste JSON format schedule directly to Firestore</p>
+              <h2 class="dash-title">Semester Result PDF Management</h2>
+              <p class="dash-subtitle">Upload and publish official BTEB semester exam result PDFs for CNGPI students</p>
             </div>
           </div>
         </div>
 
-        <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px;">
+        <!-- Upload Form -->
+        <form onsubmit="handleResultPdfUpload(event)" style="margin-bottom: 30px;">
           <div class="form-group">
-            <label>Select Routine JSON File from Device</label>
-            <input type="file" id="admin-routine-file-input" accept=".json" onchange="onAdminRoutineFileSelected(event)" style="display: none;">
-            <button type="button" class="btn-reset-default" onclick="document.getElementById('admin-routine-file-input').click()" style="background: rgba(99, 102, 241, 0.15); border-color: rgba(99, 102, 241, 0.3); color: white;">
-              <i data-lucide="file-up" style="width: 16px; height: 16px;"></i>
-              <span>Choose JSON File</span>
-            </button>
+            <label for="result-title">Result Title / Examination Name</label>
+            <input type="text" id="result-title" class="form-input" placeholder="e.g. 1st Semester Board Final Result 2026" required>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="result-dept">Department / Technology</label>
+              <select id="result-dept" class="form-select" required>
+                <option value="All Departments">All Departments</option>
+                <option value="Computer Science & Technology">Computer Science & Technology (CST)</option>
+                <option value="Civil Technology">Civil Technology (CT)</option>
+                <option value="Electrical Technology">Electrical Technology (ET)</option>
+                <option value="Electronics Technology">Electronics Technology (ENT)</option>
+                <option value="Mechanical Technology">Mechanical Technology (MT)</option>
+                <option value="Architecture Technology">Architecture Technology (AT)</option>
+                <option value="Telecommunication Technology">Telecommunication Technology (TNT)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="result-semester">Semester</label>
+              <select id="result-semester" class="form-select" required>
+                <option value="All Semesters">All Semesters</option>
+                <option value="1st Semester">1st Semester</option>
+                <option value="2nd Semester">2nd Semester</option>
+                <option value="3rd Semester">3rd Semester</option>
+                <option value="4th Semester">4th Semester</option>
+                <option value="5th Semester">5th Semester</option>
+                <option value="6th Semester">6th Semester</option>
+                <option value="7th Semester">7th Semester</option>
+                <option value="8th Semester">8th Semester</option>
+              </select>
+            </div>
           </div>
 
           <div class="form-group">
-            <label for="admin-routine-json-input">Or Paste Routine JSON Content</label>
-            <textarea id="admin-routine-json-input" class="form-input" style="height: 180px; font-family: monospace; font-size: 12px;" placeholder="Paste routine JSON code here..."></textarea>
+            <label>Upload PDF Document</label>
+            <input type="file" id="pdf-file-input" accept="application/pdf,.pdf" style="display: none;" onchange="onPdfFileSelected(event)">
+            <div class="file-drop-area" onclick="document.getElementById('pdf-file-input').click()">
+              <i data-lucide="upload-cloud" class="file-drop-icon" style="width: 32px; height: 32px;"></i>
+              <div class="file-drop-text" id="pdf-file-label">Click or Drag to Select Result PDF File</div>
+              <div class="file-drop-subtext">PDF files up to 10MB supported</div>
+            </div>
           </div>
+
+          <div class="form-group">
+            <label for="result-pdf-url">Or PDF Document Link (URL)</label>
+            <input type="url" id="result-pdf-url" class="form-input" placeholder="https://example.com/results/cst_1st_sem.pdf">
+          </div>
+
+          <div class="form-group">
+            <label for="result-notes">Additional Notes / Information</label>
+            <textarea id="result-notes" class="form-textarea" rows="2" placeholder="e.g. Official BTEB Gazette Publication for CNGPI Exam Center 2026"></textarea>
+          </div>
+
+          <button type="submit" class="btn-submit" style="background: var(--grad-cyan); box-shadow: 0 8px 24px rgba(6, 182, 212, 0.3);">
+            <i data-lucide="cloud-upload" style="width: 18px; height: 18px;"></i>
+            <span>Publish Result PDF to Portal</span>
+          </button>
+        </form>
+
+        <!-- Uploaded Results Table -->
+        <h3 style="font-family: var(--font-display); font-size: 16px; color: var(--text-main); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+          <i data-lucide="list" style="width: 18px; height: 18px; color: #22d3ee;"></i>
+          <span>Published Result PDFs</span>
+        </h3>
+
+        <div style="overflow-x: auto;">
+          <table class="results-list-table">
+            <thead>
+              <tr>
+                <th>Title / Exam Name</th>
+                <th>Department</th>
+                <th>Semester</th>
+                <th>Published Date</th>
+                <th style="text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="results-table-body">
+              <tr>
+                <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">No published results found. Upload your first PDF above.</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="admin-actions-bar">
-          <button type="button" class="btn-reset-default" onclick="loadAdminRoutinePreset()">
-            <i data-lucide="file-code" style="width: 16px; height: 16px;"></i>
-            <span>Load CST 7/2 Preset</span>
-          </button>
-          <button type="button" class="btn-save-config" onclick="uploadRoutineToFirestore()" style="background: var(--grad-primary); box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);">
-            <i data-lucide="upload-cloud" style="width: 18px; height: 18px;"></i>
-            <span>Upload Routine to Firestore</span>
-          </button>
+      </div>
+
+      <!-- MODULE 3: BOOK LIST MANAGEMENT (COMING SOON) -->
+      <div class="glass-card module-content" id="module-books" style="display: none;">
+        <div class="coming-soon-card">
+          <div class="coming-soon-icon">
+            <i data-lucide="book-open" style="width: 34px; height: 34px;"></i>
+          </div>
+          <div class="cs-badge">
+            <i data-lucide="clock" style="width: 13px; height: 13px;"></i>
+            <span>Feature Coming Soon</span>
+          </div>
+          <h2 class="cs-title">Book List & Syllabus Manager</h2>
+          <p class="cs-desc">The admin interface for managing BTEB department book lists, subject credits, and syllabus downloads is currently under active development and will be available in the upcoming release.</p>
+        </div>
+      </div>
+
+      <!-- MODULE 4: NOTICE BOARD MANAGEMENT (COMING SOON) -->
+      <div class="glass-card module-content" id="module-notices" style="display: none;">
+        <div class="coming-soon-card">
+          <div class="coming-soon-icon" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.15) 0%, rgba(99, 102, 241, 0.15) 100%); border-color: rgba(168, 85, 247, 0.3); color: #c084fc; box-shadow: 0 10px 30px rgba(168, 85, 247, 0.15);">
+            <i data-lucide="bell" style="width: 34px; height: 34px;"></i>
+          </div>
+          <div class="cs-badge" style="background: rgba(168, 85, 247, 0.15); border-color: rgba(168, 85, 247, 0.3); color: #c084fc;">
+            <i data-lucide="clock" style="width: 13px; height: 13px;"></i>
+            <span>Feature Coming Soon</span>
+          </div>
+          <h2 class="cs-title">Campus Notice Board Manager</h2>
+          <p class="cs-desc">The admin interface for publishing, pinning, and broadcasting campus notices, exam schedules, and academic alerts is currently under active development and will be available in the upcoming release.</p>
         </div>
       </div>
 
@@ -704,8 +1055,9 @@
     ];
 
     let currentWeights = [...BTEB_DEFAULT_WEIGHTS];
+    let selectedPdfDataUrl = "";
 
-    // Firebase Initialization
+    // Firebase Setup
     let db;
     try {
       const firebaseConfig = {
@@ -730,7 +1082,7 @@
       checkAuth();
     });
 
-    // Check Auth State
+    // Check Authentication State
     function checkAuth() {
       const isLoggedIn = sessionStorage.getItem("adminLoggedIn") === "true";
       const loginPanel = document.getElementById("login-panel");
@@ -742,6 +1094,7 @@
         dashPanel.classList.add("active");
         btnLogout.style.display = "flex";
         loadFirestoreWeights();
+        loadFirestoreResults();
       } else {
         loginPanel.style.display = "block";
         dashPanel.classList.remove("active");
@@ -765,14 +1118,28 @@
       }
     }
 
-    // Handle Logout
+    // Handle Admin Logout
     function handleLogout() {
       sessionStorage.removeItem("adminLoggedIn");
       showToast("Logged out successfully.", "success");
       checkAuth();
     }
 
-    // Load Live Weights from Firestore
+    // Switch Admin Navigation Tab Modules
+    function switchModule(modKey) {
+      document.querySelectorAll(".module-tab-btn").forEach(btn => btn.classList.remove("active"));
+      document.querySelectorAll(".module-content").forEach(card => card.style.display = "none");
+
+      const targetBtn = document.getElementById(`tab-btn-${modKey}`);
+      const targetCard = document.getElementById(`module-${modKey}`);
+
+      if (targetBtn) targetBtn.classList.add("active");
+      if (targetCard) targetCard.style.display = "block";
+
+      lucide.createIcons();
+    }
+
+    // Load Live CGPA Weights from Firestore
     function loadFirestoreWeights() {
       if (!db) {
         renderInputGrid();
@@ -782,7 +1149,6 @@
       db.collection("settings").doc("cgpa_weights").get().then((doc) => {
         if (doc.exists && doc.data().weights && Array.isArray(doc.data().weights)) {
           currentWeights = doc.data().weights;
-          showToast("Loaded percentage settings from Firestore!", "success");
         } else {
           currentWeights = [...BTEB_DEFAULT_WEIGHTS];
         }
@@ -794,7 +1160,7 @@
       });
     }
 
-    // Render Input Grid
+    // Render CGPA Input Grid
     function renderInputGrid() {
       const container = document.getElementById("pct-inputs-container");
       container.innerHTML = "";
@@ -831,7 +1197,7 @@
       lucide.createIcons();
     }
 
-    // On Input Weight Change
+    // On Weight Input Changed
     function onWeightInputChanged(idx, valStr) {
       let val = parseFloat(valStr);
       if (isNaN(val)) val = 0;
@@ -839,7 +1205,7 @@
       updateTotalPill();
     }
 
-    // Update Total Percentage Indicator Pill
+    // Update Total Percentage Pill Indicator
     function updateTotalPill() {
       const total = currentWeights.reduce((acc, curr) => acc + (parseFloat(curr) || 0), 0);
       const pill = document.getElementById("total-pct-pill");
@@ -862,7 +1228,7 @@
     function resetToBTEBDefaults() {
       currentWeights = [...BTEB_DEFAULT_WEIGHTS];
       renderInputGrid();
-      showToast("Reset to standard BTEB Prabidhan percentages (5%, 5%, 5%, 10%, 15%, 20%, 25%, 15%)", "success");
+      showToast("Reset to standard BTEB Prabidhan percentages", "success");
     }
 
     // Save CGPA Weights to Cloud Firestore
@@ -893,147 +1259,126 @@
       });
     }
 
-    // Default CST 7/2 Routine Preset Data
-    const CST_7_2_ROUTINE_PRESET = {
-      "id": "cst_7_2",
-      "group_short_code": "CST 7/2",
-      "institute": "Chapainawabganj Polytechnic Institute",
-      "semester": "Seventh Semester Class Routine 2026",
-      "department": "Computer Science & Technology (Second Shift)",
-      "total_load": 26,
-      "time_slots": {
-        "1st": "1:30PM-2:15PM", "2nd": "2:15PM-3:00PM", "3rd": "3:00PM-3:45PM",
-        "4th": "3:45PM-4:30PM", "5th": "4:30PM-5:15PM", "6th": "5:15PM-6:00PM", "7th": "6:00PM-6:45PM"
-      },
-      "weekly_schedule": {
-        "Sunday": [
-          { "period": "1st & 2nd", "time": "1:30PM-3:00PM", "subject_name": "Project Work-II", "subject_code": "28576", "teacher_short_code": "AbM", "room": "Hardware Lab" },
-          { "period": "3rd & 4th", "time": "3:00PM-4:30PM", "subject_name": "Apps Development Project", "subject_code": "28574", "teacher_short_code": "IH", "room": "ICT Lab" },
-          { "period": "5th", "time": "4:30PM-5:15PM", "subject_name": "Digital Marketing Technique", "subject_code": "28571", "teacher_short_code": "KA", "room": "S-418" },
-          { "period": "6th", "time": "5:15PM-6:00PM", "subject_name": "Cyber Security & Ethics", "subject_code": "28573", "teacher_short_code": "AbM", "room": "S-418" },
-          { "period": "7th", "time": "6:00PM-6:45PM", "subject_name": null, "subject_code": null, "teacher_short_code": null, "room": "-" }
-        ],
-        "Monday": [
-          { "period": "1st", "time": "1:30PM-2:15PM", "subject_name": null, "subject_code": null, "teacher_short_code": null, "room": "-" },
-          { "period": "2nd", "time": "2:15PM-3:00PM", "subject_name": "Cyber Security & Ethics", "subject_code": "28573", "teacher_short_code": "AbM", "room": "S-418" },
-          { "period": "3rd", "time": "3:00PM-3:45PM", "subject_name": "Network Administration & Services", "subject_code": "28572", "teacher_short_code": "JR", "room": "S-418" },
-          { "period": "4th & 5th", "time": "3:45PM-5:15PM", "subject_name": "Digital Marketing Technique", "subject_code": "28571", "teacher_short_code": "KA", "room": "ICT Lab" },
-          { "period": "6th", "time": "5:15PM-6:00PM", "subject_name": "Multimedia & Animation", "subject_code": "28575", "teacher_short_code": "ZI", "room": "S-418" },
-          { "period": "7th", "time": "6:00PM-6:45PM", "subject_name": null, "subject_code": null, "teacher_short_code": null, "room": "-" }
-        ],
-        "Tuesday": [
-          { "period": "1st", "time": "1:30PM-2:15PM", "subject_name": null, "subject_code": null, "teacher_short_code": null, "room": "-" },
-          { "period": "2nd", "time": "2:15PM-3:00PM", "subject_name": "Innovation & Entrepreneurship", "subject_code": "25853", "teacher_short_code": "HA", "room": "S-418" },
-          { "period": "3rd & 4th", "time": "3:00PM-4:30PM", "subject_name": "Cyber Security & Ethics", "subject_code": "28573", "teacher_short_code": "AbM", "room": "Software Lab" },
-          { "period": "5th", "time": "4:30PM-5:15PM", "subject_name": "Network Administration & Services", "subject_code": "28572", "teacher_short_code": "JR", "room": "S-418" },
-          { "period": "6th & 7th", "time": "5:15PM-6:45PM", "subject_name": null, "subject_code": null, "teacher_short_code": null, "room": "-" }
-        ],
-        "Wednesday": [
-          { "period": "1st", "time": "1:30PM-2:15PM", "subject_name": "Network Administration & Services", "subject_code": "28572", "teacher_short_code": "JR", "room": "S-418" },
-          { "period": "2nd & 3rd", "time": "2:15PM-3:45PM", "subject_name": "Project Work-II", "subject_code": "28576", "teacher_short_code": "AbM", "room": "Hardware Lab" },
-          { "period": "4th", "time": "3:45PM-4:30PM", "subject_name": "Innovation & Entrepreneurship", "subject_code": "25853", "teacher_short_code": "HA", "room": "S-418" },
-          { "period": "5th, 6th & 7th", "time": "4:30PM-6:45PM", "subject_name": "Multimedia & Animation", "subject_code": "28575", "teacher_short_code": "ZI", "room": "ICT Lab" }
-        ],
-        "Thursday": [
-          { "period": "1st", "time": "1:30PM-2:15PM", "subject_name": "Digital Marketing Technique", "subject_code": "28571", "teacher_short_code": "KA", "room": "S-418" },
-          { "period": "2nd & 3rd", "time": "2:15PM-3:45PM", "subject_name": "Network Administration & Services", "subject_code": "28572", "teacher_short_code": "JR", "room": "Hardware Lab" },
-          { "period": "4th", "time": "3:45PM-4:30PM", "subject_name": "Apps Development Project", "subject_code": "28574", "teacher_short_code": "IH", "room": "S-418" },
-          { "period": "5th", "time": "4:30PM-5:15PM", "subject_name": "Multimedia & Animation", "subject_code": "28575", "teacher_short_code": "ZI", "room": "S-418" },
-          { "period": "6th & 7th", "time": "5:15PM-6:45PM", "subject_name": null, "subject_code": null, "teacher_short_code": null, "room": "-" }
-        ]
-      },
-      "teachers_details": [
-        { "short_code": "JR", "name": "Md. Jewel Rana", "designation": "Instructor (Tech/Computer)", "phone_no": "01732755176", "role": "Class Teacher" },
-        { "short_code": "HA", "name": "Hakimin Ahmed", "designation": "Part-Time Teacher (Electronics)", "phone_no": "01759731841", "role": null },
-        { "short_code": "AbM", "name": "Md. Abdul Malek", "designation": "Instructor (Tech/Computer)", "phone_no": "01314851894", "role": null },
-        { "short_code": "IH", "name": "Md. Idul Hasan Jony", "designation": "Part-Time Teacher (Computer)", "phone_no": "01791008770", "role": null },
-        { "short_code": "KA", "name": "Md. Kausar Ali", "designation": "Jr. Instructor (Tech/Computer)", "phone_no": "01753038380", "role": null },
-        { "short_code": "ZI", "name": "ZAHIDUL ISLAM", "designation": "Jr. Instructor (Tech/Computer)", "phone_no": "01738628365", "role": null }
-      ]
-    };
-
-    function onAdminRoutineFileSelected(event) {
+    // Handle Result PDF File Selection
+    function onPdfFileSelected(event) {
       const file = event.target.files[0];
       if (!file) return;
+
+      if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
+        showToast("Please select a valid PDF document file.", "error");
+        return;
+      }
+
       const reader = new FileReader();
       reader.onload = function(e) {
-        document.getElementById("admin-routine-json-input").value = e.target.result;
-        showToast(`Loaded file: ${file.name}`, "success");
+        selectedPdfDataUrl = e.target.result;
+        document.getElementById("pdf-file-label").textContent = `Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+        showToast("PDF file attached successfully!", "success");
       };
-      reader.readAsText(file);
+      reader.readAsDataURL(file);
     }
 
-    function loadAdminRoutinePreset() {
-      document.getElementById("admin-routine-json-input").value = JSON.stringify(CST_7_2_ROUTINE_PRESET, null, 2);
-      showToast("Loaded CST 7/2 Routine JSON preset", "success");
-    }
+    // Publish Result PDF to Cloud Firestore
+    function handleResultPdfUpload(event) {
+      event.preventDefault();
 
-    function getDeptCode(deptString) {
-      if (!deptString) return "cst";
-      const str = deptString.toLowerCase();
-      if (str.includes("computer") || str.includes("cst")) return "cst";
-      if (str.includes("civil") || str.includes("ct")) return "ct";
-      if (str.includes("electrical") || str.includes("et")) return "et";
-      if (str.includes("electronics") || str.includes("ent")) return "ent";
-      if (str.includes("mechanical") || str.includes("mt")) return "mt";
-      if (str.includes("architecture") || str.includes("at")) return "at";
-      if (str.includes("telecommunication") || str.includes("tnt")) return "tnt";
-      return deptString.substring(0, 3).toLowerCase();
-    }
+      const title = document.getElementById("result-title").value.trim();
+      const department = document.getElementById("result-dept").value;
+      const semester = document.getElementById("result-semester").value;
+      const urlInput = document.getElementById("result-pdf-url").value.trim();
+      const notes = document.getElementById("result-notes").value.trim();
 
-    async function uploadRoutineToFirestore() {
-      const jsonText = document.getElementById("admin-routine-json-input").value.trim();
-      if (!jsonText) {
-        showToast("Please select a JSON file or paste routine JSON content.", "error");
+      const pdfUrl = selectedPdfDataUrl || urlInput;
+
+      if (!title || !pdfUrl) {
+        showToast("Please enter exam title and select a PDF file or URL.", "error");
         return;
       }
 
-      let parsedRoutine;
-      try {
-        parsedRoutine = JSON.parse(jsonText);
-      } catch (err) {
-        showToast("Invalid JSON format. Check syntax!", "error");
-        return;
-      }
+      const payload = {
+        title,
+        department,
+        semester,
+        pdfUrl,
+        notes,
+        createdAt: new Date().toISOString(),
+        publishedBy: ADMIN_USER
+      };
 
-      // Auto-extract Document ID (e.g. cst_7_2)
-      let docId = parsedRoutine.id;
-      if (!docId && parsedRoutine.group_short_code) {
-        docId = parsedRoutine.group_short_code
-          .toLowerCase()
-          .replace(/[^a-z0-9]/g, '_')
-          .replace(/_+/g, '_')
-          .replace(/^_|_$/g, '');
-      }
-
-      if (!docId && parsedRoutine.department) {
-        const deptShort = getDeptCode(parsedRoutine.department);
-        const semNum = (parsedRoutine.semester || '').replace(/[^0-9]/g, '') || '1';
-        const shiftNum = (parsedRoutine.department || '').includes('Second') ? '2' : '1';
-        docId = `${deptShort}_${semNum}_${shiftNum}`;
-      }
-
-      if (!docId) {
-        docId = "cst_7_2";
-      }
-
-      parsedRoutine.id = docId;
-
-      if (!db) {
-        showToast(`Validated routine '${docId}' (Database offline)`, "success");
-        return;
-      }
-
-      try {
-        await db.collection("routines").doc(docId).set(parsedRoutine);
-        showToast(`Routine '${docId}' uploaded successfully to Firestore!`, "success");
-      } catch (err) {
-        console.error("Firestore upload error:", err);
-        showToast("Failed to upload routine: " + err.message, "error");
+      if (db) {
+        db.collection("results").add(payload).then(() => {
+          showToast("Result PDF published successfully to Firestore!", "success");
+          document.getElementById("result-title").value = "";
+          document.getElementById("result-pdf-url").value = "";
+          document.getElementById("result-notes").value = "";
+          document.getElementById("pdf-file-label").textContent = "Click or Drag to Select Result PDF File";
+          selectedPdfDataUrl = "";
+          loadFirestoreResults();
+        }).catch((err) => {
+          console.error("Result save error:", err);
+          showToast("Failed to publish result PDF.", "error");
+        });
+      } else {
+        showToast("Database offline. Result created in memory.", "success");
       }
     }
 
-    // Toast Function
+    // Load Published Results List
+    function loadFirestoreResults() {
+      if (!db) return;
+
+      db.collection("results").orderBy("createdAt", "desc").get().then((snapshot) => {
+        const tbody = document.getElementById("results-table-body");
+        tbody.innerHTML = "";
+
+        if (snapshot.empty) {
+          tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">No published results found. Upload your first PDF above.</td></tr>`;
+          return;
+        }
+
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          const tr = document.createElement("tr");
+          const dateStr = new Date(data.createdAt || Date.now()).toLocaleDateString();
+
+          tr.innerHTML = `
+            <td style="font-weight: 700;">${data.title}</td>
+            <td>${data.department}</td>
+            <td>${data.semester}</td>
+            <td>${dateStr}</td>
+            <td style="text-align: right;">
+              <a href="${data.pdfUrl}" target="_blank" class="btn-action-icon btn-action-view" title="View PDF">
+                <i data-lucide="eye" style="width: 15px; height: 15px;"></i>
+              </a>
+              <button type="button" class="btn-action-icon btn-action-delete" title="Delete Result" onclick="deleteResultDoc('${doc.id}')">
+                <i data-lucide="trash-2" style="width: 15px; height: 15px;"></i>
+              </button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+        lucide.createIcons();
+      }).catch((err) => {
+        console.error("Error fetching results:", err);
+      });
+    }
+
+    // Delete Result Document
+    function deleteResultDoc(docId) {
+      if (!confirm("Are you sure you want to delete this published result PDF?")) return;
+
+      if (db) {
+        db.collection("results").doc(docId).delete().then(() => {
+          showToast("Result PDF deleted.", "success");
+          loadFirestoreResults();
+        }).catch((err) => {
+          console.error("Delete error:", err);
+          showToast("Failed to delete result PDF.", "error");
+        });
+      }
+    }
+
+    // Toast Notification Display
     function showToast(msg, type = "success") {
       const toast = document.getElementById("toast");
       const toastMsg = document.getElementById("toast-msg");
