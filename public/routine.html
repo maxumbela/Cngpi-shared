@@ -1304,13 +1304,13 @@
       lucide.createIcons();
     }
 
-    // Export / Download High-Resolution Full Week Routine PNG Image
+    // Export / Download 16:9 Anime Theme High-Resolution Routine PNG
     function exportFullWeekRoutine() {
       // 1. Switch to Full Week Grid Table view
       switchDayTab('FullWeek');
 
       const btn = document.querySelector('.btn-export-routine');
-      if (btn) btn.innerHTML = `<span>Exporting PNG...</span>`;
+      if (btn) btn.innerHTML = `<span>Generating Anime Theme PNG...</span>`;
 
       setTimeout(() => {
         const gridTable = document.querySelector(".routine-week-table-container");
@@ -1318,58 +1318,71 @@
         const deptSem = document.getElementById('info-dept-sem').textContent || 'Class Routine';
 
         if (!gridTable) {
-          if (btn) btn.innerHTML = `<i data-lucide="download" style="width: 14px; height: 14px;"></i><span>Export PNG</span>`;
+          if (btn) btn.innerHTML = `<i data-lucide="download" style="width: 14px; height: 14px;"></i><span>Export Anime PNG (16:9)</span>`;
           lucide.createIcons();
           return;
         }
 
-        // Build temporary container for high-res PNG capture
+        // Build 16:9 ratio Anime Theme Canvas Wrapper (1600x900px)
         const tempContainer = document.createElement("div");
-        tempContainer.style.cssText = "position: absolute; top: -9999px; left: -9999px; width: 1100px; padding: 32px; background: #090d16; color: #ffffff; font-family: 'Inter', sans-serif; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.6);";
+        tempContainer.style.cssText = "position: absolute; top: -9999px; left: -9999px; width: 1600px; height: 900px; background: url('assets/anime_bg.jpg') center/cover no-repeat; padding: 40px; box-sizing: border-box; font-family: 'Inter', sans-serif; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden;";
         
         tempContainer.innerHTML = `
-          <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid rgba(99, 102, 241, 0.4); padding-bottom: 20px; margin-bottom: 24px;">
-            <div>
-              <div style="font-size: 11px; font-weight: 800; color: #818cf8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Chapainawabganj Polytechnic Institute</div>
-              <h1 style="font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 900; color: #ffffff; margin: 0;">${groupTitle} Class Routine</h1>
-              <div style="font-size: 13px; color: #94a3b8; margin-top: 4px;">${deptSem}</div>
+          <div style="background: rgba(9, 13, 22, 0.84); backdrop-filter: blur(24px); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 24px; padding: 28px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);">
+            
+            <!-- Anime Header Bar -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid rgba(168, 85, 247, 0.4); padding-bottom: 16px; margin-bottom: 16px;">
+              <div>
+                <div style="font-size: 11px; font-weight: 800; color: #c084fc; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px;">Chapainawabganj Polytechnic Institute • Cyber Academic Portal</div>
+                <h1 style="font-family: 'Outfit', sans-serif; font-size: 32px; font-weight: 900; color: #ffffff; margin: 0; text-shadow: 0 4px 20px rgba(168, 85, 247, 0.5);">${groupTitle} Class Routine</h1>
+                <div style="font-size: 13px; color: #94a3b8; margin-top: 4px; font-weight: 500;">${deptSem}</div>
+              </div>
+              <div style="text-align: right;">
+                <div style="background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%); color: #ffffff; padding: 10px 22px; border-radius: 16px; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 900; box-shadow: 0 8px 25px rgba(168, 85, 247, 0.4);">
+                  16:9 Anime Edition 2026
+                </div>
+              </div>
             </div>
-            <div style="text-align: right;">
-              <div style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: #ffffff; padding: 8px 18px; border-radius: 14px; font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 800;">CNGPI Official Routine 2026</div>
+
+            <!-- Routine Grid Table Container -->
+            <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+              ${gridTable.outerHTML}
             </div>
-          </div>
-          ${gridTable.outerHTML}
-          <div style="margin-top: 20px; display: flex; justify-content: space-between; font-size: 11px; color: #64748b; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px;">
-            <span>Generated from CNGPI Academic Portal</span>
-            <span>https://cngpi-edu.web.app</span>
+
+            <!-- Anime Footer Bar -->
+            <div style="margin-top: 16px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #94a3b8; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px;">
+              <span style="font-weight: 600;">CNGPI Academic Routine • Anime Edition Wallpaper</span>
+              <span style="color: #c084fc; font-weight: 700;">https://cngpi-edu.web.app</span>
+            </div>
+
           </div>
         `;
 
         document.body.appendChild(tempContainer);
 
         html2canvas(tempContainer, {
-          scale: 3, // Ultra High-Resolution 3x HD Render
-          backgroundColor: "#090d16",
+          scale: 2, // 2x scale for 3200x1800 Ultra High-Res PNG
+          backgroundColor: null,
           useCORS: true,
           logging: false
         }).then(canvas => {
           const imgData = canvas.toDataURL("image/png", 1.0);
           const downloadLink = document.createElement("a");
           const safeName = groupTitle.replace(/[^a-z0-9]/gi, '_');
-          downloadLink.download = `CNGPI_Routine_${safeName}_FullWeek.png`;
+          downloadLink.download = `CNGPI_Routine_${safeName}_16x9_AnimeTheme.png`;
           downloadLink.href = imgData;
           downloadLink.click();
 
           document.body.removeChild(tempContainer);
-          if (btn) btn.innerHTML = `<i data-lucide="download" style="width: 14px; height: 14px;"></i><span>Export PNG</span>`;
+          if (btn) btn.innerHTML = `<i data-lucide="download" style="width: 14px; height: 14px;"></i><span>Export Anime PNG (16:9)</span>`;
           lucide.createIcons();
         }).catch(err => {
-          console.error("Export error:", err);
+          console.error("Anime PNG export error:", err);
           document.body.removeChild(tempContainer);
-          if (btn) btn.innerHTML = `<i data-lucide="download" style="width: 14px; height: 14px;"></i><span>Export PNG</span>`;
+          if (btn) btn.innerHTML = `<i data-lucide="download" style="width: 14px; height: 14px;"></i><span>Export Anime PNG (16:9)</span>`;
           lucide.createIcons();
         });
-      }, 350);
+      }, 400);
     }
   </script>
 
