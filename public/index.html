@@ -535,6 +535,31 @@
       color: var(--text-muted);
     }
 
+    /* Skeleton Loading Animation Shimmer */
+    @keyframes skeletonShimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    .skeleton {
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.04) 25%, rgba(255, 255, 255, 0.14) 37%, rgba(255, 255, 255, 0.04) 63%);
+      background-size: 200% 100%;
+      animation: skeletonShimmer 1.5s infinite ease-in-out;
+      border-radius: 10px;
+    }
+
+    .skeleton-period-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
     /* Routine Screen Specific Controls */
     .routine-header-bar {
       display: flex;
@@ -2687,8 +2712,14 @@
 
       const docId = `${activeExamDept}_${activeExamSem}`;
 
-      container.innerHTML = `<div style="text-align: center; padding: 24px; color: var(--text-muted);"><i data-lucide="loader-2" class="spin" style="width: 20px; height: 20px;"></i><div style="margin-top: 6px; font-size: 11px;">Loading Exam Schedule...</div></div>`;
-      lucide.createIcons();
+      container.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 10px; padding: 12px 0;">
+          <div class="skeleton" style="width: 100%; height: 36px; border-radius: 10px;"></div>
+          <div class="skeleton" style="width: 100%; height: 36px; border-radius: 10px;"></div>
+          <div class="skeleton" style="width: 100%; height: 36px; border-radius: 10px;"></div>
+          <div class="skeleton" style="width: 100%; height: 36px; border-radius: 10px;"></div>
+        </div>
+      `;
 
       if (db) {
         db.collection("exam_routines").doc(docId).get().then(doc => {
