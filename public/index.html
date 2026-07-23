@@ -219,14 +219,33 @@
 
     /* Home View Styles */
     .hero-banner {
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(168, 85, 247, 0.15) 100%);
-      border: 1px solid var(--border-accent);
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(168, 85, 247, 0.2) 100%);
+      border: 1px solid rgba(168, 85, 247, 0.4);
       border-radius: 24px;
       padding: 22px 20px;
       margin-bottom: 24px;
       position: relative;
-      overflow: hidden;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+      overflow: visible;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+      z-index: 1;
+    }
+
+    .hero-banner::before {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 28px;
+      background: radial-gradient(circle, rgba(168, 85, 247, 0.5) 0%, rgba(99, 102, 241, 0.35) 60%, transparent 100%);
+      filter: blur(24px);
+      opacity: 0.85;
+      z-index: -1;
+      pointer-events: none;
+      transition: all 0.3s ease;
+    }
+
+    .hero-banner:hover::before {
+      opacity: 1;
+      filter: blur(30px);
     }
 
     .banner-tag {
@@ -291,16 +310,52 @@
       justify-content: center;
       gap: 12px;
       cursor: pointer;
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
-      overflow: hidden;
+      overflow: visible;
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      z-index: 1;
+    }
+
+    .app-icon-card::before {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 26px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.5) 0%, rgba(168, 85, 247, 0.3) 70%, transparent 100%);
+      filter: blur(18px);
+      opacity: 0.6;
+      z-index: -1;
+      pointer-events: none;
+      transition: all 0.3s ease;
+    }
+
+    /* Individual Card Neon Lighting */
+    .app-icon-card:nth-child(1)::before {
+      background: radial-gradient(circle, rgba(168, 85, 247, 0.65) 0%, rgba(99, 102, 241, 0.35) 70%, transparent 100%);
+    }
+
+    .app-icon-card:nth-child(2)::before {
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.65) 0%, rgba(16, 185, 129, 0.35) 70%, transparent 100%);
+    }
+
+    .app-icon-card:nth-child(3)::before {
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.65) 0%, rgba(59, 130, 246, 0.35) 70%, transparent 100%);
+    }
+
+    .app-icon-card:nth-child(4)::before {
+      background: radial-gradient(circle, rgba(245, 158, 11, 0.65) 0%, rgba(236, 72, 153, 0.35) 70%, transparent 100%);
     }
 
     .app-icon-card:hover {
-      transform: translateY(-4px);
-      border-color: var(--border-accent);
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+      transform: translateY(-4px) scale(1.02);
+      border-color: rgba(255, 255, 255, 0.3);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.45);
+    }
+
+    .app-icon-card:hover::before {
+      opacity: 1;
+      filter: blur(24px);
     }
 
     .app-icon-card:active {
@@ -360,13 +415,32 @@
     /* Live Dhaka Clock Card */
     .dhaka-clock-card {
       background: linear-gradient(135deg, rgba(13, 19, 33, 0.95) 0%, rgba(22, 30, 48, 0.9) 100%);
-      border: 1px solid var(--border-accent);
+      border: 1px solid rgba(16, 185, 129, 0.4);
       border-radius: 24px;
       padding: 20px;
       margin-bottom: 20px;
       box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
       position: relative;
-      overflow: hidden;
+      overflow: visible;
+      z-index: 1;
+    }
+
+    .dhaka-clock-card::before {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 26px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.5) 0%, rgba(6, 182, 212, 0.3) 70%, transparent 100%);
+      filter: blur(20px);
+      opacity: 0.75;
+      z-index: -1;
+      pointer-events: none;
+      transition: all 0.3s ease;
+    }
+
+    .dhaka-clock-card:hover::before {
+      opacity: 1;
+      filter: blur(26px);
     }
 
     .dhaka-clock-card::after {
