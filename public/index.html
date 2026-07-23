@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>CNGPI Portal</title>
-  <meta name="description" content="CNGPI Mobile Responsive Student Portal">
+  <title>CNGPI Academic Portal</title>
+  <meta name="description" content="Chapainawabganj Polytechnic Institute - Mobile Responsive Student & Routine Portal">
   
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,10 +27,11 @@
       --bg-dark: #090d16;
       --bg-card: rgba(18, 26, 43, 0.75);
       --bg-card-hover: rgba(30, 41, 65, 0.85);
-      --bg-nav: rgba(13, 19, 33, 0.92);
+      --bg-nav: rgba(13, 19, 33, 0.94);
       
       --border-color: rgba(255, 255, 255, 0.08);
-      --border-accent: rgba(99, 102, 241, 0.3);
+      --border-accent: rgba(99, 102, 241, 0.35);
+      --border-live: rgba(236, 72, 153, 0.6);
       
       --color-primary: #6366f1;
       --color-primary-glow: rgba(99, 102, 241, 0.4);
@@ -39,6 +40,7 @@
       --color-emerald: #10b981;
       --color-amber: #f59e0b;
       --color-rose: #f43f5e;
+      --color-pink: #ec4899;
       
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
@@ -48,7 +50,8 @@
       --grad-result: linear-gradient(135deg, #06b6d4 0%, #0284c7 100%);
       --grad-cgpa: linear-gradient(135deg, #10b981 0%, #059669 100%);
       --grad-books: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-      --grad-card: linear-gradient(145deg, rgba(22, 30, 48, 0.8) 0%, rgba(13, 18, 30, 0.9) 100%);
+      --grad-card: linear-gradient(145deg, rgba(22, 30, 48, 0.85) 0%, rgba(13, 18, 30, 0.95) 100%);
+      --grad-live: linear-gradient(135deg, rgba(236, 72, 153, 0.25) 0%, rgba(99, 102, 241, 0.25) 100%);
     }
 
     * {
@@ -95,30 +98,30 @@
       pointer-events: none;
     }
 
-    /* Responsive Main Web Container */
+    /* Main Container */
     .web-app-container {
       width: 100%;
-      max-width: 600px;
+      max-width: 640px;
       margin: 0 auto;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       position: relative;
       z-index: 1;
-      padding-bottom: 90px;
+      padding-bottom: 95px;
     }
 
-    /* App Top Header */
+    /* Header */
     .app-header {
-      padding: 20px 20px 16px;
+      padding: 16px 20px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       position: sticky;
       top: 0;
-      background: rgba(9, 13, 22, 0.85);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      background: rgba(9, 13, 22, 0.88);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
       z-index: 50;
       border-bottom: 1px solid var(--border-color);
     }
@@ -130,9 +133,9 @@
     }
 
     .avatar {
-      width: 44px;
-      height: 44px;
-      border-radius: 16px;
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
       background: var(--grad-primary);
       display: flex;
       align-items: center;
@@ -146,7 +149,7 @@
 
     .user-info h2 {
       font-family: var(--font-display);
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 800;
       color: #ffffff;
       line-height: 1.2;
@@ -158,36 +161,60 @@
       font-weight: 500;
     }
 
-    .header-badge {
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .action-btn {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      border-radius: 12px;
+      padding: 8px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
       display: flex;
       align-items: center;
       gap: 6px;
-      padding: 6px 12px;
-      border-radius: 20px;
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid rgba(16, 185, 129, 0.25);
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--color-emerald);
+      transition: all 0.2s ease;
     }
 
-    .pulse-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--color-emerald);
-      box-shadow: 0 0 8px var(--color-emerald);
-      animation: pulse 1.5s infinite;
+    .action-btn:hover, .action-btn:active {
+      background: rgba(99, 102, 241, 0.18);
+      color: #ffffff;
+      border-color: var(--border-accent);
     }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
-    /* Content Area */
+    .btn-admin {
+      background: rgba(236, 72, 153, 0.12);
+      border-color: rgba(236, 72, 153, 0.3);
+      color: var(--color-pink);
+    }
+
+    /* Content Screens */
     .app-content {
       padding: 20px;
       flex: 1;
     }
 
-    /* Hero Banner */
+    .screen-view {
+      display: none;
+      animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .screen-view.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Home View Styles */
     .hero-banner {
       background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(168, 85, 247, 0.15) 100%);
       border: 1px solid var(--border-accent);
@@ -197,18 +224,6 @@
       position: relative;
       overflow: hidden;
       box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
-    }
-
-    .hero-banner::before {
-      content: '';
-      position: absolute;
-      top: -30%;
-      right: -20%;
-      width: 200px;
-      height: 200px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(236, 72, 153, 0.22) 0%, transparent 70%);
-      pointer-events: none;
     }
 
     .banner-tag {
@@ -238,7 +253,6 @@
       line-height: 1.5;
     }
 
-    /* Section Title */
     .section-title {
       font-family: var(--font-display);
       font-size: 17px;
@@ -256,19 +270,11 @@
       color: var(--text-muted);
     }
 
-    /* Responsive App Icons Grid */
     .app-icons-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 16px;
       margin-bottom: 24px;
-    }
-
-    @media (min-width: 500px) {
-      .app-icons-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
-      }
     }
 
     .app-icon-card {
@@ -290,7 +296,7 @@
 
     .app-icon-card:hover {
       transform: translateY(-4px);
-      border-color: var(--border-hover);
+      border-color: var(--border-accent);
       box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
     }
 
@@ -298,10 +304,9 @@
       transform: scale(0.96);
     }
 
-    /* Icon Shapes */
     .icon-shape {
-      width: 60px;
-      height: 60px;
+      width: 58px;
+      height: 58px;
       border-radius: 20px;
       display: flex;
       align-items: center;
@@ -335,19 +340,464 @@
       text-align: center;
     }
 
-    .coming-soon-pill {
+    .status-pill {
       position: absolute;
       top: 10px;
       right: 10px;
       font-size: 9px;
       font-weight: 800;
-      padding: 3px 7px;
+      padding: 3px 8px;
       border-radius: 10px;
-      background: rgba(245, 158, 11, 0.15);
-      border: 1px solid rgba(245, 158, 11, 0.3);
-      color: var(--color-amber);
       text-transform: uppercase;
       letter-spacing: 0.3px;
+    }
+    .pill-active { background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); color: var(--color-emerald); }
+    .pill-soon { background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); color: var(--color-amber); }
+
+    /* Live Dhaka Clock Card */
+    .dhaka-clock-card {
+      background: linear-gradient(135deg, rgba(13, 19, 33, 0.95) 0%, rgba(22, 30, 48, 0.9) 100%);
+      border: 1px solid var(--border-accent);
+      border-radius: 24px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .dhaka-clock-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 140px;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.08));
+      pointer-events: none;
+    }
+
+    .clock-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .clock-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 14px;
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--color-primary);
+    }
+
+    .clock-live-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--color-pink);
+    }
+
+    .pink-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-pink);
+      box-shadow: 0 0 10px var(--color-pink);
+      animation: pulsePink 1.5s infinite;
+    }
+
+    @keyframes pulsePink {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    .time-display {
+      font-family: var(--font-display);
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      color: #ffffff;
+      line-height: 1.1;
+      margin-bottom: 4px;
+      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    .date-display {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .current-class-alert {
+      margin-top: 14px;
+      padding: 10px 14px;
+      border-radius: 14px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--color-emerald);
+    }
+
+    .current-class-alert.no-class {
+      background: rgba(148, 163, 184, 0.1);
+      border-color: rgba(148, 163, 184, 0.2);
+      color: var(--text-muted);
+    }
+
+    /* Routine Screen Specific Controls */
+    .routine-header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      gap: 10px;
+    }
+
+    .routine-meta-pill {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.06);
+      padding: 8px 14px;
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Toggle View (Daily vs Full Week) */
+    .routine-view-toggle {
+      display: flex;
+      background: rgba(13, 19, 33, 0.8);
+      padding: 4px;
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 16px;
+    }
+
+    .toggle-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 12px;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: var(--font-display);
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .toggle-btn.active {
+      background: var(--grad-primary);
+      color: #ffffff;
+      box-shadow: 0 4px 15px var(--color-primary-glow);
+    }
+
+    /* Day Selector Tabs (Sunday - Thursday) */
+    .day-tabs-scroll {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 16px;
+      scrollbar-width: none;
+    }
+    .day-tabs-scroll::-webkit-scrollbar { display: none; }
+
+    .day-tab-btn {
+      padding: 8px 16px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .day-tab-btn.active {
+      background: rgba(99, 102, 241, 0.2);
+      border-color: var(--color-primary);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+    }
+
+    .day-tab-btn.is-today {
+      border-color: var(--color-pink);
+      color: var(--color-pink);
+    }
+
+    .day-tab-btn.active.is-today {
+      background: var(--color-pink);
+      color: white;
+      border-color: var(--color-pink);
+    }
+
+    /* Routine Class Cards List */
+    .class-cards-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .class-card {
+      background: var(--grad-card);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 16px 18px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .class-card.is-live {
+      border: 2px solid var(--color-pink);
+      background: var(--grad-live);
+      box-shadow: 0 8px 25px rgba(236, 72, 153, 0.35);
+      animation: glowBorder 2s infinite ease-in-out;
+    }
+
+    @keyframes glowBorder {
+      0%, 100% { box-shadow: 0 8px 25px rgba(236, 72, 153, 0.35); }
+      50% { box-shadow: 0 12px 35px rgba(236, 72, 153, 0.6); }
+    }
+
+    .class-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .period-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 10px;
+      background: rgba(99, 102, 241, 0.15);
+      color: var(--color-primary);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+
+    .time-slot-badge {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .live-badge {
+      background: var(--color-pink);
+      color: white;
+      font-size: 10px;
+      font-weight: 900;
+      padding: 3px 8px;
+      border-radius: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .class-title {
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 6px;
+    }
+
+    .class-meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .teacher-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 12px;
+      border-top: 1px dashed rgba(255, 255, 255, 0.1);
+    }
+
+    .teacher-info-text h5 {
+      font-size: 13px;
+      font-weight: 700;
+      color: #f1f5f9;
+    }
+
+    .teacher-info-text p {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .btn-call-teacher {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 13px;
+      border-radius: 12px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: var(--color-emerald);
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 800;
+      transition: all 0.2s ease;
+    }
+
+    .btn-call-teacher:hover, .btn-call-teacher:active {
+      background: var(--color-emerald);
+      color: #ffffff;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+    }
+
+    /* Off / Free Period Card */
+    .class-card.off-period {
+      opacity: 0.65;
+      border-style: dashed;
+    }
+
+    /* Full Week Table View */
+    .full-week-table-container {
+      width: 100%;
+      overflow-x: auto;
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+      background: rgba(13, 19, 33, 0.9);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .week-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      text-align: left;
+      min-width: 600px;
+    }
+
+    .week-table th {
+      background: rgba(99, 102, 241, 0.15);
+      color: #ffffff;
+      padding: 12px 10px;
+      font-family: var(--font-display);
+      font-weight: 800;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .week-table td {
+      padding: 10px;
+      border-bottom: 1px solid var(--border-color);
+      border-right: 1px solid rgba(255, 255, 255, 0.04);
+      vertical-align: top;
+    }
+
+    .table-cell-content {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .table-sub-name {
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .table-sub-code {
+      font-size: 10px;
+      color: var(--color-primary);
+    }
+
+    .table-room {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    /* Routine Not Available Screen */
+    .not-available-card {
+      background: var(--grad-card);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      border-radius: 28px;
+      padding: 36px 24px;
+      text-align: center;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .not-available-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 24px;
+      background: rgba(244, 63, 94, 0.15);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      color: var(--color-rose);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+    }
+
+    .not-available-card h3 {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 10px;
+    }
+
+    .not-available-card p {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .btn-switch-profile {
+      padding: 12px 20px;
+      border-radius: 14px;
+      border: none;
+      background: var(--grad-primary);
+      color: white;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 13px;
+      cursor: pointer;
+      box-shadow: 0 8px 20px var(--color-primary-glow);
     }
 
     /* Fixed Bottom Navigation Bar */
@@ -357,7 +807,7 @@
       left: 50%;
       transform: translateX(-50%);
       width: 100%;
-      max-width: 600px;
+      max-width: 640px;
       height: 76px;
       background: var(--bg-nav);
       backdrop-filter: blur(20px);
@@ -407,7 +857,7 @@
       letter-spacing: 0.2px;
     }
 
-    /* Coming Soon Modal Overlay */
+    /* Modals Overlay */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -421,7 +871,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 24px;
+      padding: 20px;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -434,14 +884,15 @@
 
     .modal-card {
       width: 100%;
-      max-width: 400px;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
       background: var(--grad-card);
       border: 1px solid var(--border-accent);
-      border-radius: 32px;
-      padding: 32px 24px;
-      text-align: center;
+      border-radius: 28px;
+      padding: 28px 22px;
       box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
-      transform: scale(0.9) translateY(20px);
+      transform: scale(0.92) translateY(20px);
       transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
@@ -462,59 +913,11 @@
       color: var(--color-amber);
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      margin-bottom: 20px;
-    }
-
-    .modal-icon-box {
-      width: 72px;
-      height: 72px;
-      border-radius: 24px;
-      background: linear-gradient(135deg, #f59e0b 0%, #ec4899 100%);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 20px;
-      box-shadow: 0 12px 30px rgba(245, 158, 11, 0.35);
-    }
-
-    .modal-card h3 {
-      font-family: var(--font-display);
-      font-size: 22px;
-      font-weight: 900;
-      color: #ffffff;
-      margin-bottom: 8px;
-    }
-
-    .modal-card p {
-      font-size: 13px;
-      color: var(--text-muted);
-      line-height: 1.5;
-      margin-bottom: 24px;
-    }
-
-    .btn-modal-close {
-      width: 100%;
-      padding: 14px;
-      border-radius: 16px;
-      border: none;
-      background: var(--grad-primary);
-      color: white;
-      font-family: var(--font-display);
-      font-weight: 800;
-      font-size: 14px;
-      cursor: pointer;
-      box-shadow: 0 10px 25px var(--color-primary-glow);
-      transition: all 0.2s ease;
-    }
-
-    .btn-modal-close:active {
-      transform: scale(0.97);
-    }
-
-    /* User Selection Modal Styles */
-    .form-group {
       margin-bottom: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
       text-align: left;
     }
 
@@ -526,7 +929,7 @@
       margin-bottom: 6px;
     }
 
-    .form-input, .form-select {
+    .form-input, .form-select, .form-textarea {
       width: 100%;
       padding: 12px 14px;
       border-radius: 14px;
@@ -539,7 +942,14 @@
       transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .form-input:focus, .form-select:focus {
+    .form-textarea {
+      font-family: monospace;
+      font-size: 11px;
+      resize: vertical;
+      min-height: 180px;
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
       border-color: var(--color-primary);
       box-shadow: 0 0 12px var(--color-primary-glow);
     }
@@ -549,7 +959,7 @@
       color: #ffffff;
     }
 
-    .btn-save-profile {
+    .btn-submit-form {
       width: 100%;
       padding: 14px;
       border-radius: 16px;
@@ -565,29 +975,21 @@
       margin-top: 8px;
     }
 
-    .btn-save-profile:active {
+    .btn-submit-form:active {
       transform: scale(0.97);
     }
 
-    .profile-edit-btn {
-      background: rgba(255, 255, 255, 0.08);
+    .btn-secondary-action {
+      width: 100%;
+      padding: 10px;
+      border-radius: 14px;
       border: 1px solid var(--border-color);
-      color: var(--text-muted);
-      border-radius: 12px;
-      padding: 6px 10px;
-      font-size: 11px;
-      font-weight: 600;
+      background: rgba(255, 255, 255, 0.05);
+      color: #cbd5e1;
+      font-size: 12px;
+      font-weight: 700;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      transition: all 0.2s ease;
-    }
-
-    .profile-edit-btn:hover {
-      background: rgba(99, 102, 241, 0.15);
-      color: #ffffff;
-      border-color: var(--border-accent);
+      margin-top: 8px;
     }
   </style>
 </head>
@@ -609,71 +1011,196 @@
           <p id="header-user-details">Tap to set Dept, Sem & Shift</p>
         </div>
       </div>
-      <button class="profile-edit-btn" onclick="openUserSelectModal()">
-        <i data-lucide="user-cog" style="width: 14px; height: 14px;"></i>
-        <span>Edit Profile</span>
-      </button>
+      
+      <div class="header-actions">
+        <button class="action-btn btn-admin" onclick="openAdminModal()">
+          <i data-lucide="shield-check" style="width: 14px; height: 14px;"></i>
+          <span>Admin</span>
+        </button>
+        <button class="action-btn" onclick="openUserSelectModal()">
+          <i data-lucide="user-cog" style="width: 14px; height: 14px;"></i>
+          <span>Edit Profile</span>
+        </button>
+      </div>
     </header>
 
-    <!-- Scrollable Content Body -->
+    <!-- App Content Body -->
     <div class="app-content">
 
-      <!-- Hero Announcement Banner -->
-      <div class="hero-banner">
-        <span class="banner-tag">Welcome</span>
-        <h3>Digital Campus Hub</h3>
-        <p>Access routine schedules, exam results, CGPA tools, and syllabus book lists directly from your device.</p>
-      </div>
-
-      <!-- App Section Title -->
-      <div class="section-title">
-        <span>Campus Applications</span>
-        <span class="sub">Tap any icon</span>
-      </div>
-
-      <!-- App Icons Grid (Home Screen) -->
-      <div class="app-icons-grid">
-
-        <!-- Routine App Icon -->
-        <div class="app-icon-card" onclick="openComingSoon('Routine', 'calendar-days')">
-          <span class="coming-soon-pill">Soon</span>
-          <div class="icon-shape icon-routine">
-            <i data-lucide="calendar-days" style="width: 28px; height: 28px;"></i>
-          </div>
-          <h4>Routine</h4>
-          <p>Class Schedules</p>
+      <!-- ================= HOME SCREEN ================= -->
+      <section class="screen-view active" id="screen-home">
+        
+        <!-- Hero Announcement Banner -->
+        <div class="hero-banner">
+          <span class="banner-tag">Welcome</span>
+          <h3>CNGPI Digital Hub</h3>
+          <p>Access your class routines, live timetable, results, and CGPA tools directly from your mobile device.</p>
         </div>
 
-        <!-- Result App Icon -->
-        <div class="app-icon-card" onclick="openComingSoon('Result', 'award')">
-          <span class="coming-soon-pill">Soon</span>
-          <div class="icon-shape icon-result">
-            <i data-lucide="award" style="width: 28px; height: 28px;"></i>
+        <!-- Live Dhaka Clock Card (Home Overview) -->
+        <div class="dhaka-clock-card">
+          <div class="clock-top">
+            <span class="clock-badge">
+              <i data-lucide="globe" style="width: 12px; height: 12px;"></i>
+              <span>Dhaka Timezone</span>
+            </span>
+            <span class="clock-live-indicator">
+              <span class="pink-dot"></span>
+              <span>LIVE</span>
+            </span>
           </div>
-          <h4>Result</h4>
-          <p>Exam Performance</p>
+          <div class="time-display" id="home-live-time">12:00:00 PM</div>
+          <div class="date-display" id="home-live-date">Loading Dhaka Time...</div>
+
+          <div class="current-class-alert" id="home-current-class-box">
+            <span>Checking class schedule...</span>
+          </div>
         </div>
 
-        <!-- CGPA Calculator App Icon -->
-        <div class="app-icon-card" onclick="window.location.href='calculator.html'">
-          <div class="icon-shape icon-cgpa">
-            <i data-lucide="calculator" style="width: 28px; height: 28px;"></i>
-          </div>
-          <h4>CGPA Calculator</h4>
-          <p>Grade Estimator</p>
+        <!-- Campus Applications Grid -->
+        <div class="section-title">
+          <span>Campus Applications</span>
+          <span class="sub">Tap to open</span>
         </div>
 
-        <!-- Book List App Icon -->
-        <div class="app-icon-card" onclick="openComingSoon('Book List', 'book-open')">
-          <span class="coming-soon-pill">Soon</span>
-          <div class="icon-shape icon-books">
-            <i data-lucide="book-open" style="width: 28px; height: 28px;"></i>
+        <div class="app-icons-grid">
+
+          <!-- Routine App Icon -->
+          <div class="app-icon-card" onclick="selectNav('routine')">
+            <span class="status-pill pill-active">Available</span>
+            <div class="icon-shape icon-routine">
+              <i data-lucide="calendar-days" style="width: 28px; height: 28px;"></i>
+            </div>
+            <h4>Class Routine</h4>
+            <p>Live Timetable</p>
           </div>
-          <h4>Book List</h4>
-          <p>Syllabus & Books</p>
+
+          <!-- Result App Icon -->
+          <div class="app-icon-card" onclick="openComingSoon('Result', 'award')">
+            <span class="status-pill pill-soon">Soon</span>
+            <div class="icon-shape icon-result">
+              <i data-lucide="award" style="width: 28px; height: 28px;"></i>
+            </div>
+            <h4>Result</h4>
+            <p>Exam Performance</p>
+          </div>
+
+          <!-- CGPA Calculator App Icon -->
+          <div class="app-icon-card" onclick="window.location.href='calculator.html'">
+            <span class="status-pill pill-active">Available</span>
+            <div class="icon-shape icon-cgpa">
+              <i data-lucide="calculator" style="width: 28px; height: 28px;"></i>
+            </div>
+            <h4>CGPA Calculator</h4>
+            <p>Grade Estimator</p>
+          </div>
+
+          <!-- Book List App Icon -->
+          <div class="app-icon-card" onclick="openComingSoon('Book List', 'book-open')">
+            <span class="status-pill pill-soon">Soon</span>
+            <div class="icon-shape icon-books">
+              <i data-lucide="book-open" style="width: 28px; height: 28px;"></i>
+            </div>
+            <h4>Book List</h4>
+            <p>Syllabus & Books</p>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ================= ROUTINE SCREEN ================= -->
+      <section class="screen-view" id="screen-routine">
+
+        <!-- Live Dhaka Clock & Header for Routine -->
+        <div class="dhaka-clock-card" style="margin-bottom: 16px;">
+          <div class="clock-top">
+            <span class="clock-badge">
+              <i data-lucide="clock" style="width: 12px; height: 12px;"></i>
+              <span>Dhaka Realtime Clock</span>
+            </span>
+            <span class="clock-live-indicator">
+              <span class="pink-dot"></span>
+              <span>LIVE CLOCK</span>
+            </span>
+          </div>
+          <div class="time-display" id="routine-live-time">12:00:00 PM</div>
+          <div class="date-display" id="routine-live-date">Loading Dhaka Time...</div>
         </div>
 
-      </div>
+        <!-- Routine Target Info & Controls -->
+        <div class="routine-header-bar">
+          <div class="routine-meta-pill" id="routine-profile-badge">
+            <i data-lucide="layers" style="width: 14px; height: 14px; color: var(--color-primary);"></i>
+            <span id="routine-profile-text">CST • 7th Sem • 2nd Shift</span>
+          </div>
+
+          <button class="action-btn" onclick="fetchFirestoreRoutine()" style="padding: 8px 12px;">
+            <i data-lucide="refresh-cw" style="width: 12px; height: 12px;"></i>
+            <span>Sync</span>
+          </button>
+        </div>
+
+        <!-- Routine Available View Container -->
+        <div id="routine-available-container">
+          
+          <!-- View Switcher: Daily View vs Full Week Table -->
+          <div class="routine-view-toggle">
+            <button class="toggle-btn active" id="btn-toggle-daily" onclick="switchRoutineView('daily')">
+              <i data-lucide="calendar" style="width: 14px; height: 14px;"></i>
+              <span>Daily Routine</span>
+            </button>
+            <button class="toggle-btn" id="btn-toggle-week" onclick="switchRoutineView('week')">
+              <i data-lucide="table" style="width: 14px; height: 14px;"></i>
+              <span>Full Week Table</span>
+            </button>
+          </div>
+
+          <!-- DAILY ROUTINE SECTION -->
+          <div id="view-daily-section">
+            
+            <!-- Day Tabs Scroll -->
+            <div class="day-tabs-scroll" id="day-tabs-container">
+              <button class="day-tab-btn" onclick="selectRoutineDay('Sunday')">Sunday</button>
+              <button class="day-tab-btn" onclick="selectRoutineDay('Monday')">Monday</button>
+              <button class="day-tab-btn" onclick="selectRoutineDay('Tuesday')">Tuesday</button>
+              <button class="day-tab-btn" onclick="selectRoutineDay('Wednesday')">Wednesday</button>
+              <button class="day-tab-btn" onclick="selectRoutineDay('Thursday')">Thursday</button>
+            </div>
+
+            <!-- Class Cards Container -->
+            <div class="class-cards-list" id="class-cards-container">
+              <!-- Class cards rendered dynamically -->
+            </div>
+
+          </div>
+
+          <!-- FULL WEEK TABLE SECTION -->
+          <div id="view-week-section" style="display: none;">
+            <div class="full-week-table-container" id="full-week-table-box">
+              <!-- Full week table rendered dynamically -->
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ROUTINE NOT AVAILABLE SCREEN -->
+        <div id="routine-not-available-container" style="display: none;">
+          <div class="not-available-card">
+            <div class="not-available-icon">
+              <i data-lucide="calendar-x" style="width: 36px; height: 36px;"></i>
+            </div>
+            <h3>Routine Not Available</h3>
+            <p id="not-available-desc">
+              Class routine is not yet uploaded for your selected profile: <br>
+              <strong id="not-available-profile-name">Department • Semester • Shift</strong>.
+            </p>
+            <button class="btn-switch-profile" onclick="openUserSelectModal()">
+              Update Student Profile
+            </button>
+          </div>
+        </div>
+
+      </section>
 
     </div>
 
@@ -724,33 +1251,33 @@
 
     <!-- Coming Soon Modal -->
     <div class="modal-overlay" id="coming-soon-modal">
-      <div class="modal-card">
+      <div class="modal-card" style="text-align: center;">
         <div class="modal-badge">
           <i data-lucide="clock" style="width: 12px; height: 12px;"></i>
           <span>Coming Soon</span>
         </div>
-        <div class="modal-icon-box">
-          <i data-lucide="sparkles" id="modal-icon" style="width: 34px; height: 34px;"></i>
+        <div style="width: 64px; height: 64px; border-radius: 20px; background: var(--grad-primary); color: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+          <i data-lucide="sparkles" id="modal-icon" style="width: 32px; height: 32px;"></i>
         </div>
-        <h3 id="modal-title">Feature Coming Soon</h3>
-        <p id="modal-desc">The <strong>Routine</strong> feature is currently under active development. Stay tuned for future updates!</p>
-        <button class="btn-modal-close" onclick="closeComingSoon()">Got it</button>
+        <h3 id="modal-title" style="font-family: var(--font-display); font-size: 20px; color: white; margin-bottom: 8px;">Feature Coming Soon</h3>
+        <p id="modal-desc" style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Feature currently under development.</p>
+        <button class="btn-submit-form" onclick="closeComingSoon()">Got it</button>
       </div>
     </div>
 
-    <!-- User Selection Popup Modal -->
+    <!-- Student Profile Selection Popup Modal -->
     <div class="modal-overlay" id="user-select-modal">
       <div class="modal-card">
         <div class="modal-badge" style="background: rgba(99, 102, 241, 0.15); border-color: rgba(99, 102, 241, 0.3); color: var(--color-primary);">
           <i data-lucide="user-check" style="width: 12px; height: 12px;"></i>
           <span>Student Setup</span>
         </div>
-        <h3 style="margin-bottom: 4px;">Student Profile</h3>
-        <p style="margin-bottom: 20px;">Select your department, semester, and shift to personalize your portal.</p>
+        <h3 style="font-family: var(--font-display); font-size: 20px; color: white; margin-bottom: 4px;">Student Profile</h3>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 18px;">Select your department, semester, and shift to view your routine.</p>
         
         <form id="user-profile-form" onsubmit="saveUserProfile(event)">
           <div class="form-group">
-            <label for="input-user-name">Your Name</label>
+            <label for="input-user-name">Your Full Name</label>
             <input type="text" id="input-user-name" class="form-input" placeholder="e.g. Student Name" required>
           </div>
 
@@ -764,7 +1291,6 @@
               <option value="Electronics Technology">Electronics Technology (ENT)</option>
               <option value="Mechanical Technology">Mechanical Technology (MT)</option>
               <option value="Architecture Technology">Architecture Technology (AT)</option>
-              <option value="Telecommunication Technology">Telecommunication Technology (TNT)</option>
             </select>
           </div>
 
@@ -792,7 +1318,48 @@
             </select>
           </div>
 
-          <button type="submit" class="btn-save-profile">Save & Continue</button>
+          <button type="submit" class="btn-submit-form">Save Profile</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Admin Panel Routine Upload Modal -->
+    <div class="modal-overlay" id="admin-modal">
+      <div class="modal-card">
+        <div class="modal-badge" style="background: rgba(236, 72, 153, 0.15); border-color: rgba(236, 72, 153, 0.3); color: var(--color-pink);">
+          <i data-lucide="shield-alert" style="width: 12px; height: 12px;"></i>
+          <span>Admin Portal</span>
+        </div>
+        <h3 style="font-family: var(--font-display); font-size: 20px; color: white; margin-bottom: 4px;">Routine Upload Panel</h3>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Upload a JSON routine file or paste JSON code. Group code will be detected automatically!</p>
+
+        <form onsubmit="handleAdminRoutineUpload(event)">
+          <div class="form-group">
+            <label>Select Routine JSON File</label>
+            <input type="file" id="admin-file-input" accept=".json" onchange="handleAdminJsonFileSelect(event)" style="display: none;">
+            <button type="button" class="btn-secondary-action" onclick="document.getElementById('admin-file-input').click()" style="background: rgba(99, 102, 241, 0.15); border-color: rgba(99, 102, 241, 0.3); color: white;">
+              <i data-lucide="file-up" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle;"></i>
+              Choose JSON File from Device
+            </button>
+          </div>
+
+          <div class="form-group">
+            <label for="admin-json-input">Or Paste Routine JSON Code</label>
+            <textarea id="admin-json-input" class="form-textarea" placeholder="Paste routine JSON here..." required></textarea>
+          </div>
+
+          <button type="button" class="btn-secondary-action" onclick="loadAdminPresetJSON()">
+            <i data-lucide="file-code" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle;"></i>
+            Load Preset (CST 7/2 Routine JSON)
+          </button>
+
+          <button type="submit" class="btn-submit-form">
+            Upload to Firebase Firestore
+          </button>
+          
+          <button type="button" class="btn-secondary-action" onclick="closeAdminModal()" style="border: none; background: transparent; color: var(--text-muted);">
+            Cancel
+          </button>
         </form>
       </div>
     </div>
@@ -804,8 +1371,72 @@
     // Initialize Lucide Icons
     lucide.createIcons();
 
-    // Firebase compat setup placeholder
-    let db;
+    // Default CST 7/2 Routine JSON provided by user
+    const CST_7_2_ROUTINE = {
+      "id": "cst_7_2",
+      "group_short_code": "CST 7/2",
+      "institute": "Chapainawabganj Polytechnic Institute",
+      "semester": "Seventh Semester Class Routine 2026",
+      "department": "Computer Science & Technology (Second Shift)",
+      "total_load": 26,
+      "time_slots": {
+        "1st": "1:30PM-2:15PM",
+        "2nd": "2:15PM-3:00PM",
+        "3rd": "3:00PM-3:45PM",
+        "4th": "3:45PM-4:30PM",
+        "5th": "4:30PM-5:15PM",
+        "6th": "5:15PM-6:00PM",
+        "7th": "6:00PM-6:45PM"
+      },
+      "weekly_schedule": {
+        "Sunday": [
+          { "period": "1st & 2nd", "time": "1:30PM-3:00PM", "subject_name": "Project Work-II", "subject_code": "28576", "teacher_short_code": "AbM", "room": "Hardware Lab" },
+          { "period": "3rd & 4th", "time": "3:00PM-4:30PM", "subject_name": "Apps Development Project", "subject_code": "28574", "teacher_short_code": "IH", "room": "ICT Lab" },
+          { "period": "5th", "time": "4:30PM-5:15PM", "subject_name": "Digital Marketing Technique", "subject_code": "28571", "teacher_short_code": "KA", "room": "S-418" },
+          { "period": "6th", "time": "5:15PM-6:00PM", "subject_name": "Cyber Security & Ethics", "subject_code": "28573", "teacher_short_code": "AbM", "room": "S-418" },
+          { "period": "7th", "time": "6:00PM-6:45PM", "subject_name": null, "subject_code": null, "teacher_short_code": null, "room": "-" }
+        ],
+        "Monday": [
+          { "period": "1st", "time": "1:30PM-2:15PM", "subject_name": null, "subject_code": null, "teacher_short_code": null, "room": "-" },
+          { "period": "2nd", "time": "2:15PM-3:00PM", "subject_name": "Cyber Security & Ethics", "subject_code": "28573", "teacher_short_code": "AbM", "room": "S-418" },
+          { "period": "3rd", "time": "3:00PM-3:45PM", "subject_name": "Network Administration & Services", "subject_code": "28572", "teacher_short_code": "JR", "room": "S-418" },
+          { "period": "4th & 5th", "time": "3:45PM-5:15PM", "subject_name": "Digital Marketing Technique", "subject_code": "28571", "teacher_short_code": "KA", "room": "ICT Lab" },
+          { "period": "6th", "time": "5:15PM-6:00PM", "subject_name": "Multimedia & Animation", "subject_code": "28575", "teacher_short_code": "ZI", "room": "S-418" },
+          { "period": "7th", "time": "6:00PM-6:45PM", "subject_name": null, "subject_code": null, "teacher_short_code": null, "room": "-" }
+        ],
+        "Tuesday": [
+          { "period": "1st", "time": "1:30PM-2:15PM", "subject_name": null, "subject_code": null, "teacher_short_code": null, "room": "-" },
+          { "period": "2nd", "time": "2:15PM-3:00PM", "subject_name": "Innovation & Entrepreneurship", "subject_code": "25853", "teacher_short_code": "HA", "room": "S-418" },
+          { "period": "3rd & 4th", "time": "3:00PM-4:30PM", "subject_name": "Cyber Security & Ethics", "subject_code": "28573", "teacher_short_code": "AbM", "room": "Software Lab" },
+          { "period": "5th", "time": "4:30PM-5:15PM", "subject_name": "Network Administration & Services", "subject_code": "28572", "teacher_short_code": "JR", "room": "S-418" },
+          { "period": "6th & 7th", "time": "5:15PM-6:45PM", "subject_name": null, "subject_code": null, "teacher_short_code": null, "room": "-" }
+        ],
+        "Wednesday": [
+          { "period": "1st", "time": "1:30PM-2:15PM", "subject_name": "Network Administration & Services", "subject_code": "28572", "teacher_short_code": "JR", "room": "S-418" },
+          { "period": "2nd & 3rd", "time": "2:15PM-3:45PM", "subject_name": "Project Work-II", "subject_code": "28576", "teacher_short_code": "AbM", "room": "Hardware Lab" },
+          { "period": "4th", "time": "3:45PM-4:30PM", "subject_name": "Innovation & Entrepreneurship", "subject_code": "25853", "teacher_short_code": "HA", "room": "S-418" },
+          { "period": "5th, 6th & 7th", "time": "4:30PM-6:45PM", "subject_name": "Multimedia & Animation", "subject_code": "28575", "teacher_short_code": "ZI", "room": "ICT Lab" }
+        ],
+        "Thursday": [
+          { "period": "1st", "time": "1:30PM-2:15PM", "subject_name": "Digital Marketing Technique", "subject_code": "28571", "teacher_short_code": "KA", "room": "S-418" },
+          { "period": "2nd & 3rd", "time": "2:15PM-3:45PM", "subject_name": "Network Administration & Services", "subject_code": "28572", "teacher_short_code": "JR", "room": "Hardware Lab" },
+          { "period": "4th", "time": "3:45PM-4:30PM", "subject_name": "Apps Development Project", "subject_code": "28574", "teacher_short_code": "IH", "room": "S-418" },
+          { "period": "5th", "time": "4:30PM-5:15PM", "subject_name": "Multimedia & Animation", "subject_code": "28575", "teacher_short_code": "ZI", "room": "S-418" },
+          { "period": "6th & 7th", "time": "5:15PM-6:45PM", "subject_name": null, "subject_code": null, "teacher_short_code": null, "room": "-" }
+        ]
+      },
+      "teachers_details": [
+        { "short_code": "JR", "name": "Md. Jewel Rana", "designation": "Instructor (Tech/Computer)", "phone_no": "01732755176", "role": "Class Teacher" },
+        { "short_code": "HA", "name": "Hakimin Ahmed", "designation": "Part-Time Teacher (Electronics)", "phone_no": "01759731841", "role": null },
+        { "short_code": "AbM", "name": "Md. Abdul Malek", "designation": "Instructor (Tech/Computer)", "phone_no": "01314851894", "role": null },
+        { "short_code": "IH", "name": "Md. Idul Hasan Jony", "designation": "Part-Time Teacher (Computer)", "phone_no": "01791008770", "role": null },
+        { "short_code": "KA", "name": "Md. Kausar Ali", "designation": "Jr. Instructor (Tech/Computer)", "phone_no": "01753038380", "role": null },
+        { "short_code": "ZI", "name": "ZAHIDUL ISLAM", "designation": "Jr. Instructor (Tech/Computer)", "phone_no": "01738628365", "role": null }
+      ]
+    };
+
+    // Firebase Setup
+    let db = null;
     try {
       const firebaseConfig = {
         apiKey: "AIzaSyD-EE4pIw9rD4tZmz9tKnzsd6VQzhC3ck0",
@@ -817,51 +1448,173 @@
       };
 
       if (typeof firebase !== 'undefined') {
-        firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
+        }
         db = firebase.firestore();
       }
     } catch (e) {
-      console.log("Firebase initialized");
+      console.warn("Firebase initialization warning:", e);
     }
 
-    // User Profile Management & Auto Popup
-    function checkUserProfileOnLoad() {
-      const savedProfile = localStorage.getItem('cngpi_user_profile');
-      if (savedProfile) {
-        try {
-          const profile = JSON.parse(savedProfile);
-          if (profile.name && profile.department && profile.semester && profile.shift) {
-            applyUserProfile(profile);
-            return;
+    // App State Variables
+    let currentProfile = null;
+    let currentRoutineData = null;
+    let selectedRoutineDay = 'Sunday';
+    let currentRoutineViewMode = 'daily';
+
+    // Seed default CST 7/2 routine into Firestore on app launch if missing
+    async function seedDefaultFirestoreRoutine() {
+      if (!db) return;
+      try {
+        const docRef = db.collection('routines').doc('cst_7_2');
+        const docSnap = await docRef.get();
+        if (!docSnap.exists) {
+          await docRef.set(CST_7_2_ROUTINE);
+          console.log("Pre-seeded CST 7/2 routine into Firestore");
+        }
+      } catch (err) {
+        console.warn("Firestore seed note:", err.message);
+      }
+    }
+
+    // Realtime Dhaka Clock (Asia/Dhaka)
+    function startDhakaClock() {
+      function updateClock() {
+        const now = new Date();
+        const options = {
+          timeZone: "Asia/Dhaka",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: true
+        };
+        const dateOptions = {
+          timeZone: "Asia/Dhaka",
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric"
+        };
+
+        const timeStr = now.toLocaleTimeString("en-US", options);
+        const dateStr = now.toLocaleDateString("en-US", dateOptions);
+
+        const homeTime = document.getElementById("home-live-time");
+        const homeDate = document.getElementById("home-live-date");
+        const routineTime = document.getElementById("routine-live-time");
+        const routineDate = document.getElementById("routine-live-date");
+
+        if (homeTime) homeTime.textContent = timeStr;
+        if (homeDate) homeDate.textContent = dateStr;
+        if (routineTime) routineTime.textContent = timeStr;
+        if (routineDate) routineDate.textContent = dateStr;
+
+        // Highlight Live Ongoing Class
+        checkOngoingClass(now);
+      }
+
+      updateClock();
+      setInterval(updateClock, 1000);
+    }
+
+    // Parse time range like "1:30PM-3:00PM" or "4:30PM-5:15PM" into minutes from 00:00
+    function parseTimeStringToMinutes(timeStr) {
+      if (!timeStr || timeStr === "-") return null;
+      try {
+        const parts = timeStr.split("-");
+        if (parts.length !== 2) return null;
+
+        function toMinutes(tStr) {
+          tStr = tStr.trim().toUpperCase();
+          const isPM = tStr.includes("PM");
+          const isAM = tStr.includes("AM");
+          let clean = tStr.replace("PM", "").replace("AM", "").trim();
+          let [hours, mins] = clean.split(":").map(Number);
+          if (isPM && hours < 12) hours += 12;
+          if (isAM && hours === 12) hours = 0;
+          return hours * 60 + mins;
+        }
+
+        return {
+          start: toMinutes(parts[0]),
+          end: toMinutes(parts[1])
+        };
+      } catch (e) {
+        return null;
+      }
+    }
+
+    // Get current Dhaka day and time in minutes
+    function getDhakaCurrentTimeInfo(nowDate) {
+      const dhakaDateStr = nowDate.toLocaleString("en-US", { timeZone: "Asia/Dhaka" });
+      const dhakaDate = new Date(dhakaDateStr);
+
+      const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      const dayName = dayNames[dhakaDate.getDay()];
+      const currentMinutes = dhakaDate.getHours() * 60 + dhakaDate.getMinutes();
+
+      return { dayName, currentMinutes };
+    }
+
+    // Check ongoing class & update UI highlights
+    function checkOngoingClass(nowDate) {
+      const { dayName, currentMinutes } = getDhakaCurrentTimeInfo(nowDate);
+
+      let ongoingClassInfo = null;
+
+      if (currentRoutineData && currentRoutineData.weekly_schedule && currentRoutineData.weekly_schedule[dayName]) {
+        const todayClasses = currentRoutineData.weekly_schedule[dayName];
+        todayClasses.forEach(item => {
+          if (!item.subject_name) return;
+          const range = parseTimeStringToMinutes(item.time);
+          if (range && currentMinutes >= range.start && currentMinutes < range.end) {
+            ongoingClassInfo = item;
           }
-        } catch (e) {
-          console.error("Error loading user profile:", e);
+        });
+      }
+
+      // Update Home Screen alert box
+      const homeAlert = document.getElementById("home-current-class-box");
+      if (homeAlert) {
+        if (ongoingClassInfo) {
+          homeAlert.className = "current-class-alert";
+          homeAlert.innerHTML = `
+            <span>🔴 Live Class Now: <strong>${ongoingClassInfo.subject_name}</strong> (${ongoingClassInfo.room})</span>
+            <span>${ongoingClassInfo.time}</span>
+          `;
+        } else {
+          homeAlert.className = "current-class-alert no-class";
+          homeAlert.innerHTML = `
+            <span>☕ No active class currently in progress</span>
+            <span>${dayName}</span>
+          `;
         }
       }
-      openUserSelectModal();
+
+      // Re-render routine card highlights if in routine screen
+      renderDailyRoutineCards();
     }
 
-    function openUserSelectModal() {
-      const modal = document.getElementById("user-select-modal");
-      const savedProfile = localStorage.getItem('cngpi_user_profile');
-      if (savedProfile) {
+    // Load & Match Student Profile with Routine
+    function loadProfileAndRoutine() {
+      const saved = localStorage.getItem('cngpi_user_profile');
+      if (saved) {
         try {
-          const profile = JSON.parse(savedProfile);
-          if (profile.name) document.getElementById('input-user-name').value = profile.name;
-          if (profile.department) document.getElementById('select-department').value = profile.department;
-          if (profile.semester) document.getElementById('select-semester').value = profile.semester;
-          if (profile.shift) document.getElementById('select-shift').value = profile.shift;
-        } catch(e) {}
+          currentProfile = JSON.parse(saved);
+          applyUserProfileHeader(currentProfile);
+        } catch (e) {}
       }
-      modal.classList.add("active");
-      lucide.createIcons();
+
+      if (!currentProfile) {
+        openUserSelectModal();
+        return;
+      }
+
+      fetchFirestoreRoutine();
     }
 
-    function closeUserSelectModal() {
-      const modal = document.getElementById("user-select-modal");
-      modal.classList.remove("active");
-    }
-
+    // Save Student Profile
     function saveUserProfile(event) {
       event.preventDefault();
       const name = document.getElementById('input-user-name').value.trim();
@@ -870,20 +1623,22 @@
       const shift = document.getElementById('select-shift').value;
 
       if (!name || !department || !semester || !shift) {
-        alert("Please select all fields.");
+        alert("Please complete all profile fields.");
         return;
       }
 
-      const profile = { name, department, semester, shift };
-      localStorage.setItem('cngpi_user_profile', JSON.stringify(profile));
-      applyUserProfile(profile);
+      currentProfile = { name, department, semester, shift };
+      localStorage.setItem('cngpi_user_profile', JSON.stringify(currentProfile));
+      applyUserProfileHeader(currentProfile);
       closeUserSelectModal();
+      fetchFirestoreRoutine();
     }
 
-    function applyUserProfile(profile) {
+    function applyUserProfileHeader(profile) {
       const nameElem = document.getElementById('header-user-name');
       const detailsElem = document.getElementById('header-user-details');
       const avatarElem = document.getElementById('header-avatar');
+      const routineBadge = document.getElementById('routine-profile-text');
 
       if (nameElem) nameElem.textContent = profile.name;
       if (detailsElem) {
@@ -893,31 +1648,345 @@
       if (avatarElem && profile.name) {
         avatarElem.textContent = profile.name.charAt(0).toUpperCase();
       }
+      if (routineBadge) {
+        routineBadge.textContent = `${profile.department.split(' ')[0]} • ${profile.semester} • ${profile.shift}`;
+      }
     }
 
-    // Open Coming Soon Modal
+    // Helper: Map profile parameters to routine key (e.g. CST 7/2 -> cst_7_2)
+    function getProfileRoutineKey(profile) {
+      if (!profile) return "cst_7_2";
+      const isCST = profile.department.includes("Computer") || profile.department.includes("CST");
+      const is7th = profile.semester.includes("7th");
+      const is2ndShift = profile.shift.includes("2nd");
+
+      if (isCST && is7th && is2ndShift) {
+        return "cst_7_2";
+      }
+
+      // Generate a normalized document key
+      const deptCode = profile.department.match(/\(([^)]+)\)/)?.[1] || profile.department.substring(0, 3).toUpperCase();
+      const semNum = profile.semester.replace(/[^0-9]/g, '');
+      const shiftNum = profile.shift.replace(/[^0-9]/g, '');
+      return `${deptCode.toLowerCase()}_${semNum}_${shiftNum}`;
+    }
+
+    // Fetch Routine from Firebase Firestore or fallback cache
+    async function fetchFirestoreRoutine() {
+      if (!currentProfile) return;
+
+      const routineKey = getProfileRoutineKey(currentProfile);
+      let foundRoutine = null;
+
+      // Check Firestore
+      if (db) {
+        try {
+          const docRef = db.collection('routines').doc(routineKey);
+          const docSnap = await docRef.get();
+          if (docSnap.exists) {
+            foundRoutine = docSnap.data();
+          }
+        } catch (err) {
+          console.warn("Firestore fetch error, using local fallback:", err);
+        }
+      }
+
+      // Fallback check for CST 7/2
+      if (!foundRoutine && routineKey === "cst_7_2") {
+        foundRoutine = CST_7_2_ROUTINE;
+      }
+
+      if (foundRoutine) {
+        currentRoutineData = foundRoutine;
+        showRoutineAvailableView();
+      } else {
+        currentRoutineData = null;
+        showRoutineNotAvailableView();
+      }
+    }
+
+    // Show Available Routine UI
+    function showRoutineAvailableView() {
+      document.getElementById('routine-available-container').style.display = 'block';
+      document.getElementById('routine-not-available-container').style.display = 'none';
+
+      // Auto select current Dhaka day if valid weekday
+      const now = new Date();
+      const { dayName } = getDhakaCurrentTimeInfo(now);
+      if (currentRoutineData.weekly_schedule[dayName]) {
+        selectedRoutineDay = dayName;
+      } else {
+        selectedRoutineDay = 'Sunday';
+      }
+
+      updateDayTabs();
+      renderDailyRoutineCards();
+      renderFullWeekTable();
+    }
+
+    // Show Not Available UI
+    function showRoutineNotAvailableView() {
+      document.getElementById('routine-available-container').style.display = 'none';
+      document.getElementById('routine-not-available-container').style.display = 'block';
+
+      const descName = document.getElementById('not-available-profile-name');
+      if (descName && currentProfile) {
+        descName.textContent = `${currentProfile.department} • ${currentProfile.semester} • ${currentProfile.shift}`;
+      }
+    }
+
+    // Switch Routine View (Daily vs Full Week)
+    function switchRoutineView(mode) {
+      currentRoutineViewMode = mode;
+      const btnDaily = document.getElementById('btn-toggle-daily');
+      const btnWeek = document.getElementById('btn-toggle-week');
+      const secDaily = document.getElementById('view-daily-section');
+      const secWeek = document.getElementById('view-week-section');
+
+      if (mode === 'daily') {
+        btnDaily.classList.add('active');
+        btnWeek.classList.remove('active');
+        secDaily.style.display = 'block';
+        secWeek.style.display = 'none';
+      } else {
+        btnWeek.classList.add('active');
+        btnDaily.classList.remove('active');
+        secWeek.style.display = 'block';
+        secDaily.style.display = 'none';
+      }
+    }
+
+    // Render Day Tabs
+    function updateDayTabs() {
+      const container = document.getElementById('day-tabs-container');
+      if (!container || !currentRoutineData) return;
+
+      const days = Object.keys(currentRoutineData.weekly_schedule);
+      const now = new Date();
+      const { dayName: todayName } = getDhakaCurrentTimeInfo(now);
+
+      container.innerHTML = days.map(day => {
+        const isActive = day === selectedRoutineDay ? 'active' : '';
+        const isToday = day === todayName ? 'is-today' : '';
+        return `
+          <button class="day-tab-btn ${isActive} ${isToday}" onclick="selectRoutineDay('${day}')">
+            ${day} ${day === todayName ? '• Today' : ''}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectRoutineDay(day) {
+      selectedRoutineDay = day;
+      updateDayTabs();
+      renderDailyRoutineCards();
+    }
+
+    // Helper: Lookup Teacher Details by Short Code
+    function getTeacherInfo(shortCode) {
+      if (!shortCode || !currentRoutineData || !currentRoutineData.teachers_details) return null;
+      return currentRoutineData.teachers_details.find(t => t.short_code === shortCode) || {
+        name: shortCode,
+        designation: "Faculty Member",
+        phone_no: null
+      };
+    }
+
+    // Render Daily Routine Cards
+    function renderDailyRoutineCards() {
+      const container = document.getElementById('class-cards-container');
+      if (!container || !currentRoutineData) return;
+
+      const dayClasses = currentRoutineData.weekly_schedule[selectedRoutineDay] || [];
+      const now = new Date();
+      const { dayName: currentDayName, currentMinutes } = getDhakaCurrentTimeInfo(now);
+
+      if (dayClasses.length === 0) {
+        container.innerHTML = `
+          <div class="class-card off-period" style="text-align: center; padding: 30px;">
+            <h4>☕ Day Off</h4>
+            <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">No scheduled classes for ${selectedRoutineDay}.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = dayClasses.map(item => {
+        const isFreePeriod = !item.subject_name;
+        const range = parseTimeStringToMinutes(item.time);
+        const isLive = !isFreePeriod && (selectedRoutineDay === currentDayName) && range && (currentMinutes >= range.start && currentMinutes < range.end);
+        const teacher = !isFreePeriod ? getTeacherInfo(item.teacher_short_code) : null;
+
+        if (isFreePeriod) {
+          return `
+            <div class="class-card off-period">
+              <div class="class-card-top">
+                <span class="period-badge" style="background: rgba(148, 163, 184, 0.15); color: var(--text-muted); border-color: rgba(148, 163, 184, 0.25);">
+                  Period ${item.period}
+                </span>
+                <span class="time-slot-badge">${item.time}</span>
+              </div>
+              <h4 class="class-title" style="color: var(--text-muted); font-size: 15px;">☕ Break / Off Period</h4>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="class-card ${isLive ? 'is-live' : ''}">
+            <div class="class-card-top">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="period-badge">Period ${item.period}</span>
+                ${isLive ? '<span class="live-badge">🔴 LIVE NOW</span>' : ''}
+              </div>
+              <span class="time-slot-badge">${item.time}</span>
+            </div>
+
+            <h4 class="class-title">${item.subject_name}</h4>
+
+            <div class="class-meta-row">
+              <div class="meta-item">
+                <i data-lucide="hash" style="width: 13px; height: 13px; color: var(--color-primary);"></i>
+                <span>Code: <strong>${item.subject_code}</strong></span>
+              </div>
+              <div class="meta-item">
+                <i data-lucide="map-pin" style="width: 13px; height: 13px; color: var(--color-pink);"></i>
+                <span>Room: <strong>${item.room}</strong></span>
+              </div>
+            </div>
+
+            <div class="teacher-box">
+              <div class="teacher-info-text">
+                <h5>${teacher ? teacher.name : item.teacher_short_code}</h5>
+                <p>${teacher ? teacher.designation : 'Instructor'}</p>
+              </div>
+
+              ${teacher && teacher.phone_no ? `
+                <a href="tel:${teacher.phone_no}" class="btn-call-teacher">
+                  <i data-lucide="phone-call" style="width: 13px; height: 13px;"></i>
+                  <span>Call Teacher</span>
+                </a>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    // Render Full Week Table
+    function renderFullWeekTable() {
+      const container = document.getElementById('full-week-table-box');
+      if (!container || !currentRoutineData) return;
+
+      const schedule = currentRoutineData.weekly_schedule;
+      const days = Object.keys(schedule);
+
+      let tableHTML = `
+        <table class="week-table">
+          <thead>
+            <tr>
+              <th style="width: 90px;">Day</th>
+              <th>Classes & Period Schedule</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      days.forEach(day => {
+        const classes = schedule[day] || [];
+        tableHTML += `
+          <tr>
+            <td style="font-weight: 800; color: var(--color-primary); font-family: var(--font-display);">${day}</td>
+            <td>
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+        `;
+
+        classes.forEach(c => {
+          if (!c.subject_name) return;
+          const teacher = getTeacherInfo(c.teacher_short_code);
+          tableHTML += `
+            <div style="background: rgba(255,255,255,0.03); padding: 8px 10px; border-radius: 10px; border-left: 3px solid var(--color-primary);">
+              <div class="table-cell-content">
+                <span class="table-sub-name">${c.subject_name} <span style="font-weight: normal; color: var(--text-muted);">(${c.period})</span></span>
+                <span class="table-sub-code">Code: ${c.subject_code} • ${c.time} • Room: ${c.room}</span>
+                <span class="table-room">Teacher: ${teacher ? teacher.name : c.teacher_short_code}</span>
+              </div>
+            </div>
+          `;
+        });
+
+        tableHTML += `
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+
+      tableHTML += `
+          </tbody>
+        </table>
+      `;
+
+      container.innerHTML = tableHTML;
+    }
+
+    // Navigation Switcher
+    function selectNav(target) {
+      document.querySelectorAll(".nav-item").forEach(item => item.classList.remove("active"));
+      document.querySelectorAll(".screen-view").forEach(screen => screen.classList.remove("active"));
+
+      const activeNav = document.getElementById(`nav-${target}`);
+      if (activeNav) activeNav.classList.add("active");
+
+      if (target === 'home') {
+        document.getElementById('screen-home').classList.add('active');
+      } else if (target === 'routine') {
+        document.getElementById('screen-routine').classList.add('active');
+        fetchFirestoreRoutine();
+      } else if (target === 'result') {
+        document.getElementById('screen-home').classList.add('active');
+        openComingSoon('Result', 'award');
+      } else if (target === 'cgpa') {
+        document.getElementById('screen-home').classList.add('active');
+        openComingSoon('CGPA Calculator', 'calculator');
+      } else if (target === 'books') {
+        document.getElementById('screen-home').classList.add('active');
+        openComingSoon('Book List', 'book-open');
+      }
+    }
+
+    // Modals Control
+    function openUserSelectModal() {
+      const modal = document.getElementById("user-select-modal");
+      if (currentProfile) {
+        if (currentProfile.name) document.getElementById('input-user-name').value = currentProfile.name;
+        if (currentProfile.department) document.getElementById('select-department').value = currentProfile.department;
+        if (currentProfile.semester) document.getElementById('select-semester').value = currentProfile.semester;
+        if (currentProfile.shift) document.getElementById('select-shift').value = currentProfile.shift;
+      }
+      modal.classList.add("active");
+      lucide.createIcons();
+    }
+
+    function closeUserSelectModal() {
+      document.getElementById("user-select-modal").classList.remove("active");
+    }
+
     function openComingSoon(featureName, iconName) {
       const modal = document.getElementById("coming-soon-modal");
-      const title = document.getElementById("modal-title");
-      const desc = document.getElementById("modal-desc");
+      document.getElementById("modal-title").textContent = `${featureName} Coming Soon`;
+      document.getElementById("modal-desc").innerHTML = `The <strong>${featureName}</strong> feature is currently under active development.`;
       const icon = document.getElementById("modal-icon");
-
-      title.textContent = `${featureName} Coming Soon`;
-      desc.innerHTML = `The <strong>${featureName}</strong> feature is currently under active development. Stay tuned for upcoming releases!`;
-      
       if (iconName) {
         icon.setAttribute("data-lucide", iconName);
         lucide.createIcons();
       }
-
       modal.classList.add("active");
     }
 
-    // Close Coming Soon Modal
     function closeComingSoon() {
-      const modal = document.getElementById("coming-soon-modal");
-      modal.classList.remove("active");
-      selectNav('home');
+      document.getElementById("coming-soon-modal").classList.remove("active");
     }
 
     // Bottom Navigation Bar Switch
@@ -933,11 +2002,93 @@
       else if (target === 'books') openComingSoon('Book List', 'book-open');
     }
 
-    // Initialize profile check on DOM load
+    // Admin Panel Logic
+    function openAdminModal() {
+      document.getElementById('admin-modal').classList.add('active');
+      lucide.createIcons();
+    }
+    }
+
+    function closeAdminModal() {
+      document.getElementById('admin-modal').classList.remove('active');
+    }
+
+    function handleAdminJsonFileSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('admin-json-input').value = e.target.result;
+      };
+      reader.readAsText(file);
+    }
+
+    function loadAdminPresetJSON() {
+      document.getElementById('admin-json-input').value = JSON.stringify(CST_7_2_ROUTINE, null, 2);
+    }
+
+    async function handleAdminRoutineUpload(event) {
+      event.preventDefault();
+      const jsonText = document.getElementById('admin-json-input').value.trim();
+
+      if (!jsonText) {
+        alert("Please select a JSON file or paste JSON code.");
+        return;
+      }
+
+      let parsedRoutine;
+      try {
+        parsedRoutine = JSON.parse(jsonText);
+      } catch (err) {
+        alert("Invalid JSON format. Please check syntax!");
+        return;
+      }
+
+      // Automatically determine document ID / group code from JSON object
+      let groupCode = parsedRoutine.id;
+      if (!groupCode && parsedRoutine.group_short_code) {
+        // e.g. "CST 7/2" -> "cst_7_2"
+        groupCode = parsedRoutine.group_short_code
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, '_')
+          .replace(/_+/g, '_')
+          .replace(/^_|_$/g, '');
+      }
+
+      if (!groupCode && parsedRoutine.department) {
+        const deptShort = parsedRoutine.department.split(' ')[0].toLowerCase();
+        const semNum = (parsedRoutine.semester || '').replace(/[^0-9]/g, '') || '1';
+        const shiftNum = (parsedRoutine.department || '').includes('Second') ? '2' : '1';
+        groupCode = `${deptShort}_${semNum}_${shiftNum}`;
+      }
+
+      if (!groupCode) {
+        groupCode = "routine_" + Date.now();
+      }
+
+      parsedRoutine.id = groupCode;
+
+      if (db) {
+        try {
+          await db.collection('routines').doc(groupCode).set(parsedRoutine);
+          alert(`Successfully uploaded routine '${groupCode}' to Firebase Firestore!`);
+          closeAdminModal();
+          fetchFirestoreRoutine();
+        } catch (err) {
+          alert("Error saving to Firestore: " + err.message);
+        }
+      } else {
+        alert(`Routine '${groupCode}' validated successfully!`);
+        closeAdminModal();
+      }
+    }
+
+    // App Initialization
     window.addEventListener('DOMContentLoaded', () => {
-      checkUserProfileOnLoad();
+      startDhakaClock();
+      seedDefaultFirestoreRoutine();
+      loadProfileAndRoutine();
     });
   </script>
-
 </body>
 </html>
