@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>BTEB CGPA Calculator | CNGPI Student Portal</title>
+  <meta name="description" content="Calculate 8-Semester Diploma in Engineering CGPA according to BTEB Board percentage regulations.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.344.0/dist/umd/lucide.min.js"></script>
+
+  <style>
+    :root {
+      --font-primary: 'Inter', sans-serif;
+      --font-display: 'Outfit', sans-serif;
+      
+      --bg-dark: #090d16;
+      --bg-card: rgba(18, 26, 43, 0.75);
+      --bg-card-hover: rgba(30, 41, 65, 0.85);
+      --bg-nav: rgba(13, 19, 33, 0.92);
+      
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(99, 102, 241, 0.3);
+      
+      --color-primary: #6366f1;
+      --color-primary-glow: rgba(99, 102, 241, 0.4);
+      --color-purple: #8b5cf6;
+      --color-cyan: #06b6d4;
+      --color-emerald: #10b981;
+      --color-amber: #f59e0b;
+      --color-rose: #f43f5e;
+      
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      
+      --grad-primary: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+      --grad-cgpa: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+      --grad-card: linear-gradient(145deg, rgba(22, 30, 48, 0.8) 0%, rgba(13, 18, 30, 0.9) 100%);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      min-height: 100vh;
+      font-family: var(--font-primary);
+      background: var(--bg-dark);
+      color: var(--text-main);
+    }
+
+    /* Ambient Background Glows */
+    .bg-glow-top {
+      position: fixed;
+      top: -15%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+      filter: blur(90px);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .bg-glow-bottom {
+      position: fixed;
+      bottom: -15%;
+      right: 10%;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
+      filter: blur(100px);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Responsive Main Web Container */
+    .web-app-container {
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 1;
+      padding-bottom: 100px;
+    }
+
+    /* App Header */
+    .app-header {
+      padding: 18px 20px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      background: rgba(9, 13, 22, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      z-index: 100;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-back {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-back:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .header-title-group h1 {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header-title-group p {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .bteb-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+
+    /* Content Wrapper */
+    .content-wrapper {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Regulation Selector Card */
+    .regulation-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 16px;
+      backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .reg-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .reg-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .reg-title i {
+      color: var(--color-emerald);
+    }
+
+    .reg-tabs {
+      display: flex;
+      background: rgba(10, 15, 26, 0.6);
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      gap: 4px;
+    }
+
+    .reg-tab-btn {
+      flex: 1;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .reg-tab-btn.active {
+      background: var(--grad-cgpa);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+    }
+
+    /* Hero CGPA Score Display */
+    .result-hero-card {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(6, 182, 212, 0.08) 50%, rgba(99, 102, 241, 0.1) 100%);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: 24px;
+      padding: 24px 20px;
+      backdrop-filter: blur(16px);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+    }
+
+    .result-hero-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 180px;
+      height: 180px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.25) 0%, rgba(0,0,0,0) 70%);
+      pointer-events: none;
+    }
+
+    .result-main-group {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .result-score-block {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .result-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 4px;
+    }
+
+    .score-number-group {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .cgpa-val {
+      font-family: var(--font-display);
+      font-size: 44px;
+      font-weight: 900;
+      line-height: 1;
+      background: linear-gradient(135deg, #ffffff 0%, #34d399 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .cgpa-max {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .grade-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+      margin-top: 8px;
+      width: fit-content;
+    }
+
+    /* Gauge / Progress Circle */
+    .gauge-wrapper {
+      position: relative;
+      width: 80px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .gauge-svg {
+      transform: rotate(-90deg);
+      width: 80px;
+      height: 80px;
+    }
+
+    .gauge-bg {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.08);
+      stroke-width: 8;
+    }
+
+    .gauge-fill {
+      fill: none;
+      stroke: url(#cgpaGradient);
+      stroke-width: 8;
+      stroke-dasharray: 220;
+      stroke-dashoffset: 220;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .gauge-percent {
+      position: absolute;
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 800;
+      color: #ffffff;
+    }
+
+    /* Stats Grid inside Hero */
+    .hero-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .stat-box {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    /* Section Header */
+    .section-title-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 6px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .section-title i {
+      color: var(--color-emerald);
+    }
+
+    .btn-reset {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(244, 63, 94, 0.12);
+      border: 1px solid rgba(244, 63, 94, 0.25);
+      color: #fb7185;
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-reset:hover {
+      background: rgba(244, 63, 94, 0.2);
+    }
+
+    /* Semesters Grid */
+    .semesters-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .semester-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 18px;
+      padding: 14px 16px;
+      backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: all 0.25s ease;
+    }
+
+    .semester-card:focus-within, .semester-card.filled {
+      border-color: var(--border-accent);
+      background: var(--bg-card-hover);
+      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.1);
+    }
+
+    .sem-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sem-title-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sem-badge-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: #818cf8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .sem-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .sem-weight-tag {
+      font-size: 11px;
+      font-weight: 700;
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .sem-input-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .input-field-box {
+      flex: 1;
+      position: relative;
+    }
+
+    .gpa-input {
+      width: 100%;
+      background: rgba(10, 15, 26, 0.7);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 700;
+      color: #ffffff;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .gpa-input:focus {
+      border-color: var(--color-emerald);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+      background: rgba(10, 15, 26, 0.9);
+    }
+
+    .gpa-input::placeholder {
+      color: rgba(148, 163, 184, 0.4);
+      font-weight: 500;
+      font-size: 13px;
+    }
+
+    .gp-contribution {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      min-width: 75px;
+      text-align: right;
+    }
+
+    .gp-contribution.active {
+      color: #34d399;
+    }
+
+    /* Quick Grade Select Pills */
+    .quick-pills {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scrollbar-width: none;
+    }
+
+    .quick-pills::-webkit-scrollbar {
+      display: none;
+    }
+
+    .grade-pill {
+      padding: 4px 10px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .grade-pill:hover, .grade-pill.active {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: rgba(16, 185, 129, 0.4);
+      color: #34d399;
+    }
+
+    /* Grading Reference Card */
+    .reference-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 18px;
+      backdrop-filter: blur(12px);
+    }
+
+    .ref-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .ref-title {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .grade-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .grade-table th {
+      text-align: left;
+      padding: 8px 10px;
+      color: var(--text-muted);
+      font-weight: 600;
+      border-bottom: 1px solid var(--border-color);
+      background: rgba(10, 15, 26, 0.4);
+    }
+
+    .grade-table td {
+      padding: 8px 10px;
+      color: var(--text-main);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .grade-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .badge-aplus { color: #34d399; font-weight: 700; }
+    .badge-a { color: #60a5fa; font-weight: 700; }
+    .badge-aminus { color: #818cf8; font-weight: 700; }
+    .badge-bplus { color: #a78bfa; font-weight: 700; }
+    .badge-b { color: #facc15; font-weight: 700; }
+
+    /* Share Result Button */
+    .btn-share-result {
+      width: 100%;
+      background: var(--grad-cgpa);
+      border: none;
+      border-radius: 16px;
+      padding: 14px;
+      color: #ffffff;
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+      transition: all 0.25s ease;
+    }
+
+    .btn-share-result:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(16, 185, 129, 0.4);
+    }
+
+    /* Bottom Navigation Bar */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 600px;
+      height: 70px;
+      background: var(--bg-nav);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border-color);
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      align-items: center;
+      z-index: 1000;
+      padding: 0 10px;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      color: var(--text-muted);
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .nav-item:hover, .nav-item.active {
+      color: var(--color-emerald);
+    }
+
+    .nav-icon-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 28px;
+      border-radius: 12px;
+      transition: all 0.25s ease;
+    }
+
+    .nav-item.active .nav-icon-wrapper {
+      background: rgba(16, 185, 129, 0.15);
+    }
+
+    .nav-label {
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    /* Toast Notification */
+    .toast-popup {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      background: rgba(18, 26, 43, 0.95);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      padding: 12px 20px;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 2000;
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      backdrop-filter: blur(12px);
+    }
+
+    .toast-popup.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .toast-popup i {
+      color: #34d399;
+    }
+
+    @media (max-width: 480px) {
+      .cgpa-val { font-size: 38px; }
+      .gauge-wrapper { width: 70px; height: 70px; }
+      .gauge-svg { width: 70px; height: 70px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Glow Effects -->
+  <div class="bg-glow-top"></div>
+  <div class="bg-glow-bottom"></div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast-popup">
+    <i data-lucide="check-circle" style="width: 18px; height: 18px;"></i>
+    <span id="toast-msg">CGPA calculated successfully!</span>
+  </div>
+
+  <main class="web-app-container">
+
+    <!-- App Sticky Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <a href="index.html" class="btn-back" title="Back to Home">
+          <i data-lucide="arrow-left" style="width: 20px; height: 20px;"></i>
+        </a>
+        <div class="header-title-group">
+          <h1>CGPA Calculator</h1>
+          <p>BTEB 8-Semester Evaluation</p>
+        </div>
+      </div>
+      <div class="bteb-badge">
+        <i data-lucide="award" style="width: 14px; height: 14px;"></i>
+        <span>BTEB Rules</span>
+      </div>
+    </header>
+
+    <div class="content-wrapper">
+
+      <!-- Regulation Picker -->
+      <div class="regulation-card">
+        <div class="reg-header">
+          <div class="reg-title">
+            <i data-lucide="sliders" style="width: 16px; height: 16px;"></i>
+            <span>BTEB Prabidhan Weighting</span>
+          </div>
+        </div>
+        <div class="reg-tabs">
+          <button class="reg-tab-btn active" id="tab-p2016" onclick="setRegulation('2016')">Prabidhan 2016 / 2022</button>
+          <button class="reg-tab-btn" id="tab-p2010" onclick="setRegulation('2010')">Prabidhan 2010</button>
+        </div>
+      </div>
+
+      <!-- Hero Result Card -->
+      <div class="result-hero-card">
+        <div class="result-main-group">
+          <div class="result-score-block">
+            <span class="result-label">Cumulative CGPA</span>
+            <div class="score-number-group">
+              <span class="cgpa-val" id="display-cgpa">0.00</span>
+              <span class="cgpa-max">/ 4.00</span>
+            </div>
+            <div class="grade-badge" id="display-grade-badge">
+              <i data-lucide="sparkles" style="width: 14px; height: 14px;"></i>
+              <span id="display-grade-text">Enter semester GPAs below</span>
+            </div>
+          </div>
+
+          <!-- Circular Radial Progress -->
+          <div class="gauge-wrapper">
+            <svg class="gauge-svg" viewBox="0 0 80 80">
+              <defs>
+                <linearGradient id="cgpaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#10b981" />
+                  <stop offset="50%" stop-color="#06b6d4" />
+                  <stop offset="100%" stop-color="#6366f1" />
+                </linearGradient>
+              </defs>
+              <circle class="gauge-bg" cx="40" cy="40" r="34" />
+              <circle class="gauge-fill" id="gauge-circle" cx="40" cy="40" r="34" />
+            </svg>
+            <span class="gauge-percent" id="gauge-percent-text">0%</span>
+          </div>
+        </div>
+
+        <!-- Quick Stats Breakdown -->
+        <div class="hero-stats-grid">
+          <div class="stat-box">
+            <span class="stat-label">Semesters Completed</span>
+            <span class="stat-value" id="stat-completed">0 / 8</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">Weighted Points</span>
+            <span class="stat-value" id="stat-weighted-gp">0.00 GP</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">Weight Completed</span>
+            <span class="stat-value" id="stat-weight-pct">0%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Semesters List Header -->
+      <div class="section-title-bar">
+        <div class="section-title">
+          <i data-lucide="book-open" style="width: 18px; height: 18px;"></i>
+          <span>Semester Grade Points (GPA)</span>
+        </div>
+        <button class="btn-reset" onclick="resetAllFields()">
+          <i data-lucide="rotate-ccw" style="width: 14px; height: 14px;"></i>
+          <span>Reset All</span>
+        </button>
+      </div>
+
+      <!-- 8 Semesters Inputs Grid -->
+      <div class="semesters-list" id="semesters-container">
+        <!-- Rendered dynamically by JavaScript -->
+      </div>
+
+      <!-- Action Buttons -->
+      <button class="btn-share-result" onclick="copyCGPAReport()">
+        <i data-lucide="copy" style="width: 18px; height: 18px;"></i>
+        <span>Copy Detailed CGPA Summary</span>
+      </button>
+
+      <!-- Grading Reference Table -->
+      <div class="reference-card">
+        <div class="ref-header">
+          <div class="ref-title">
+            <i data-lucide="info" style="width: 16px; height: 16px;"></i>
+            <span>BTEB Official Grading System</span>
+          </div>
+        </div>
+        <table class="grade-table">
+          <thead>
+            <tr>
+              <th>Marks Range</th>
+              <th>Letter Grade</th>
+              <th>Grade Point</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>80% and above</td>
+              <td><span class="badge-aplus">A+</span></td>
+              <td>4.00</td>
+            </tr>
+            <tr>
+              <td>75% to less than 80%</td>
+              <td><span class="badge-a">A</span></td>
+              <td>3.75</td>
+            </tr>
+            <tr>
+              <td>70% to less than 75%</td>
+              <td><span class="badge-aminus">A-</span></td>
+              <td>3.50</td>
+            </tr>
+            <tr>
+              <td>65% to less than 70%</td>
+              <td><span class="badge-bplus">B+</span></td>
+              <td>3.25</td>
+            </tr>
+            <tr>
+              <td>60% to less than 65%</td>
+              <td><span class="badge-b">B</span></td>
+              <td>3.00</td>
+            </tr>
+            <tr>
+              <td>55% to less than 60%</td>
+              <td>B-</td>
+              <td>2.75</td>
+            </tr>
+            <tr>
+              <td>50% to less than 55%</td>
+              <td>C+</td>
+              <td>2.50</td>
+            </tr>
+            <tr>
+              <td>45% to less than 50%</td>
+              <td>C</td>
+              <td>2.25</td>
+            </tr>
+            <tr>
+              <td>40% to less than 45%</td>
+              <td>D</td>
+              <td>2.00</td>
+            </tr>
+            <tr>
+              <td>Less than 40%</td>
+              <td>F (Fail)</td>
+              <td>0.00</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <!-- Fixed Bottom Navigation Bar -->
+    <nav class="bottom-nav">
+      <a href="index.html" class="nav-item">
+        <div class="nav-icon-wrapper">
+          <i data-lucide="home" style="width: 20px; height: 20px;"></i>
+        </div>
+        <span class="nav-label">Home</span>
+      </a>
+
+      <a href="index.html" class="nav-item">
+        <div class="nav-icon-wrapper">
+          <i data-lucide="calendar-days" style="width: 20px; height: 20px;"></i>
+        </div>
+        <span class="nav-label">Routine</span>
+      </a>
+
+      <a href="index.html" class="nav-item">
+        <div class="nav-icon-wrapper">
+          <i data-lucide="award" style="width: 20px; height: 20px;"></i>
+        </div>
+        <span class="nav-label">Result</span>
+      </a>
+
+      <a href="calculator.html" class="nav-item active">
+        <div class="nav-icon-wrapper">
+          <i data-lucide="calculator" style="width: 20px; height: 20px;"></i>
+        </div>
+        <span class="nav-label">CGPA</span>
+      </a>
+
+      <a href="index.html" class="nav-item">
+        <div class="nav-icon-wrapper">
+          <i data-lucide="book-open" style="width: 20px; height: 20px;"></i>
+        </div>
+        <span class="nav-label">Book List</span>
+      </a>
+    </nav>
+
+  </main>
+
+  <script>
+    // BTEB Percentage Weight Distributions
+    const BTEB_REGULATIONS = {
+      '2016': [5, 5, 5, 10, 15, 20, 25, 15], // 2016 & 2022 Prabidhan
+      '2010': [5, 5, 5, 10, 15, 20, 25, 15]  // 2010 Prabidhan
+    };
+
+    const SEMESTER_NAMES = [
+      "1st Semester", "2nd Semester", "3rd Semester", "4th Semester",
+      "5th Semester", "6th Semester", "7th Semester", "8th Semester"
+    ];
+
+    const QUICK_GRADES = [
+      { label: "A+ 4.00", val: 4.00 },
+      { label: "A 3.75", val: 3.75 },
+      { label: "A- 3.50", val: 3.50 },
+      { label: "B+ 3.25", val: 3.25 },
+      { label: "B 3.00", val: 3.00 }
+    ];
+
+    let currentRegulation = '2016';
+    let semesterGPAs = Array(8).fill('');
+
+    // Initialize Page
+    document.addEventListener("DOMContentLoaded", () => {
+      renderSemesterCards();
+      loadSavedState();
+      calculateCGPA();
+      lucide.createIcons();
+    });
+
+    // Switch Prabidhan Regulation
+    function setRegulation(regKey) {
+      currentRegulation = regKey;
+      document.getElementById('tab-p2016').classList.toggle('active', regKey === '2016');
+      document.getElementById('tab-p2010').classList.toggle('active', regKey === '2010');
+      renderSemesterCards();
+      calculateCGPA();
+      showToast(`Switched to Prabidhan ${regKey} rules`);
+    }
+
+    // Render Semester Card Inputs
+    function renderSemesterCards() {
+      const container = document.getElementById("semesters-container");
+      const weights = BTEB_REGULATIONS[currentRegulation];
+      
+      container.innerHTML = "";
+
+      SEMESTER_NAMES.forEach((name, idx) => {
+        const weight = weights[idx];
+        const val = semesterGPAs[idx] !== '' ? semesterGPAs[idx] : '';
+        const card = document.createElement("div");
+        card.className = `semester-card ${val !== '' ? 'filled' : ''}`;
+        card.id = `sem-card-${idx}`;
+
+        card.innerHTML = `
+          <div class="sem-card-top">
+            <div class="sem-title-group">
+              <div class="sem-badge-icon">S${idx + 1}</div>
+              <span class="sem-name">${name}</span>
+            </div>
+            <span class="sem-weight-tag">${weight}% Weight</span>
+          </div>
+
+          <div class="sem-input-wrapper">
+            <div class="input-field-box">
+              <input 
+                type="number" 
+                step="0.01" 
+                min="0" 
+                max="4.00" 
+                class="gpa-input" 
+                id="gpa-input-${idx}" 
+                placeholder="Enter GPA (e.g. 3.85)"
+                value="${val}" 
+                oninput="onGPAInput(${idx}, this.value)"
+              >
+            </div>
+            <div class="gp-contribution ${val !== '' ? 'active' : ''}" id="gp-contrib-${idx}">
+              ${val !== '' ? `+${((parseFloat(val) * weight) / 100).toFixed(3)} GP` : '0.00 GP'}
+            </div>
+          </div>
+
+          <div class="quick-pills">
+            ${QUICK_GRADES.map(g => `
+              <button 
+                type="button" 
+                class="grade-pill ${parseFloat(val) === g.val ? 'active' : ''}"
+                onclick="applyQuickGrade(${idx}, ${g.val})"
+              >${g.label}</button>
+            `).join('')}
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+
+      lucide.createIcons();
+    }
+
+    // Handle GPA Manual Input
+    function onGPAInput(idx, value) {
+      if (value < 0) value = 0;
+      if (value > 4.00) value = 4.00;
+      
+      semesterGPAs[idx] = value !== '' ? parseFloat(value) : '';
+      
+      updateSemesterCardUI(idx);
+      calculateCGPA();
+      saveState();
+    }
+
+    // Apply Quick Grade Pill
+    function applyQuickGrade(idx, gpaVal) {
+      semesterGPAs[idx] = gpaVal;
+      const inputElem = document.getElementById(`gpa-input-${idx}`);
+      if (inputElem) inputElem.value = gpaVal;
+
+      updateSemesterCardUI(idx);
+      calculateCGPA();
+      saveState();
+    }
+
+    // Update single semester UI
+    function updateSemesterCardUI(idx) {
+      const val = semesterGPAs[idx];
+      const card = document.getElementById(`sem-card-${idx}`);
+      const contrib = document.getElementById(`gp-contrib-${idx}`);
+      const weight = BTEB_REGULATIONS[currentRegulation][idx];
+
+      if (card) {
+        if (val !== '') {
+          card.classList.add('filled');
+        } else {
+          card.classList.remove('filled');
+        }
+      }
+
+      if (contrib) {
+        if (val !== '' && !isNaN(val)) {
+          contrib.textContent = `+${((parseFloat(val) * weight) / 100).toFixed(3)} GP`;
+          contrib.classList.add('active');
+        } else {
+          contrib.textContent = '0.00 GP';
+          contrib.classList.remove('active');
+        }
+      }
+
+      // Update pills inside card
+      if (card) {
+        card.querySelectorAll('.grade-pill').forEach(pill => {
+          const pVal = parseFloat(pill.textContent.split(' ')[1]);
+          if (val !== '' && parseFloat(val) === pVal) {
+            pill.classList.add('active');
+          } else {
+            pill.classList.remove('active');
+          }
+        });
+      }
+    }
+
+    // Main CGPA Calculation Logic
+    function calculateCGPA() {
+      const weights = BTEB_REGULATIONS[currentRegulation];
+      let weightedGPSum = 0;
+      let totalWeightCompleted = 0;
+      let countCompleted = 0;
+
+      semesterGPAs.forEach((gpa, idx) => {
+        if (gpa !== '' && !isNaN(gpa)) {
+          const numGpa = parseFloat(gpa);
+          const weight = weights[idx];
+          weightedGPSum += (numGpa * weight) / 100;
+          totalWeightCompleted += weight;
+          countCompleted++;
+        }
+      });
+
+      // Calculate Final Cumulative CGPA
+      let finalCGPA = 0;
+      if (totalWeightCompleted > 0) {
+        // Normalized CGPA based on completed semester weight
+        finalCGPA = (weightedGPSum / totalWeightCompleted) * 4.00;
+      }
+
+      // Update Hero Display
+      const cgpaElem = document.getElementById("display-cgpa");
+      cgpaElem.textContent = finalCGPA.toFixed(2);
+
+      // Update Gauge SVG Circle
+      const maxCircumference = 220; // 2 * pi * 34 ~= 213.6
+      const offset = maxCircumference - (maxCircumference * (finalCGPA / 4.00));
+      document.getElementById("gauge-circle").style.strokeDashoffset = offset;
+      
+      const pct = Math.round((finalCGPA / 4.00) * 100);
+      document.getElementById("gauge-percent-text").textContent = `${pct}%`;
+
+      // Update Grade Badge
+      const gradeBadge = document.getElementById("display-grade-badge");
+      const gradeText = document.getElementById("display-grade-text");
+
+      const gradeDetails = getLetterGradeDetails(finalCGPA, countCompleted);
+      gradeText.textContent = gradeDetails.title;
+
+      // Stats Update
+      document.getElementById("stat-completed").textContent = `${countCompleted} / 8`;
+      document.getElementById("stat-weighted-gp").textContent = `${weightedGPSum.toFixed(3)} GP`;
+      document.getElementById("stat-weight-pct").textContent = `${totalWeightCompleted}%`;
+    }
+
+    // Get Letter Grade Classification
+    function getLetterGradeDetails(cgpa, count) {
+      if (count === 0) return { title: "Enter semester GPAs below" };
+
+      if (cgpa >= 4.00) return { title: "A+ (Outstanding)" };
+      if (cgpa >= 3.75) return { title: "A (Excellent)" };
+      if (cgpa >= 3.50) return { title: "A- (Very Good)" };
+      if (cgpa >= 3.25) return { title: "B+ (Good)" };
+      if (cgpa >= 3.00) return { title: "B (Satisfactory)" };
+      if (cgpa >= 2.75) return { title: "B- (Above Average)" };
+      if (cgpa >= 2.50) return { title: "C+ (Average)" };
+      if (cgpa >= 2.25) return { title: "C (Below Average)" };
+      if (cgpa >= 2.00) return { title: "D (Pass)" };
+      return { title: "F (Fail)" };
+    }
+
+    // Reset All Fields
+    function resetAllFields() {
+      semesterGPAs = Array(8).fill('');
+      localStorage.removeItem("cngpi_cgpa_saved_gpas");
+      renderSemesterCards();
+      calculateCGPA();
+      showToast("All semester entries cleared!");
+    }
+
+    // Save & Load Local Storage State
+    function saveState() {
+      try {
+        localStorage.setItem("cngpi_cgpa_saved_gpas", JSON.stringify({
+          regulation: currentRegulation,
+          gpas: semesterGPAs
+        }));
+      } catch (e) {}
+    }
+
+    function loadSavedState() {
+      try {
+        const saved = localStorage.getItem("cngpi_cgpa_saved_gpas");
+        if (saved) {
+          const data = JSON.parse(saved);
+          if (data.gpas && Array.isArray(data.gpas)) {
+            semesterGPAs = data.gpas;
+          }
+          if (data.regulation) {
+            currentRegulation = data.regulation;
+            document.getElementById('tab-p2016').classList.toggle('active', currentRegulation === '2016');
+            document.getElementById('tab-p2010').classList.toggle('active', currentRegulation === '2010');
+          }
+          renderSemesterCards();
+        }
+      } catch (e) {}
+    }
+
+    // Copy CGPA Summary Report
+    function copyCGPAReport() {
+      const weights = BTEB_REGULATIONS[currentRegulation];
+      let reportText = `🎓 CNGPI Student Portal - BTEB CGPA Report\n`;
+      reportText += `Regulation: Prabidhan ${currentRegulation}\n`;
+      reportText += `----------------------------------------\n`;
+
+      let count = 0;
+      let weightedSum = 0;
+      let weightTotal = 0;
+
+      semesterGPAs.forEach((gpa, idx) => {
+        if (gpa !== '' && !isNaN(gpa)) {
+          const weight = weights[idx];
+          const gpContrib = ((parseFloat(gpa) * weight) / 100).toFixed(3);
+          reportText += `${SEMESTER_NAMES[idx]} (${weight}%): GPA ${parseFloat(gpa).toFixed(2)} -> +${gpContrib} GP\n`;
+          weightedSum += (parseFloat(gpa) * weight) / 100;
+          weightTotal += weight;
+          count++;
+        }
+      });
+
+      if (count === 0) {
+        showToast("Please enter at least one semester GPA first!");
+        return;
+      }
+
+      const finalCGPA = ((weightedSum / weightTotal) * 4.00).toFixed(2);
+      const grade = getLetterGradeDetails(parseFloat(finalCGPA), count).title;
+
+      reportText += `----------------------------------------\n`;
+      reportText += `Completed: ${count}/8 Semesters (${weightTotal}% Weight)\n`;
+      reportText += `Final CGPA: ${finalCGPA} / 4.00 (${grade})\n`;
+
+      navigator.clipboard.writeText(reportText).then(() => {
+        showToast("CGPA Report copied to clipboard! 📋");
+      }).catch(() => {
+        showToast("Failed to copy report automatically.");
+      });
+    }
+
+    // Show Toast
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      const msgElem = document.getElementById("toast-msg");
+      msgElem.textContent = msg;
+      toast.classList.add("show");
+
+      setTimeout(() => {
+        toast.classList.remove("show");
+      }, 3000);
+    }
+  </script>
+
+</body>
+</html>

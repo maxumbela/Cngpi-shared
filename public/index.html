@@ -655,8 +655,7 @@
         </div>
 
         <!-- CGPA Calculator App Icon -->
-        <div class="app-icon-card" onclick="openComingSoon('CGPA Calculator', 'calculator')">
-          <span class="coming-soon-pill">Soon</span>
+        <div class="app-icon-card" onclick="window.location.href='calculator.html'">
           <div class="icon-shape icon-cgpa">
             <i data-lucide="calculator" style="width: 28px; height: 28px;"></i>
           </div>
@@ -930,7 +929,7 @@
 
       if (target === 'routine') openComingSoon('Routine', 'calendar-days');
       else if (target === 'result') openComingSoon('Result', 'award');
-      else if (target === 'cgpa') openComingSoon('CGPA Calculator', 'calculator');
+      else if (target === 'cgpa') window.location.href = 'calculator.html';
       else if (target === 'books') openComingSoon('Book List', 'book-open');
     }
 
