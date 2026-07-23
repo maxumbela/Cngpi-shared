@@ -511,6 +511,84 @@
     .btn-modal-close:active {
       transform: scale(0.97);
     }
+
+    /* User Selection Modal Styles */
+    .form-group {
+      margin-bottom: 16px;
+      text-align: left;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #cbd5e1;
+      margin-bottom: 6px;
+    }
+
+    .form-input, .form-select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(13, 19, 33, 0.85);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      font-family: var(--font-primary);
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .form-input:focus, .form-select:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 12px var(--color-primary-glow);
+    }
+
+    .form-select option {
+      background: #0d1321;
+      color: #ffffff;
+    }
+
+    .btn-save-profile {
+      width: 100%;
+      padding: 14px;
+      border-radius: 16px;
+      border: none;
+      background: var(--grad-primary);
+      color: white;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 14px;
+      cursor: pointer;
+      box-shadow: 0 10px 25px var(--color-primary-glow);
+      transition: all 0.2s ease;
+      margin-top: 8px;
+    }
+
+    .btn-save-profile:active {
+      transform: scale(0.97);
+    }
+
+    .profile-edit-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      border-radius: 12px;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .profile-edit-btn:hover {
+      background: rgba(99, 102, 241, 0.15);
+      color: #ffffff;
+      border-color: var(--border-accent);
+    }
   </style>
 </head>
 <body>
@@ -524,17 +602,17 @@
 
     <!-- App Top Header -->
     <header class="app-header">
-      <div class="user-profile">
-        <div class="avatar">C</div>
+      <div class="user-profile" onclick="openUserSelectModal()" style="cursor: pointer;">
+        <div class="avatar" id="header-avatar">C</div>
         <div class="user-info">
-          <h2>CNGPI Portal</h2>
-          <p>Student Workspace</p>
+          <h2 id="header-user-name">CNGPI Student</h2>
+          <p id="header-user-details">Tap to set Dept, Sem & Shift</p>
         </div>
       </div>
-      <div class="header-badge">
-        <span class="pulse-dot"></span>
-        <span>Online</span>
-      </div>
+      <button class="profile-edit-btn" onclick="openUserSelectModal()">
+        <i data-lucide="user-cog" style="width: 14px; height: 14px;"></i>
+        <span>Edit Profile</span>
+      </button>
     </header>
 
     <!-- Scrollable Content Body -->
@@ -661,6 +739,65 @@
       </div>
     </div>
 
+    <!-- User Selection Popup Modal -->
+    <div class="modal-overlay" id="user-select-modal">
+      <div class="modal-card">
+        <div class="modal-badge" style="background: rgba(99, 102, 241, 0.15); border-color: rgba(99, 102, 241, 0.3); color: var(--color-primary);">
+          <i data-lucide="user-check" style="width: 12px; height: 12px;"></i>
+          <span>Student Setup</span>
+        </div>
+        <h3 style="margin-bottom: 4px;">Student Profile</h3>
+        <p style="margin-bottom: 20px;">Select your department, semester, and shift to personalize your portal.</p>
+        
+        <form id="user-profile-form" onsubmit="saveUserProfile(event)">
+          <div class="form-group">
+            <label for="input-user-name">Your Name</label>
+            <input type="text" id="input-user-name" class="form-input" placeholder="e.g. Student Name" required>
+          </div>
+
+          <div class="form-group">
+            <label for="select-department">Department</label>
+            <select id="select-department" class="form-select" required>
+              <option value="" disabled selected>Select Department</option>
+              <option value="Computer Science & Technology">Computer Science & Technology (CST)</option>
+              <option value="Civil Technology">Civil Technology (CT)</option>
+              <option value="Electrical Technology">Electrical Technology (ET)</option>
+              <option value="Electronics Technology">Electronics Technology (ENT)</option>
+              <option value="Mechanical Technology">Mechanical Technology (MT)</option>
+              <option value="Architecture Technology">Architecture Technology (AT)</option>
+              <option value="Telecommunication Technology">Telecommunication Technology (TNT)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="select-semester">Semester</label>
+            <select id="select-semester" class="form-select" required>
+              <option value="" disabled selected>Select Semester</option>
+              <option value="1st Semester">1st Semester</option>
+              <option value="2nd Semester">2nd Semester</option>
+              <option value="3rd Semester">3rd Semester</option>
+              <option value="4th Semester">4th Semester</option>
+              <option value="5th Semester">5th Semester</option>
+              <option value="6th Semester">6th Semester</option>
+              <option value="7th Semester">7th Semester</option>
+              <option value="8th Semester">8th Semester</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="select-shift">Shift</label>
+            <select id="select-shift" class="form-select" required>
+              <option value="" disabled selected>Select Shift</option>
+              <option value="1st Shift">1st Shift</option>
+              <option value="2nd Shift">2nd Shift</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn-save-profile">Save & Continue</button>
+        </form>
+      </div>
+    </div>
+
   </main>
 
   <!-- JavaScript Logic -->
@@ -686,6 +823,77 @@
       }
     } catch (e) {
       console.log("Firebase initialized");
+    }
+
+    // User Profile Management & Auto Popup
+    function checkUserProfileOnLoad() {
+      const savedProfile = localStorage.getItem('cngpi_user_profile');
+      if (savedProfile) {
+        try {
+          const profile = JSON.parse(savedProfile);
+          if (profile.name && profile.department && profile.semester && profile.shift) {
+            applyUserProfile(profile);
+            return;
+          }
+        } catch (e) {
+          console.error("Error loading user profile:", e);
+        }
+      }
+      openUserSelectModal();
+    }
+
+    function openUserSelectModal() {
+      const modal = document.getElementById("user-select-modal");
+      const savedProfile = localStorage.getItem('cngpi_user_profile');
+      if (savedProfile) {
+        try {
+          const profile = JSON.parse(savedProfile);
+          if (profile.name) document.getElementById('input-user-name').value = profile.name;
+          if (profile.department) document.getElementById('select-department').value = profile.department;
+          if (profile.semester) document.getElementById('select-semester').value = profile.semester;
+          if (profile.shift) document.getElementById('select-shift').value = profile.shift;
+        } catch(e) {}
+      }
+      modal.classList.add("active");
+      lucide.createIcons();
+    }
+
+    function closeUserSelectModal() {
+      const modal = document.getElementById("user-select-modal");
+      modal.classList.remove("active");
+    }
+
+    function saveUserProfile(event) {
+      event.preventDefault();
+      const name = document.getElementById('input-user-name').value.trim();
+      const department = document.getElementById('select-department').value;
+      const semester = document.getElementById('select-semester').value;
+      const shift = document.getElementById('select-shift').value;
+
+      if (!name || !department || !semester || !shift) {
+        alert("Please select all fields.");
+        return;
+      }
+
+      const profile = { name, department, semester, shift };
+      localStorage.setItem('cngpi_user_profile', JSON.stringify(profile));
+      applyUserProfile(profile);
+      closeUserSelectModal();
+    }
+
+    function applyUserProfile(profile) {
+      const nameElem = document.getElementById('header-user-name');
+      const detailsElem = document.getElementById('header-user-details');
+      const avatarElem = document.getElementById('header-avatar');
+
+      if (nameElem) nameElem.textContent = profile.name;
+      if (detailsElem) {
+        let deptShort = profile.department.split(' ')[0];
+        detailsElem.textContent = `${deptShort} • ${profile.semester.replace(' Semester', ' Sem')} • ${profile.shift}`;
+      }
+      if (avatarElem && profile.name) {
+        avatarElem.textContent = profile.name.charAt(0).toUpperCase();
+      }
     }
 
     // Open Coming Soon Modal
@@ -725,6 +933,11 @@
       else if (target === 'cgpa') openComingSoon('CGPA Calculator', 'calculator');
       else if (target === 'books') openComingSoon('Book List', 'book-open');
     }
+
+    // Initialize profile check on DOM load
+    window.addEventListener('DOMContentLoaded', () => {
+      checkUserProfileOnLoad();
+    });
   </script>
 
 </body>
