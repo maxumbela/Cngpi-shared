@@ -676,11 +676,6 @@
             });
           });
         }
-
-        if (allNotices.length === 0) {
-          allNotices = [...SAMPLE_NOTICES];
-        }
-
         renderNoticesList();
       }, (err) => {
         console.error("Firestore notice listener error:", err);
