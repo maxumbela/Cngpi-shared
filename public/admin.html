@@ -2783,6 +2783,23 @@
       }
     }
 
+    function sanitizeFirestoreData(data) {
+      if (data === null || data === undefined) return null;
+      if (typeof data !== 'object') return data;
+      if (data instanceof Date) return data.toISOString();
+      if (Array.isArray(data)) {
+        return data.map(item => sanitizeFirestoreData(item)).filter(item => item !== undefined);
+      }
+      const cleanObj = {};
+      Object.keys(data).forEach(key => {
+        const val = data[key];
+        if (val !== undefined) {
+          cleanObj[key] = sanitizeFirestoreData(val);
+        }
+      });
+      return cleanObj;
+    }
+
     function loadDefaultCstExamPreset() {
       currentAdminExamSchedule = JSON.parse(JSON.stringify(DEFAULT_CST_7TH_EXAMS));
       renderAdminExamRows();
@@ -2793,20 +2810,39 @@
       const dept = document.getElementById("admin-exam-dept").value;
       const sem = document.getElementById("admin-exam-sem").value;
       const examTitle = document.getElementById("admin-exam-title").value.trim() || "BTEB Semester Final 2026";
+      const semNumOnly = sem.replace(/[^0-9]/g, "") || "1";
+      const routineCode = `${dept}-${semNumOnly}`;
+      const lowerRoutineCode = routineCode.toLowerCase();
       const docId = `${dept}_${sem}`;
+      const altDocId = `${dept.toLowerCase()}_${semNumOnly}`;
 
-      const payload = {
+      const rawPayload = {
+        routine_code: routineCode,
+        technology_short_form: dept,
         department: dept,
         semester: sem,
+        semester_name: `${sem} Semester`,
+        exam_title: examTitle,
         exam_type: examTitle,
         schedule: currentAdminExamSchedule,
+        routine: currentAdminExamSchedule,
         updatedAt: new Date().toISOString(),
         updatedBy: ADMIN_USER
       };
 
+      const payload = sanitizeFirestoreData(rawPayload);
+
       if (db) {
-        db.collection("exam_routines").doc(docId).set(payload).then(() => {
-          showToast(`Exam routine for ${dept} (${sem} Sem) published to Firestore!`, "success");
+        Promise.all([
+          db.collection("exam_routines").doc(routineCode).set(payload),
+          db.collection("exam_routines").doc(lowerRoutineCode).set(payload),
+          db.collection("exam_routines").doc(docId).set(payload),
+          db.collection("exam_routines").doc(altDocId).set(payload),
+          db.collection("routines").doc(routineCode).set(payload),
+          db.collection("routines").doc(lowerRoutineCode).set(payload),
+          db.collection("routines").doc(docId).set(payload)
+        ]).then(() => {
+          showToast(`Exam routine [${routineCode}] for ${dept} (${sem} Sem) published to Firestore!`, "success");
         }).catch(err => {
           console.error("Exam routine save error:", err);
           showToast("Failed to publish exam routine: " + err.message, "error");
@@ -2832,75 +2868,44 @@
 
     function loadSampleRoutineJsonText() {
       const sample = {
+        "routine_code": "ET-4",
+        "technology_short_form": "ET",
         "exam_title": "Diploma in Engineering and Tourism Exam-2025",
         "exam_year_as_published": 2025,
         "exam_schedule_year": 2026,
         "regulation": 2022,
         "exam_category": "Written/Theory",
-        "technology": "Computer Science & Technology (CST)",
-        "technology_key": "cst",
-        "technology_short_name": "CST",
-        "technology_code": "85",
-        "semester": 1,
-        "semester_name": "1st Semester",
+        "technology": "Electrical Technology",
+        "technology_key": "electrical",
+        "technology_short_name": "ET",
+        "technology_code": "67",
+        "semester": 4,
+        "semester_name": "4th Semester",
         "date_range": {
           "start": "2026-08-06",
           "end": "2026-09-07"
         },
         "timezone": "Asia/Dhaka",
-        "total_exams": 5,
+        "total_exams": 6,
         "routine": [
           {
             "serial": 1,
-            "subject_code": "25712",
-            "subject_name": "English-I",
-            "date": "2026-08-09",
-            "date_display": "09 August 2026",
-            "day": "Sunday",
+            "subject_code": "27044",
+            "subject_name": "Applied Mechanics",
+            "date": "2026-08-08",
+            "date_display": "08 August 2026",
+            "day": "Saturday",
             "time": "02:00 PM",
             "time_24_hour": "14:00",
             "timezone": "Asia/Dhaka"
           },
           {
             "serial": 2,
-            "subject_code": "25912",
-            "subject_name": "Physics-I",
-            "date": "2026-08-15",
-            "date_display": "15 August 2026",
-            "day": "Saturday",
-            "time": "02:00 PM",
-            "time_24_hour": "14:00",
-            "timezone": "Asia/Dhaka"
-          },
-          {
-            "serial": 3,
-            "subject_code": "25911",
-            "subject_name": "Mathematics-I",
-            "date": "2026-08-24",
-            "date_display": "24 August 2026",
-            "day": "Monday",
-            "time": "02:00 PM",
-            "time_24_hour": "14:00",
-            "timezone": "Asia/Dhaka"
-          },
-          {
-            "serial": 4,
-            "subject_code": "26711",
-            "subject_name": "Basic Electricity",
-            "date": "2026-09-02",
-            "date_display": "02 September 2026",
-            "day": "Wednesday",
-            "time": "10:00 AM",
-            "time_24_hour": "10:00",
-            "timezone": "Asia/Dhaka"
-          },
-          {
-            "serial": 5,
-            "subject_code": "25711",
-            "subject_name": "Bangla-I",
-            "date": "2026-09-05",
-            "date_display": "05 September 2026",
-            "day": "Saturday",
+            "subject_code": "25811",
+            "subject_name": "Social Science",
+            "date": "2026-08-11",
+            "date_display": "11 August 2026",
+            "day": "Tuesday",
             "time": "02:00 PM",
             "time_24_hour": "14:00",
             "timezone": "Asia/Dhaka"
@@ -3133,6 +3138,30 @@
         return;
       }
 
+      // Check / Re-init Firestore db
+      if (!db && typeof firebase !== 'undefined') {
+        try {
+          if (!firebase.apps.length) {
+            firebase.initializeApp({
+              apiKey: "AIzaSyD-EE4pIw9rD4tZmz9tKnzsd6VQzhC3ck0",
+              authDomain: "cngpi-edu.firebaseapp.com",
+              projectId: "cngpi-edu",
+              storageBucket: "cngpi-edu.firebasestorage.app",
+              messagingSenderId: "889275125335",
+              appId: "1:889275125335:web:a3e8a944d1a2d429501d12"
+            });
+          }
+          db = firebase.firestore();
+        } catch (e) {
+          console.error("Firebase init error:", e);
+        }
+      }
+
+      if (!db) {
+        showToast("❌ Error: Firebase database connection unavailable.", "error");
+        return;
+      }
+
       // Open Batch Upload Modal & Prepare Progress UI
       openBatchUploadModal();
 
@@ -3165,7 +3194,6 @@
       const total = itemsToUpload.length;
       let successCount = 0;
 
-      // Process and Upload Fast using Firestore Write Batch
       for (let i = 0; i < total; i++) {
         const item = itemsToUpload[i];
         const currentPct = Math.round(((i + 1) / total) * 100);
@@ -3179,40 +3207,24 @@
         }
 
         try {
-          if (db) {
-            const batch = db.batch();
+          const cleanData = sanitizeFirestoreData(item.data);
 
-            // 1. Primary write under routine_code (e.g. ET-4, CST-1)
-            batch.set(db.collection("exam_routines").doc(item.routineCode), item.data);
-            
-            // 2. Lowercase routine_code (e.g. et-4, cst-1)
-            batch.set(db.collection("exam_routines").doc(item.lowerRoutineCode), item.data);
-
-            // 3. Main docId (e.g. ET_4th)
-            batch.set(db.collection("exam_routines").doc(item.docId), item.data);
-
-            // 4. Alt key (e.g. et_4)
-            if (item.altDocId) {
-              batch.set(db.collection("exam_routines").doc(item.altDocId), item.data);
-            }
-
-            // 5. Tech code key (e.g. 67_4)
-            if (item.techCodeDocId) {
-              batch.set(db.collection("exam_routines").doc(item.techCodeDocId), item.data);
-            }
-
-            // Also mirror under routines collection for total compatibility
-            batch.set(db.collection("routines").doc(item.routineCode), item.data);
-            batch.set(db.collection("routines").doc(item.lowerRoutineCode), item.data);
-            batch.set(db.collection("routines").doc(item.docId), item.data);
-            if (item.altDocId) {
-              batch.set(db.collection("routines").doc(item.altDocId), item.data);
-            }
-
-            // Commit atomic batch write
-            await batch.commit();
+          // Write cleanly to exam_routines and routines collections
+          await db.collection("exam_routines").doc(item.routineCode).set(cleanData);
+          await db.collection("exam_routines").doc(item.lowerRoutineCode).set(cleanData);
+          await db.collection("exam_routines").doc(item.docId).set(cleanData);
+          if (item.altDocId) {
+            await db.collection("exam_routines").doc(item.altDocId).set(cleanData);
           }
-          
+          if (item.techCodeDocId) {
+            await db.collection("exam_routines").doc(item.techCodeDocId).set(cleanData);
+          }
+
+          // Mirror in routines collection
+          await db.collection("routines").doc(item.routineCode).set(cleanData);
+          await db.collection("routines").doc(item.lowerRoutineCode).set(cleanData);
+          await db.collection("routines").doc(item.docId).set(cleanData);
+
           successCount++;
           if (barFill) barFill.style.width = `${currentPct}%`;
           if (percentText) percentText.textContent = `${currentPct}%`;
@@ -3221,15 +3233,14 @@
             badgeEl.textContent = "✅ Published";
           }
         } catch (err) {
-          console.error("Firestore batch upload error:", err);
+          console.error("Firestore save error for", item.routineCode, err);
           if (badgeEl) {
             badgeEl.style.color = "#f87171";
-            badgeEl.textContent = "❌ Error: " + err.message;
+            badgeEl.textContent = "❌ Error: " + (err.message || err);
           }
-          showToast(`Save error for ${item.routineCode}: ` + err.message, "error");
+          showToast(`Save error for ${item.routineCode}: ` + (err.message || err), "error");
         }
 
-        // 150ms smooth transition delay
         await new Promise(r => setTimeout(r, 150));
       }
 
