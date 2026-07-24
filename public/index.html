@@ -382,6 +382,44 @@
       transform: scale(0.96);
     }
 
+    /* Long Press Tap & Hold Card Move & Customizing Styles */
+    @keyframes jiggleCard {
+      0% { transform: rotate(-1.5deg) scale(1.01); }
+      50% { transform: rotate(1.5deg) scale(1.01); }
+      100% { transform: rotate(-1.5deg) scale(1.01); }
+    }
+
+    .app-icons-grid.move-mode .app-icon-card {
+      animation: jiggleCard 0.25s infinite ease-in-out;
+      border-color: rgba(168, 85, 247, 0.8) !important;
+      box-shadow: 0 10px 25px rgba(168, 85, 247, 0.3) !important;
+      cursor: grab;
+      position: relative;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .app-icons-grid.move-mode .app-icon-card:active {
+      cursor: grabbing;
+    }
+
+    .app-icons-grid.move-mode .app-icon-card::before {
+      content: '≡';
+      position: absolute;
+      top: 6px;
+      right: 10px;
+      font-size: 18px;
+      font-weight: 900;
+      color: #c084fc;
+      line-height: 1;
+    }
+
+    .app-icon-card.dragging-target {
+      opacity: 0.35;
+      border: 2px dashed #a855f7 !important;
+      transform: scale(0.94);
+    }
+
     .icon-shape {
       width: 58px;
       height: 58px;
@@ -1270,15 +1308,33 @@
         </div>
 
         <!-- Campus Applications Grid -->
-        <div class="section-title">
-          <span>Campus Applications</span>
-          <span class="sub">Tap to open</span>
+        <div class="section-title" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <div>
+            <span>Campus Applications</span>
+            <span class="sub" id="grid-sub-info">Hold card to reorder layout</span>
+          </div>
+          <button type="button" id="btn-toggle-move-mode" onclick="toggleCardMoveMode()" style="background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.35); color: #818cf8; padding: 5px 10px; border-radius: 10px; font-size: 11px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.2s ease;">
+            <i data-lucide="sliders" style="width: 13px; height: 13px;"></i>
+            <span>Customize</span>
+          </button>
         </div>
 
-        <div class="app-icons-grid">
+        <!-- Floating Action Banner for Card Move Mode -->
+        <div id="grid-move-action-bar" style="display: none; background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 14px; padding: 10px 14px; margin-bottom: 14px; align-items: center; justify-content: space-between;">
+          <div style="font-size: 12px; font-weight: 800; color: #c084fc; display: flex; align-items: center; gap: 6px;">
+            <i data-lucide="move" style="width: 15px; height: 15px;"></i>
+            <span>Drag & Move cards to custom order</span>
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <button type="button" onclick="resetDefaultCardLayout()" style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">Reset</button>
+            <button type="button" onclick="toggleCardMoveMode(false)" style="background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%); border: none; color: white; padding: 4px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">Done ✅</button>
+          </div>
+        </div>
+
+        <div class="app-icons-grid" id="app-icons-grid-container">
 
           <!-- Routine App Icon -->
-          <div class="app-icon-card" onclick="selectNav('routine')">
+          <div class="app-icon-card" data-card-id="routine" onclick="handleAppCardClick(event, 'routine')">
             <span class="status-pill pill-active">Available</span>
             <div class="icon-shape icon-routine">
               <i data-lucide="calendar-days" style="width: 28px; height: 28px;"></i>
@@ -1288,7 +1344,7 @@
           </div>
 
           <!-- Result App Icon -->
-          <div class="app-icon-card" onclick="window.location.href='result.html'">
+          <div class="app-icon-card" data-card-id="result" onclick="handleAppCardClick(event, 'result')">
             <span class="status-pill pill-active">Available</span>
             <div class="icon-shape icon-result">
               <i data-lucide="award" style="width: 28px; height: 28px;"></i>
@@ -1298,7 +1354,7 @@
           </div>
 
           <!-- CGPA Calculator App Icon -->
-          <div class="app-icon-card" onclick="window.location.href='calculator.html'">
+          <div class="app-icon-card" data-card-id="cgpa" onclick="handleAppCardClick(event, 'cgpa')">
             <span class="status-pill pill-active">Available</span>
             <div class="icon-shape icon-cgpa">
               <i data-lucide="calculator" style="width: 28px; height: 28px;"></i>
@@ -1308,7 +1364,7 @@
           </div>
 
           <!-- Book List App Icon -->
-          <div class="app-icon-card" onclick="window.location.href='books.html'">
+          <div class="app-icon-card" data-card-id="books" onclick="handleAppCardClick(event, 'books')">
             <span class="status-pill pill-active">Available</span>
             <div class="icon-shape icon-books">
               <i data-lucide="book-open" style="width: 28px; height: 28px;"></i>
@@ -1318,7 +1374,7 @@
           </div>
 
           <!-- Exam Routine App Icon -->
-          <div class="app-icon-card" onclick="openExamRoutineModal()">
+          <div class="app-icon-card" data-card-id="exam" onclick="handleAppCardClick(event, 'exam')">
             <span class="status-pill pill-active">Available</span>
             <div class="icon-shape icon-exam">
               <i data-lucide="file-text" style="width: 28px; height: 28px;"></i>
@@ -1328,7 +1384,7 @@
           </div>
 
           <!-- Teacher Contact App Icon -->
-          <div class="app-icon-card" onclick="openTeacherContactModal()">
+          <div class="app-icon-card" data-card-id="teacher" onclick="handleAppCardClick(event, 'teacher')">
             <span class="status-pill pill-active">Available</span>
             <div class="icon-shape icon-teacher">
               <i data-lucide="phone-call" style="width: 28px; height: 28px;"></i>
@@ -1338,7 +1394,7 @@
           </div>
 
           <!-- Notice Board App Icon -->
-          <div class="app-icon-card" onclick="window.location.href='notice.html'">
+          <div class="app-icon-card" data-card-id="notice" onclick="handleAppCardClick(event, 'notice')">
             <span class="status-pill pill-active">Available</span>
             <div class="icon-shape icon-notice">
               <i data-lucide="bell" style="width: 28px; height: 28px;"></i>
@@ -1348,7 +1404,7 @@
           </div>
 
           <!-- Help & Support App Icon -->
-          <div class="app-icon-card" onclick="openSupportModal()">
+          <div class="app-icon-card" data-card-id="support" onclick="handleAppCardClick(event, 'support')">
             <span class="status-pill pill-active" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border-color: rgba(16, 185, 129, 0.4);">24/7 Live</span>
             <div class="icon-shape icon-support">
               <i data-lucide="life-buoy" style="width: 28px; height: 28px;"></i>
@@ -3412,6 +3468,208 @@
       });
     }
 
+    // ================= CARD LONG PRESS & TOUCH/MOUSE DRAG REORDERING =================
+    let isCardMoveMode = false;
+    let longPressHoldTimer = null;
+    let activeDraggedCard = null;
+    let touchStartOffset = { x: 0, y: 0 };
+
+    function toggleCardMoveMode(forceState) {
+      if (typeof forceState === 'boolean') {
+        isCardMoveMode = forceState;
+      } else {
+        isCardMoveMode = !isCardMoveMode;
+      }
+
+      const grid = document.getElementById("app-icons-grid-container");
+      const actionBar = document.getElementById("grid-move-action-bar");
+      const btnToggle = document.getElementById("btn-toggle-move-mode");
+      const subInfo = document.getElementById("grid-sub-info");
+
+      if (!grid) return;
+
+      if (isCardMoveMode) {
+        grid.classList.add("move-mode");
+        if (actionBar) actionBar.style.display = "flex";
+        if (subInfo) subInfo.textContent = "Hold & drag cards to move position";
+        if (btnToggle) {
+          btnToggle.style.background = "rgba(168, 85, 247, 0.3)";
+          btnToggle.style.color = "#c084fc";
+          btnToggle.innerHTML = `<i data-lucide="check" style="width: 13px; height: 13px;"></i> Done`;
+        }
+        grid.querySelectorAll(".app-icon-card").forEach(c => c.setAttribute("draggable", "true"));
+      } else {
+        grid.classList.remove("move-mode");
+        if (actionBar) actionBar.style.display = "none";
+        if (subInfo) subInfo.textContent = "Hold card to reorder layout";
+        if (btnToggle) {
+          btnToggle.style.background = "rgba(99, 102, 241, 0.15)";
+          btnToggle.style.color = "#818cf8";
+          btnToggle.innerHTML = `<i data-lucide="sliders" style="width: 13px; height: 13px;"></i> Customize`;
+        }
+        grid.querySelectorAll(".app-icon-card").forEach(c => c.removeAttribute("draggable"));
+        saveCurrentCardLayout();
+      }
+      lucide.createIcons();
+    }
+
+    function handleAppCardClick(event, cardId) {
+      if (isCardMoveMode) {
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+
+      if (cardId === 'routine') {
+        selectNav('routine');
+      } else if (cardId === 'result') {
+        window.location.href = 'result.html';
+      } else if (cardId === 'cgpa') {
+        window.location.href = 'calculator.html';
+      } else if (cardId === 'books') {
+        window.location.href = 'books.html';
+      } else if (cardId === 'exam') {
+        openExamRoutineModal();
+      } else if (cardId === 'teacher') {
+        openTeacherContactModal();
+      } else if (cardId === 'notice') {
+        window.location.href = 'notice.html';
+      } else if (cardId === 'support') {
+        openSupportModal();
+      }
+    }
+
+    function saveCurrentCardLayout() {
+      const grid = document.getElementById("app-icons-grid-container");
+      if (!grid) return;
+      const order = [];
+      grid.querySelectorAll(".app-icon-card").forEach(card => {
+        if (card.dataset.cardId) order.push(card.dataset.cardId);
+      });
+      localStorage.setItem("cngpi_card_layout_order", JSON.stringify(order));
+    }
+
+    function restoreSavedCardLayout() {
+      const grid = document.getElementById("app-icons-grid-container");
+      if (!grid) return;
+      const saved = localStorage.getItem("cngpi_card_layout_order");
+      if (!saved) return;
+
+      try {
+        const order = JSON.parse(saved);
+        if (Array.isArray(order) && order.length > 0) {
+          const cardMap = {};
+          grid.querySelectorAll(".app-icon-card").forEach(card => {
+            if (card.dataset.cardId) cardMap[card.dataset.cardId] = card;
+          });
+
+          order.forEach(id => {
+            if (cardMap[id]) {
+              grid.appendChild(cardMap[id]);
+            }
+          });
+        }
+      } catch (err) {
+        console.error("Error restoring card layout:", err);
+      }
+    }
+
+    function resetDefaultCardLayout() {
+      localStorage.removeItem("cngpi_card_layout_order");
+      const grid = document.getElementById("app-icons-grid-container");
+      if (!grid) return;
+
+      const defaultOrder = ["routine", "result", "cgpa", "books", "exam", "teacher", "notice", "support"];
+      const cardMap = {};
+      grid.querySelectorAll(".app-icon-card").forEach(card => {
+        if (card.dataset.cardId) cardMap[card.dataset.cardId] = card;
+      });
+
+      defaultOrder.forEach(id => {
+        if (cardMap[id]) grid.appendChild(cardMap[id]);
+      });
+
+      toggleCardMoveMode(false);
+    }
+
+    function setupAppCardDragAndDrop() {
+      const grid = document.getElementById("app-icons-grid-container");
+      if (!grid) return;
+
+      restoreSavedCardLayout();
+
+      const cards = grid.querySelectorAll(".app-icon-card");
+      cards.forEach(card => {
+        // Touch events: Tap & Hold for 400ms triggers Move Mode
+        card.addEventListener('touchstart', (e) => {
+          longPressHoldTimer = setTimeout(() => {
+            if (navigator.vibrate) navigator.vibrate(60);
+            toggleCardMoveMode(true);
+          }, 400);
+        }, { passive: true });
+
+        card.addEventListener('touchend', () => {
+          if (longPressHoldTimer) clearTimeout(longPressHoldTimer);
+          if (activeDraggedCard) {
+            activeDraggedCard.classList.remove('dragging-target');
+            activeDraggedCard = null;
+            saveCurrentCardLayout();
+          }
+        });
+
+        card.addEventListener('touchmove', (e) => {
+          if (longPressHoldTimer) clearTimeout(longPressHoldTimer);
+
+          if (isCardMoveMode && e.touches && e.touches.length > 0) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
+            if (targetElement) {
+              const hoverCard = targetElement.closest('.app-icon-card');
+              if (hoverCard && hoverCard !== card && grid.contains(hoverCard)) {
+                const bounding = hoverCard.getBoundingClientRect();
+                const offset = touch.clientY - bounding.top - (bounding.height / 2);
+                if (offset > 0) {
+                  grid.insertBefore(card, hoverCard.nextSibling);
+                } else {
+                  grid.insertBefore(card, hoverCard);
+                }
+              }
+            }
+          }
+        }, { passive: false });
+
+        // HTML5 Mouse Drag and Drop
+        card.addEventListener('dragstart', (e) => {
+          if (!isCardMoveMode) return;
+          activeDraggedCard = card;
+          card.classList.add('dragging-target');
+          e.dataTransfer.setData('text/plain', card.dataset.cardId);
+        });
+
+        card.addEventListener('dragend', () => {
+          if (activeDraggedCard) activeDraggedCard.classList.remove('dragging-target');
+          activeDraggedCard = null;
+          saveCurrentCardLayout();
+        });
+
+        card.addEventListener('dragover', (e) => {
+          if (!isCardMoveMode) return;
+          e.preventDefault();
+          const hoverCard = e.currentTarget;
+          if (activeDraggedCard && activeDraggedCard !== hoverCard) {
+            const bounding = hoverCard.getBoundingClientRect();
+            const offset = e.clientY - bounding.top - (bounding.height / 2);
+            if (offset > 0) {
+              grid.insertBefore(activeDraggedCard, hoverCard.nextSibling);
+            } else {
+              grid.insertBefore(activeDraggedCard, hoverCard);
+            }
+          }
+        });
+      });
+    }
+
     // App Initialization
     window.addEventListener('DOMContentLoaded', () => {
       startDhakaClock();
@@ -3419,6 +3677,7 @@
       fetchFirestoreHolidayConfig();
       listenToPinnedNoticesMarquee();
       loadProfileAndRoutine();
+      setupAppCardDragAndDrop();
     });
   </script>
 </body>
