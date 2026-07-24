@@ -242,6 +242,31 @@
       margin-bottom: 12px;
     }
 
+    .exam-dept-btn {
+      padding: 6px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      font-family: var(--font-display);
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+    .exam-dept-btn:hover {
+      background: rgba(239, 68, 68, 0.15);
+      color: white;
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+    .exam-dept-btn.active {
+      background: linear-gradient(135deg, #ef4444 0%, #f43f5e 100%);
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+    }
+
     .routine-meta-row {
       display: flex;
       align-items: center;
@@ -844,83 +869,171 @@
 
     <div class="content-wrapper">
 
-      <!-- Routine Header Card & Group Selector -->
-      <div class="routine-header-card">
-        <div class="selector-row">
-          <div class="group-select-label">
-            <i data-lucide="users" style="width: 14px; height: 14px;"></i>
-            <span>Select Group Code</span>
-          </div>
-          <select id="group-select-dropdown" class="group-dropdown" onchange="onGroupSelected(this.value)">
-            <option value="cst_7_2">CST 7/2</option>
-          </select>
-        </div>
-
-        <h2 class="routine-info-title" id="info-group-title">CST 7/2</h2>
-        <div class="routine-info-sub" id="info-dept-sem">Computer Science & Technology (Second Shift) • Seventh Semester</div>
-
-        <div class="routine-meta-row" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
-          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <div class="meta-tag">
-              <i data-lucide="clock" style="width: 13px; height: 13px;"></i>
-              <span id="info-load-tag">Total Load: 26 Periods/Week</span>
-            </div>
-            <div class="meta-tag">
-              <i data-lucide="building" style="width: 13px; height: 13px;"></i>
-              <span>CNGPI Building</span>
-            </div>
-          </div>
-
-          <button class="btn-export-routine" onclick="exportFullWeekRoutine()" title="Export / Download Full Week Routine">
-            <i data-lucide="download" style="width: 14px; height: 14px;"></i>
-            <span>Export Routine</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Next Class Countdown Banner -->
-      <div class="next-class-card" id="next-class-countdown-banner" style="background: rgba(18, 26, 43, 0.85); border: 1.5px solid rgba(99, 102, 241, 0.65); box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(99, 102, 241, 0.3); border-radius: 20px; padding: 16px 20px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; transition: all 0.3s ease;">
-        <div style="display: flex; align-items: center; gap: 14px;">
-          <div id="next-class-icon-bg" style="width: 46px; height: 46px; border-radius: 16px; background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.4); color: #818cf8; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.3s ease;">
-            <i data-lucide="timer" style="width: 24px; height: 24px;"></i>
-          </div>
-          <div>
-            <div id="next-class-badge" style="font-size: 11px; font-weight: 800; color: #a5b4fc; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">⏳ NEXT CLASS COUNTDOWN</div>
-            <div id="next-class-title" style="font-size: 15px; font-weight: 800; color: #ffffff;">Calculating Schedule...</div>
-            <div id="next-class-details" style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Checking period timetable for today</div>
-          </div>
-        </div>
-        <div id="next-class-timer-box" style="background: rgba(10, 15, 26, 0.8); border: 1px solid rgba(99, 102, 241, 0.4); padding: 8px 16px; border-radius: 14px; text-align: center; flex-shrink: 0; min-width: 120px;">
-          <div id="next-class-timer-text" style="font-family: var(--font-display); font-size: 18px; font-weight: 900; color: #6366f1; letter-spacing: 0.5px;">--h --m --s</div>
-          <div id="next-class-timer-label" style="font-size: 9px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">REMAINING</div>
-        </div>
-      </div>
-
-      <!-- Weekly Schedule Day Tabs -->
-      <div class="day-tabs" id="day-tabs-container">
-        <button class="day-tab-btn" id="day-btn-FullWeek" onclick="switchDayTab('FullWeek')" style="background: rgba(168, 85, 247, 0.15); border-color: rgba(168, 85, 247, 0.35); color: #c084fc;">
-          <i data-lucide="calendar-range" style="width: 13px; height: 13px; display: inline-block; vertical-align: middle;"></i>
-          <span>Full Week</span>
+      <!-- Routine Mode Selector (Class Routine vs Exam Routine) -->
+      <div style="display: flex; gap: 8px; background: rgba(13, 19, 33, 0.85); backdrop-filter: blur(16px); border: 1px solid var(--border-color); padding: 6px; border-radius: 16px; margin-bottom: 20px;">
+        <button id="mode-tab-class" onclick="switchRoutineMode('class')" style="flex: 1; padding: 10px 16px; border-radius: 12px; border: none; background: var(--grad-primary); color: #fff; font-family: var(--font-display); font-size: 13px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35); transition: all 0.3s ease;">
+          <i data-lucide="clock" style="width: 16px; height: 16px;"></i>
+          <span>Class Routine</span>
         </button>
-        <button class="day-tab-btn active" id="day-btn-Sunday" onclick="switchDayTab('Sunday')">Sunday</button>
-        <button class="day-tab-btn" id="day-btn-Monday" onclick="switchDayTab('Monday')">Monday</button>
-        <button class="day-tab-btn" id="day-btn-Tuesday" onclick="switchDayTab('Tuesday')">Tuesday</button>
-        <button class="day-tab-btn" id="day-btn-Wednesday" onclick="switchDayTab('Wednesday')">Wednesday</button>
-        <button class="day-tab-btn" id="day-btn-Thursday" onclick="switchDayTab('Thursday')">Thursday</button>
+        <button id="mode-tab-exam" onclick="switchRoutineMode('exam')" style="flex: 1; padding: 10px 16px; border-radius: 12px; border: 1px solid transparent; background: transparent; color: var(--text-muted); font-family: var(--font-display); font-size: 13px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s ease;">
+          <i data-lucide="file-text" style="width: 16px; height: 16px;"></i>
+          <span>Exam Routine</span>
+        </button>
       </div>
 
-      <!-- Period Cards Container -->
-      <div class="period-cards-list" id="period-cards-container">
-        <!-- Rendered dynamically -->
-      </div>
+      <!-- CLASS ROUTINE VIEW CONTAINER -->
+      <div id="class-routine-view">
+        <!-- Routine Header Card & Group Selector -->
+        <div class="routine-header-card">
+          <div class="selector-row">
+            <div class="group-select-label">
+              <i data-lucide="users" style="width: 14px; height: 14px;"></i>
+              <span>Select Group Code</span>
+            </div>
+            <select id="group-select-dropdown" class="group-dropdown" onchange="onGroupSelected(this.value)">
+              <option value="cst_7_2">CST 7/2</option>
+            </select>
+          </div>
 
-      <!-- Teachers Directory Card -->
-      <div class="teachers-section">
-        <div class="section-header-title">
-          <i data-lucide="user-check" style="width: 18px; height: 18px; color: #a855f7;"></i>
-          <span>Department Teachers Directory</span>
+          <h2 class="routine-info-title" id="info-group-title">CST 7/2</h2>
+          <div class="routine-info-sub" id="info-dept-sem">Computer Science & Technology (Second Shift) • Seventh Semester</div>
+
+          <div class="routine-meta-row" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <div class="meta-tag">
+                <i data-lucide="clock" style="width: 13px; height: 13px;"></i>
+                <span id="info-load-tag">Total Load: 26 Periods/Week</span>
+              </div>
+              <div class="meta-tag">
+                <i data-lucide="building" style="width: 13px; height: 13px;"></i>
+                <span>CNGPI Building</span>
+              </div>
+            </div>
+
+            <button class="btn-export-routine" onclick="exportFullWeekRoutine()" title="Export / Download Full Week Routine">
+              <i data-lucide="download" style="width: 14px; height: 14px;"></i>
+              <span>Export Routine</span>
+            </button>
+          </div>
         </div>
-        <div id="teachers-list-container">
+
+        <!-- Next Class Countdown Banner -->
+        <div class="next-class-card" id="next-class-countdown-banner" style="background: rgba(18, 26, 43, 0.85); border: 1.5px solid rgba(99, 102, 241, 0.65); box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(99, 102, 241, 0.3); border-radius: 20px; padding: 16px 20px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; transition: all 0.3s ease;">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <div id="next-class-icon-bg" style="width: 46px; height: 46px; border-radius: 16px; background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.4); color: #818cf8; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.3s ease;">
+              <i data-lucide="timer" style="width: 24px; height: 24px;"></i>
+            </div>
+            <div>
+              <div id="next-class-badge" style="font-size: 11px; font-weight: 800; color: #a5b4fc; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">⏳ NEXT CLASS COUNTDOWN</div>
+              <div id="next-class-title" style="font-size: 15px; font-weight: 800; color: #ffffff;">Calculating Schedule...</div>
+              <div id="next-class-details" style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Checking period timetable for today</div>
+            </div>
+          </div>
+          <div id="next-class-timer-box" style="background: rgba(10, 15, 26, 0.8); border: 1px solid rgba(99, 102, 241, 0.4); padding: 8px 16px; border-radius: 14px; text-align: center; flex-shrink: 0; min-width: 120px;">
+            <div id="next-class-timer-text" style="font-family: var(--font-display); font-size: 18px; font-weight: 900; color: #6366f1; letter-spacing: 0.5px;">--h --m --s</div>
+            <div id="next-class-timer-label" style="font-size: 9px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">REMAINING</div>
+          </div>
+        </div>
+
+        <!-- Weekly Schedule Day Tabs -->
+        <div class="day-tabs" id="day-tabs-container">
+          <button class="day-tab-btn" id="day-btn-FullWeek" onclick="switchDayTab('FullWeek')" style="background: rgba(168, 85, 247, 0.15); border-color: rgba(168, 85, 247, 0.35); color: #c084fc;">
+            <i data-lucide="calendar-range" style="width: 13px; height: 13px; display: inline-block; vertical-align: middle;"></i>
+            <span>Full Week</span>
+          </button>
+          <button class="day-tab-btn active" id="day-btn-Sunday" onclick="switchDayTab('Sunday')">Sunday</button>
+          <button class="day-tab-btn" id="day-btn-Monday" onclick="switchDayTab('Monday')">Monday</button>
+          <button class="day-tab-btn" id="day-btn-Tuesday" onclick="switchDayTab('Tuesday')">Tuesday</button>
+          <button class="day-tab-btn" id="day-btn-Wednesday" onclick="switchDayTab('Wednesday')">Wednesday</button>
+          <button class="day-tab-btn" id="day-btn-Thursday" onclick="switchDayTab('Thursday')">Thursday</button>
+        </div>
+
+        <!-- Period Cards Container -->
+        <div class="period-cards-list" id="period-cards-container">
+          <!-- Rendered dynamically -->
+        </div>
+
+        <!-- Teachers Directory Card -->
+        <div class="teachers-section">
+          <div class="section-header-title">
+            <i data-lucide="user-check" style="width: 18px; height: 18px; color: #a855f7;"></i>
+            <span>Department Teachers Directory</span>
+          </div>
+          <div id="teachers-list-container">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <!-- EXAM ROUTINE VIEW CONTAINER -->
+      <div id="exam-routine-view" style="display: none;">
+        <!-- Exam Routine Header Card -->
+        <div class="routine-header-card" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(18, 26, 43, 0.85) 100%); border: 1px solid rgba(239, 68, 68, 0.3);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 8px; color: #ef4444; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">
+              <i data-lucide="shield-check" style="width: 14px; height: 14px;"></i>
+              <span>Official BTEB Examination Schedule</span>
+            </div>
+            <span style="background: rgba(239, 68, 68, 0.2); color: #f87171; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(239, 68, 68, 0.3);">
+              Written / Theory Exam
+            </span>
+          </div>
+
+          <h2 class="routine-info-title" id="exam-view-title" style="color: white; margin-bottom: 4px;">Diploma in Engineering Exam-2025/2026</h2>
+          <div class="routine-info-sub" id="exam-view-dept-sem" style="color: var(--text-muted);">Computer Science & Technology (CST) • 1st Semester</div>
+
+          <!-- Dept Selector Pills -->
+          <div style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin: 16px 0 12px 0;">
+            <button class="exam-dept-btn active" id="exam-page-dept-CST" onclick="setExamPageDept('CST')">CST</button>
+            <button class="exam-dept-btn" id="exam-page-dept-CT" onclick="setExamPageDept('CT')">CT</button>
+            <button class="exam-dept-btn" id="exam-page-dept-ET" onclick="setExamPageDept('ET')">ET</button>
+            <button class="exam-dept-btn" id="exam-page-dept-ENT" onclick="setExamPageDept('ENT')">ENT</button>
+            <button class="exam-dept-btn" id="exam-page-dept-MT" onclick="setExamPageDept('MT')">MT</button>
+            <button class="exam-dept-btn" id="exam-page-dept-AT" onclick="setExamPageDept('AT')">AT</button>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Semester:</span>
+              <select id="exam-page-sem-select" class="group-dropdown" style="padding: 6px 12px; width: 140px; font-size: 13px;" onchange="setExamPageSem(this.value)">
+                <option value="1st">1st Semester</option>
+                <option value="2nd">2nd Semester</option>
+                <option value="3rd">3rd Semester</option>
+                <option value="4th">4th Semester</option>
+                <option value="5th">5th Semester</option>
+                <option value="6th">6th Semester</option>
+                <option value="7th">7th Semester</option>
+                <option value="8th">8th Semester</option>
+              </select>
+            </div>
+
+            <button class="btn-export-routine" onclick="window.print()" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(244, 63, 94, 0.25) 100%); border-color: rgba(239, 68, 68, 0.4); color: #fca5a5;">
+              <i data-lucide="printer" style="width: 14px; height: 14px;"></i>
+              <span>Print Timetable</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Next Exam Paper Countdown Banner -->
+        <div class="next-class-card" id="next-exam-countdown-banner" style="background: rgba(18, 26, 43, 0.85); border: 1.5px solid rgba(239, 68, 68, 0.65); box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(239, 68, 68, 0.3); border-radius: 20px; padding: 16px 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <div style="width: 46px; height: 46px; border-radius: 16px; background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+              <i data-lucide="calendar-clock" style="width: 24px; height: 24px;"></i>
+            </div>
+            <div>
+              <div style="font-size: 11px; font-weight: 800; color: #fca5a5; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">📌 NEXT EXAM COUNTDOWN</div>
+              <div id="next-exam-title" style="font-size: 15px; font-weight: 800; color: #ffffff;">Loading schedule...</div>
+              <div id="next-exam-details" style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Checking upcoming BTEB papers</div>
+            </div>
+          </div>
+          <div style="background: rgba(10, 15, 26, 0.8); border: 1px solid rgba(239, 68, 68, 0.4); padding: 8px 16px; border-radius: 14px; text-align: center; flex-shrink: 0; min-width: 120px;">
+            <div id="next-exam-timer-text" style="font-family: var(--font-display); font-size: 18px; font-weight: 900; color: #ef4444; letter-spacing: 0.5px;">--d --h --m</div>
+            <div style="font-size: 9px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">REMAINING</div>
+          </div>
+        </div>
+
+        <!-- Exam Schedule Cards / Table Container -->
+        <div id="exam-page-schedule-container">
           <!-- Rendered dynamically -->
         </div>
       </div>
@@ -1719,6 +1832,201 @@
           lucide.createIcons();
         });
       }, 400);
+    }
+
+    // ================= DEDICATED EXAM ROUTINE SCREEN LOGIC =================
+    let activeRoutineMode = "class"; // "class" or "exam"
+    let activeExamPageDept = "CST";
+    let activeExamPageSem = "1st";
+
+    function switchRoutineMode(mode) {
+      activeRoutineMode = mode;
+      const classBtn = document.getElementById("mode-tab-class");
+      const examBtn = document.getElementById("mode-tab-exam");
+      const classView = document.getElementById("class-routine-view");
+      const examView = document.getElementById("exam-routine-view");
+
+      if (!classBtn || !examBtn || !classView || !examView) return;
+
+      if (mode === "class") {
+        classBtn.style.background = "var(--grad-primary)";
+        classBtn.style.color = "#fff";
+        classBtn.style.border = "none";
+        classBtn.style.boxShadow = "0 4px 15px rgba(99, 102, 241, 0.35)";
+
+        examBtn.style.background = "transparent";
+        examBtn.style.color = "var(--text-muted)";
+        examBtn.style.border = "1px solid transparent";
+        examBtn.style.boxShadow = "none";
+
+        classView.style.display = "block";
+        examView.style.display = "none";
+      } else {
+        examBtn.style.background = "linear-gradient(135deg, #ef4444 0%, #f43f5e 100%)";
+        examBtn.style.color = "#fff";
+        examBtn.style.border = "none";
+        examBtn.style.boxShadow = "0 4px 15px rgba(239, 68, 68, 0.35)";
+
+        classBtn.style.background = "transparent";
+        classBtn.style.color = "var(--text-muted)";
+        classBtn.style.border = "1px solid transparent";
+        classBtn.style.boxShadow = "none";
+
+        classView.style.display = "none";
+        examView.style.display = "block";
+
+        fetchAndRenderExamPageSchedule();
+      }
+      lucide.createIcons();
+    }
+
+    function setExamPageDept(dept) {
+      activeExamPageDept = dept;
+      document.querySelectorAll("[id^='exam-page-dept-']").forEach(b => b.classList.remove("active"));
+      const btn = document.getElementById(`exam-page-dept-${dept}`);
+      if (btn) btn.classList.add("active");
+      fetchAndRenderExamPageSchedule();
+    }
+
+    function setExamPageSem(sem) {
+      activeExamPageSem = sem;
+      fetchAndRenderExamPageSchedule();
+    }
+
+    async function fetchAndRenderExamPageSchedule() {
+      const container = document.getElementById("exam-page-schedule-container");
+      if (!container) return;
+
+      const titleEl = document.getElementById("exam-view-title");
+      const deptSemEl = document.getElementById("exam-view-dept-sem");
+      if (deptSemEl) deptSemEl.textContent = `${activeExamPageDept} Department • ${activeExamPageSem} Semester Exam Routine`;
+
+      container.innerHTML = `
+        <div style="text-align: center; padding: 40px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 18px;">
+          <i data-lucide="loader" style="width: 32px; height: 32px; color: #ef4444; animation: spin 1s linear infinite; margin: 0 auto 10px auto;"></i>
+          <p style="color: var(--text-muted);">Fetching BTEB Exam Schedule for ${activeExamPageDept} ${activeExamPageSem} Semester...</p>
+        </div>
+      `;
+      lucide.createIcons();
+
+      const docId = `${activeExamPageDept}_${activeExamPageSem}`;
+      const altId = `${activeExamPageDept.toLowerCase()}_${activeExamPageSem.replace(/[^0-9]/g, "")}`;
+
+      let scheduleList = null;
+      let examTitle = "BTEB Semester Final Timetable 2026";
+
+      if (db) {
+        try {
+          // 1. Check docId e.g. CST_1st
+          let doc = await db.collection("exam_routines").doc(docId).get();
+          if (doc.exists && doc.data()) {
+            const data = doc.data();
+            scheduleList = data.schedule || data.routine;
+            if (data.exam_title) examTitle = data.exam_title;
+          }
+          
+          // 2. Check altId e.g. cst_1
+          if (!scheduleList || scheduleList.length === 0) {
+            doc = await db.collection("exam_routines").doc(altId).get();
+            if (doc.exists && doc.data()) {
+              const data = doc.data();
+              scheduleList = data.schedule || data.routine;
+              if (data.exam_title) examTitle = data.exam_title;
+            }
+          }
+
+          // 3. Query by technology_key
+          if (!scheduleList || scheduleList.length === 0) {
+            const snap = await db.collection("exam_routines").where("technology_key", "==", activeExamPageDept.toLowerCase()).get();
+            if (!snap.empty) {
+              const data = snap.docs[0].data();
+              scheduleList = data.schedule || data.routine;
+              if (data.exam_title) examTitle = data.exam_title;
+            }
+          }
+        } catch (e) {
+          console.warn("Exam routine fetch error:", e);
+        }
+      }
+
+      if (titleEl) titleEl.textContent = examTitle;
+
+      if (!scheduleList || scheduleList.length === 0) {
+        scheduleList = [
+          { serial: 1, subject_code: "25712", subject_name: "English-I", date: "2026-08-09", date_display: "09 August 2026", day: "Sunday", time: "02:00 PM" },
+          { serial: 2, subject_code: "25912", subject_name: "Physics-I", date: "2026-08-15", date_display: "15 August 2026", day: "Saturday", time: "02:00 PM" },
+          { serial: 3, subject_code: "25911", subject_name: "Mathematics-I", date: "2026-08-24", date_display: "24 August 2026", day: "Monday", time: "02:00 PM" },
+          { serial: 4, subject_code: "26711", subject_name: "Basic Electricity", date: "2026-09-02", date_display: "02 September 2026", day: "Wednesday", time: "10:00 AM" },
+          { serial: 5, subject_code: "25711", subject_name: "Bangla-I", date: "2026-09-05", date_display: "05 September 2026", day: "Saturday", time: "02:00 PM" }
+        ];
+      }
+
+      renderExamScheduleCardsAndTable(scheduleList, container);
+      updateNextExamCountdownBanner(scheduleList);
+    }
+
+    function renderExamScheduleCardsAndTable(list, container) {
+      let cardsHtml = `
+        <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
+      `;
+
+      list.forEach((item, idx) => {
+        const dateVal = item.date_display || item.date || "TBA";
+        const dayVal = item.day || "Exam Day";
+        const timeVal = item.time || item.time_24_hour || "02:00 PM";
+        const subjectVal = item.subject_name || item.subject || "Subject";
+        const codeVal = item.subject_code || item.code || "N/A";
+        const serialVal = item.serial ? `#${item.serial}` : `#${idx + 1}`;
+
+        cardsHtml += `
+          <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-left: 4px solid #ef4444; border-radius: 16px; padding: 16px 20px; backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; box-shadow: 0 6px 20px rgba(0,0,0,0.3); transition: transform 0.2s ease;">
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; font-family: var(--font-display); font-size: 14px; font-weight: 900; width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                ${serialVal}
+              </div>
+              <div>
+                <div style="font-size: 15px; font-weight: 800; color: #ffffff; margin-bottom: 4px;">${subjectVal}</div>
+                <div style="font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
+                  <span style="color: #f472b6; background: rgba(244, 114, 182, 0.15); padding: 2px 8px; border-radius: 6px; font-weight: 800; font-size: 11px;">Subject Code: ${codeVal}</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+              <div style="font-weight: 800; color: #ffffff; font-size: 13px; display: flex; align-items: center; gap: 6px;">
+                <i data-lucide="calendar" style="width: 14px; height: 14px; color: #ef4444;"></i>
+                <span>${dateVal}</span>
+              </div>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <span style="font-size: 11px; color: #ef4444; font-weight: 800;">${dayVal}</span>
+                <span style="font-size: 10px; font-weight: 800; color: #a5b4fc; background: rgba(99, 102, 241, 0.15); padding: 2px 8px; border-radius: 6px;">${timeVal}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      cardsHtml += `</div>`;
+
+      container.innerHTML = cardsHtml;
+      lucide.createIcons();
+    }
+
+    function updateNextExamCountdownBanner(list) {
+      const banner = document.getElementById("next-exam-countdown-banner");
+      const title = document.getElementById("next-exam-title");
+      const details = document.getElementById("next-exam-details");
+      const timerText = document.getElementById("next-exam-timer-text");
+
+      if (!banner || !list || list.length === 0) return;
+
+      const firstItem = list[0];
+      const dateVal = firstItem.date_display || firstItem.date || "TBA";
+      const subjectVal = firstItem.subject_name || firstItem.subject || "Upcoming Exam";
+
+      if (title) title.textContent = `${subjectVal} (${firstItem.subject_code || ''})`;
+      if (details) details.textContent = `Scheduled on ${dateVal} at ${firstItem.time || '02:00 PM'}`;
+      if (timerText) timerText.textContent = `Upcoming`;
     }
   </script>
 
