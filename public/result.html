@@ -507,59 +507,87 @@
       }
     }
 
-    function handleRollSearch(event) {
+    async function handleRollSearch(event) {
       event.preventDefault();
-      const roll = document.getElementById("roll-input").value.trim();
+      const rawRoll = document.getElementById("roll-input").value.trim();
 
-      if (!roll) return;
+      if (!rawRoll) return;
 
       const outputArea = document.getElementById("result-output-area");
       outputArea.style.display = "block";
       outputArea.innerHTML = `
         <div class="result-display-card" style="text-align: center; padding: 30px;">
           <i data-lucide="loader" style="width: 32px; height: 32px; color: var(--color-cyan); animation: spin 1s linear infinite; margin: 0 auto 10px auto;"></i>
-          <p style="color: var(--text-muted);">Fetching result for Roll ${roll} from Firebase...</p>
+          <p style="color: var(--text-muted);">Searching result for Roll ${rawRoll}...</p>
         </div>
       `;
       lucide.createIcons();
 
-      // Query Firebase Firestore 'student_results' collection first
+      const rollStr = String(rawRoll);
+      const rollNum = Number(rawRoll);
+
       if (db) {
-        db.collection("student_results").doc(roll).get().then((doc) => {
-          if (doc.exists) {
-            renderStudentResult(doc.data());
-          } else {
-            // Query by roll string field if document ID differs
-            db.collection("student_results").where("roll", "==", roll).get().then((snap) => {
-              if (!snap.empty) {
-                renderStudentResult(snap.docs[0].data());
-              } else {
-                fetchFallbackLocalApi(roll);
-              }
-            }).catch(() => fetchFallbackLocalApi(roll));
+        try {
+          // 1. Doc ID in student_results
+          let doc = await db.collection("student_results").doc(rollStr).get();
+          if (doc.exists) { renderStudentResult(doc.data()); return; }
+
+          // 2. String field "roll" in student_results
+          let snap = await db.collection("student_results").where("roll", "==", rollStr).get();
+          if (!snap.empty) { renderStudentResult(snap.docs[0].data()); return; }
+
+          // 3. Numeric field "roll" in student_results (if stored as number 200029)
+          if (!isNaN(rollNum)) {
+            snap = await db.collection("student_results").where("roll", "==", rollNum).get();
+            if (!snap.empty) { renderStudentResult(snap.docs[0].data()); return; }
           }
-        }).catch((err) => {
-          console.warn("Firestore search error, trying local server:", err);
-          fetchFallbackLocalApi(roll);
-        });
-      } else {
-        fetchFallbackLocalApi(roll);
+
+          // 4. Doc ID in results
+          doc = await db.collection("results").doc(rollStr).get();
+          if (doc.exists && doc.data().roll) { renderStudentResult(doc.data()); return; }
+
+          // 5. String field "roll" in results
+          snap = await db.collection("results").where("roll", "==", rollStr).get();
+          if (!snap.empty) { renderStudentResult(snap.docs[0].data()); return; }
+
+          // 6. Numeric field "roll" in results
+          if (!isNaN(rollNum)) {
+            snap = await db.collection("results").where("roll", "==", rollNum).get();
+            if (!snap.empty) { renderStudentResult(snap.docs[0].data()); return; }
+          }
+        } catch (err) {
+          console.warn("Firestore search error, trying fallbacks:", err);
+        }
       }
+
+      // 7. Fallback Local API Search
+      fetchFallbackLocalApi(rollStr);
     }
 
-    function fetchFallbackLocalApi(roll) {
-      fetch(`/api/result?roll=${encodeURIComponent(roll)}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.success && data.result) {
-            renderStudentResult(data.result);
-          } else {
-            renderNotFound(roll);
-          }
-        })
-        .catch(err => {
-          renderNotFound(roll);
-        });
+    async function fetchFallbackLocalApi(rollStr) {
+      try {
+        let res = await fetch(`/api/result/${encodeURIComponent(rollStr)}`);
+        let data = await res.json();
+        if (data.ok && data.results && data.results.length > 0) {
+          renderStudentResult(data.results[0]);
+          return;
+        }
+        if (data.success && data.result) {
+          renderStudentResult(data.result);
+          return;
+        }
+
+        res = await fetch(`/api/result?roll=${encodeURIComponent(rollStr)}`);
+        data = await res.json();
+        if (data.success && data.result) {
+          renderStudentResult(data.result);
+          return;
+        }
+      } catch (e) {
+        console.warn("Local API fallback error:", e);
+      }
+
+      renderNotFound(rollStr);
     }
 
     function renderStudentResult(data) {
