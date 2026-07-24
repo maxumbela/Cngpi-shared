@@ -3163,7 +3163,11 @@
       const container = document.getElementById("exam-schedule-container");
       if (!container) return;
 
+      const semNumOnly = activeExamSem.replace(/[^0-9]/g, "") || "1";
+      const routineCode = `${activeExamDept}-${semNumOnly}`;
+      const lowerRoutineCode = routineCode.toLowerCase();
       const docId = `${activeExamDept}_${activeExamSem}`;
+      const altId = `${activeExamDept.toLowerCase()}_${semNumOnly}`;
 
       container.innerHTML = `
         <div style="display: flex; flex-direction: column; gap: 10px; padding: 12px 0;">
@@ -3175,31 +3179,36 @@
       `;
 
       if (db) {
-        db.collection("exam_routines").doc(docId).get().then(doc => {
-          if (doc.exists) {
-            const data = doc.data();
-            const list = data.schedule || data.routine || [];
-            if (list && list.length > 0) {
-              displayExamScheduleList(list, container);
-              return;
-            }
+        db.collection("exam_routines").doc(routineCode).get().then(doc => {
+          if (doc.exists && doc.data() && (doc.data().schedule || doc.data().routine)) {
+            displayExamScheduleList(doc.data().schedule || doc.data().routine, container);
+            return;
           }
           
-          const altId = `${activeExamDept.toLowerCase()}_${activeExamSem.replace(/[^0-9]/g, "")}`;
-          db.collection("exam_routines").doc(altId).get().then(altDoc => {
-            if (altDoc.exists) {
-              const data = altDoc.data();
-              const list = data.schedule || data.routine || [];
-              if (list && list.length > 0) {
-                displayExamScheduleList(list, container);
+          db.collection("exam_routines").doc(lowerRoutineCode).get().then(lowerDoc => {
+            if (lowerDoc.exists && lowerDoc.data() && (lowerDoc.data().schedule || lowerDoc.data().routine)) {
+              displayExamScheduleList(lowerDoc.data().schedule || lowerDoc.data().routine, container);
+              return;
+            }
+
+            db.collection("exam_routines").doc(docId).get().then(mainDoc => {
+              if (mainDoc.exists && mainDoc.data() && (mainDoc.data().schedule || mainDoc.data().routine)) {
+                displayExamScheduleList(mainDoc.data().schedule || mainDoc.data().routine, container);
                 return;
               }
-            }
-            const fallback = SAMPLE_EXAM_SCHEDULES[docId] || [];
-            displayExamScheduleList(fallback, container);
-          }).catch(() => {
-            const fallback = SAMPLE_EXAM_SCHEDULES[docId] || [];
-            displayExamScheduleList(fallback, container);
+
+              db.collection("exam_routines").doc(altId).get().then(altDoc => {
+                if (altDoc.exists && altDoc.data() && (altDoc.data().schedule || altDoc.data().routine)) {
+                  displayExamScheduleList(altDoc.data().schedule || altDoc.data().routine, container);
+                  return;
+                }
+                const fallback = SAMPLE_EXAM_SCHEDULES[docId] || [];
+                displayExamScheduleList(fallback, container);
+              }).catch(() => {
+                const fallback = SAMPLE_EXAM_SCHEDULES[docId] || [];
+                displayExamScheduleList(fallback, container);
+              });
+            });
           });
         }).catch(err => {
           console.error("Firestore exam fetch error:", err);

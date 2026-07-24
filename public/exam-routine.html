@@ -875,21 +875,46 @@
       `;
       lucide.createIcons();
 
+      const semNumOnly = activeSem.replace(/[^0-9]/g, "") || "1";
+      const routineCode = `${activeDept}-${semNumOnly}`;
+      const lowerRoutineCode = routineCode.toLowerCase();
       const docId = `${activeDept}_${activeSem}`;
-      const altId = `${activeDept.toLowerCase()}_${activeSem.replace(/[^0-9]/g, "")}`;
+      const altId = `${activeDept.toLowerCase()}_${semNumOnly}`;
 
       let scheduleList = null;
       let examTitle = "BTEB Semester Final Timetable 2026";
 
       if (db) {
         try {
-          let doc = await db.collection("exam_routines").doc(docId).get();
+          // 1. Query by routine_code e.g. ET-4, CST-1
+          let doc = await db.collection("exam_routines").doc(routineCode).get();
           if (doc.exists && doc.data()) {
             const data = doc.data();
             scheduleList = data.schedule || data.routine;
             if (data.exam_title) examTitle = data.exam_title;
           }
 
+          // 2. Query by lowerRoutineCode e.g. et-4
+          if (!scheduleList || scheduleList.length === 0) {
+            doc = await db.collection("exam_routines").doc(lowerRoutineCode).get();
+            if (doc.exists && doc.data()) {
+              const data = doc.data();
+              scheduleList = data.schedule || data.routine;
+              if (data.exam_title) examTitle = data.exam_title;
+            }
+          }
+
+          // 3. Query by docId e.g. CST_1st
+          if (!scheduleList || scheduleList.length === 0) {
+            doc = await db.collection("exam_routines").doc(docId).get();
+            if (doc.exists && doc.data()) {
+              const data = doc.data();
+              scheduleList = data.schedule || data.routine;
+              if (data.exam_title) examTitle = data.exam_title;
+            }
+          }
+
+          // 4. Query by altId e.g. cst_1
           if (!scheduleList || scheduleList.length === 0) {
             doc = await db.collection("exam_routines").doc(altId).get();
             if (doc.exists && doc.data()) {
@@ -899,8 +924,9 @@
             }
           }
 
+          // 5. Query where routine_code == routineCode
           if (!scheduleList || scheduleList.length === 0) {
-            const snap = await db.collection("exam_routines").where("technology_key", "==", activeDept.toLowerCase()).get();
+            const snap = await db.collection("exam_routines").where("routine_code", "==", routineCode).get();
             if (!snap.empty) {
               const data = snap.docs[0].data();
               scheduleList = data.schedule || data.routine;

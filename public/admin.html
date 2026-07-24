@@ -2960,26 +2960,23 @@
     }
 
     function formatRoutinePayload(jsonObj) {
-      const rawTech = jsonObj.technology_short_name || jsonObj.technology_key || jsonObj.technology || "CST";
-      let deptShortCode = String(rawTech).toUpperCase().replace(/[^A-Z]/g, '');
-      const lower = String(rawTech).toLowerCase();
-      if (lower.includes("cst") || lower.includes("computer")) deptShortCode = "CST";
-      else if (lower.includes("electrical") || lower.includes("et")) deptShortCode = "ET";
-      else if (lower.includes("electronics") || lower.includes("ent")) deptShortCode = "ENT";
-      else if (lower.includes("mechatronics") || lower.includes("mt") || lower.includes("mechanical")) deptShortCode = "MT";
-      else if (lower.includes("refrigeration") || lower.includes("rac") || lower.includes("air conditioning")) deptShortCode = "RAC";
-      else if (lower.includes("food") || lower.includes("ft")) deptShortCode = "FT";
-      else if (!["CST", "ET", "ENT", "MT", "RAC", "FT"].includes(deptShortCode)) deptShortCode = "CST";
+      const rawShortForm = jsonObj.routine_code ? jsonObj.routine_code.split('-')[0] : (jsonObj.technology_short_form || jsonObj.technology_short_name || jsonObj.technology_key || jsonObj.technology || "CST");
+      let deptShortCode = String(rawShortForm).toUpperCase().replace(/[^A-Z]/g, '');
+      const lower = String(rawShortForm).toLowerCase();
 
-      const semRaw = jsonObj.semester_name || (jsonObj.semester ? jsonObj.semester + "st" : "1st");
-      let semCode = String(semRaw).toLowerCase();
-      if (!semCode.includes("st") && !semCode.includes("nd") && !semCode.includes("rd") && !semCode.includes("th")) {
-        const num = semCode.replace(/[^0-9]/g, "") || "1";
-        semCode = num === "1" ? "1st" : num === "2" ? "2nd" : num === "3" ? "3rd" : num + "th";
-      } else {
-        const num = semCode.replace(/[^0-9]/g, "") || "1";
-        semCode = num === "1" ? "1st" : num === "2" ? "2nd" : num === "3" ? "3rd" : num + "th";
-      }
+      if (lower.includes("cst") || lower.includes("computer")) deptShortCode = "CST";
+      else if (lower.includes("electrical") || lower === "et") deptShortCode = "ET";
+      else if (lower.includes("electronics") || lower === "ent") deptShortCode = "ENT";
+      else if (lower.includes("mechatronics") || lower === "mnt" || lower === "mt" || lower.includes("mechanical")) deptShortCode = "MNT";
+      else if (lower.includes("refrigeration") || lower === "rac" || lower.includes("air conditioning")) deptShortCode = "RAC";
+      else if (lower.includes("food") || lower === "ft") deptShortCode = "FT";
+      else if (!["CST", "ET", "ENT", "MNT", "MT", "RAC", "FT"].includes(deptShortCode)) deptShortCode = "CST";
+
+      const semNumOnly = String(jsonObj.semester || (jsonObj.semester_name ? jsonObj.semester_name.replace(/[^0-9]/g, "") : "1")).replace(/[^0-9]/g, "") || "1";
+      const semCode = semNumOnly === "1" ? "1st" : semNumOnly === "2" ? "2nd" : semNumOnly === "3" ? "3rd" : semNumOnly + "th";
+
+      const routineCode = jsonObj.routine_code ? jsonObj.routine_code.trim() : `${deptShortCode}-${semNumOnly}`;
+      const lowerRoutineCode = routineCode.toLowerCase();
 
       const routineList = jsonObj.routine || jsonObj.weekly_schedule || jsonObj.schedule || [];
       
@@ -2992,18 +2989,22 @@
         time: item.time || item.time_24_hour || "02:00 PM"
       }));
 
-      const semNumOnly = (jsonObj.semester || semCode.replace(/[^0-9]/g, "") || "1");
-
       return {
+        routineCode: routineCode,
+        lowerRoutineCode: lowerRoutineCode,
         docId: `${deptShortCode}_${semCode}`,
         altDocId: `${deptShortCode.toLowerCase()}_${semNumOnly}`,
         techCodeDocId: jsonObj.technology_code ? `${jsonObj.technology_code}_${semNumOnly}` : null,
         data: {
+          routine_code: routineCode,
+          technology_short_form: deptShortCode,
           exam_title: jsonObj.exam_title || "BTEB Semester Final 2026",
           department: deptShortCode,
           semester: semCode,
+          semester_name: jsonObj.semester_name || `${semCode} Semester`,
           technology: jsonObj.technology || deptShortCode,
           technology_key: (jsonObj.technology_key || deptShortCode).toLowerCase(),
+          technology_short_name: jsonObj.technology_short_name || deptShortCode,
           technology_code: jsonObj.technology_code || "",
           regulation: jsonObj.regulation || 2022,
           exam_category: jsonObj.exam_category || "Written/Theory",
@@ -3036,7 +3037,7 @@
 
             currentAdminExamSchedule = formatted.data.schedule;
             renderAdminExamScheduleTable();
-            showToast(`Parsed "${formatted.data.exam_title}" (${formatted.data.schedule.length} subjects)! Preview loaded below.`, "success");
+            showToast(`Parsed "${formatted.routineCode}" - ${formatted.data.exam_title} (${formatted.data.schedule.length} subjects)! Preview loaded below.`, "success");
           }
         } catch (err) {
           showToast("Failed to parse JSON text: " + err.message, "error");
@@ -3057,7 +3058,7 @@
 
             currentAdminExamSchedule = formatted.data.schedule;
             renderAdminExamScheduleTable();
-            showToast(`Parsed file "${file.name}" (${formatted.data.schedule.length} subjects)! Preview loaded below.`, "success");
+            showToast(`Parsed file "${file.name}" [${formatted.routineCode}] (${formatted.data.schedule.length} subjects)! Preview loaded below.`, "success");
           }
         } catch (err) {
           showToast(`Failed to parse "${file.name}": ` + err.message, "error");
@@ -3129,7 +3130,7 @@
         itemListContainer.innerHTML = itemsToUpload.map((item, idx) => `
           <div id="batch-row-${idx}" style="display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: rgba(255,255,255,0.04); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
             <div>
-              <span style="font-weight: 800; color: #ffffff;">#${idx + 1} ${item.data.department} (${item.data.semester})</span>
+              <span style="font-weight: 800; color: #ffffff;">#${idx + 1} ${item.routineCode} (${item.data.department} ${item.data.semester})</span>
               <span style="color: var(--text-muted); font-size: 11px; margin-left: 6px;">${item.data.total_exams} Subjects</span>
             </div>
             <span id="batch-badge-${idx}" style="color: #fbbf24; font-weight: 800; font-size: 11px;">⏳ Pending</span>
@@ -3147,7 +3148,7 @@
 
         if (barFill) barFill.style.width = `${currentPct}%`;
         if (percentText) percentText.textContent = `${currentPct}%`;
-        if (statusText) statusText.textContent = `[${i + 1}/${total}] Uploading ${item.data.department} ${item.data.semester}...`;
+        if (statusText) statusText.textContent = `[${i + 1}/${total}] Uploading ${item.routineCode} (${item.data.department} ${item.data.semester})...`;
 
         const badgeEl = document.getElementById(`batch-badge-${i}`);
         if (badgeEl) {
@@ -3157,25 +3158,28 @@
 
         try {
           if (db) {
-            // Write to exam_routines under main docId (e.g. CST_1st)
-            await db.collection("exam_routines").doc(item.docId).set(item.data);
+            // 1. Primary write under routine_code (e.g. ET-4, CST-1)
+            await db.collection("exam_routines").doc(item.routineCode).set(item.data);
             
-            // Also write under lower case alt key (e.g. cst_1)
+            // 2. Lowercase routine_code (e.g. et-4, cst-1)
+            await db.collection("exam_routines").doc(item.lowerRoutineCode).set(item.data);
+
+            // 3. Main docId (e.g. ET_4th)
+            await db.collection("exam_routines").doc(item.docId).set(item.data);
+
+            // 4. Alt key (e.g. et_4)
             if (item.altDocId) {
               await db.collection("exam_routines").doc(item.altDocId).set(item.data);
             }
 
-            // Write under technology_key doc (e.g. cst)
-            if (item.data.technology_key) {
-              await db.collection("exam_routines").doc(item.data.technology_key).set(item.data);
-            }
-
-            // Write under techCodeDocId (e.g. 85_1)
+            // 5. Tech code key (e.g. 67_4)
             if (item.techCodeDocId) {
               await db.collection("exam_routines").doc(item.techCodeDocId).set(item.data);
             }
-            
-            // Write under routines collection for total compatibility
+
+            // Also mirror under routines collection for total compatibility
+            await db.collection("routines").doc(item.routineCode).set(item.data);
+            await db.collection("routines").doc(item.lowerRoutineCode).set(item.data);
             await db.collection("routines").doc(item.docId).set(item.data);
             if (item.altDocId) {
               await db.collection("routines").doc(item.altDocId).set(item.data);
@@ -3193,7 +3197,7 @@
             badgeEl.style.color = "#f87171";
             badgeEl.textContent = "❌ Error";
           }
-          showToast(`Save error for ${item.docId}: ` + err.message, "error");
+          showToast(`Save error for ${item.routineCode}: ` + err.message, "error");
         }
 
         // 250ms smooth delay so progress bar transition is visible
@@ -3221,7 +3225,7 @@
         renderAdminExamScheduleTable();
       }
 
-      // Auto close modal after 1.5s
+      // Auto close modal after 1.8s
       setTimeout(() => {
         closeBatchUploadModal();
       }, 1800);
