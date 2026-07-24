@@ -14,7 +14,7 @@
   <!-- Lucide Icons -->
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.344.0/dist/umd/lucide.min.js"></script>
 
-  <!-- HTML2Canvas -->
+  <!-- HTML2Canvas for HD PNG Export -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <!-- Firebase SDKs -->
@@ -95,7 +95,7 @@
     /* Responsive Container */
     .web-app-container {
       width: 100%;
-      max-width: 640px;
+      max-width: 680px;
       margin: 0 auto;
       min-height: 100vh;
       display: flex;
@@ -107,12 +107,12 @@
 
     /* Header Bar */
     .app-header {
-      padding: 18px 20px;
+      padding: 16px 20px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       border-bottom: 1px solid var(--border-color);
-      background: rgba(9, 13, 22, 0.8);
+      background: rgba(9, 13, 22, 0.85);
       backdrop-filter: blur(16px);
       position: sticky;
       top: 0;
@@ -182,7 +182,7 @@
 
     /* Header Hero Card */
     .hero-card {
-      background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(18, 26, 43, 0.85) 100%);
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(18, 26, 43, 0.88) 100%);
       border: 1px solid rgba(239, 68, 68, 0.3);
       border-radius: 22px;
       padding: 22px;
@@ -270,12 +270,12 @@
       box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
     }
 
-    /* Form Controls */
+    /* Form Controls Bar */
     .controls-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       flex-wrap: wrap;
     }
 
@@ -297,30 +297,66 @@
       color: #ffffff;
     }
 
-    .btn-print {
+    /* Action Buttons Row */
+    .action-buttons-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-action-custom {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 8px 16px;
+      padding: 8px 14px;
       border-radius: 12px;
-      background: linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(244, 63, 94, 0.25) 100%);
-      border: 1px solid rgba(239, 68, 68, 0.4);
-      color: #fca5a5;
       font-size: 12px;
       font-weight: 800;
       cursor: pointer;
       transition: all 0.2s ease;
+      text-decoration: none;
     }
 
-    .btn-print:hover {
+    .btn-action-rose {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(244, 63, 94, 0.25) 100%);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+    }
+
+    .btn-action-rose:hover {
       background: var(--grad-rose);
       color: #ffffff;
       box-shadow: 0 4px 15px rgba(239, 68, 68, 0.35);
     }
 
+    .btn-action-purple {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.25) 0%, rgba(99, 102, 241, 0.25) 100%);
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      color: #c084fc;
+    }
+
+    .btn-action-purple:hover {
+      background: var(--grad-primary);
+      color: #ffffff;
+      box-shadow: 0 4px 15px rgba(168, 85, 247, 0.35);
+    }
+
+    .btn-action-emerald {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(5, 150, 105, 0.25) 100%);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #6ee7b7;
+    }
+
+    .btn-action-emerald:hover {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);
+    }
+
     /* Next Exam Countdown Banner */
     .countdown-card {
-      background: rgba(18, 26, 43, 0.85);
+      background: rgba(18, 26, 43, 0.88);
       border: 1.5px solid rgba(239, 68, 68, 0.65);
       box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(239, 68, 68, 0.3);
       border-radius: 20px;
@@ -346,13 +382,68 @@
     }
 
     .countdown-timer-box {
-      background: rgba(10, 15, 26, 0.8);
+      background: rgba(10, 15, 26, 0.85);
       border: 1px solid rgba(239, 68, 68, 0.4);
       padding: 8px 18px;
       border-radius: 14px;
       text-align: center;
       flex-shrink: 0;
-      min-width: 130px;
+      min-width: 140px;
+    }
+
+    /* View Switcher & Search Bar */
+    .filter-bar-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .search-input-box {
+      flex: 1;
+      min-width: 200px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 8px 14px;
+    }
+
+    .search-input-box input {
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 12px;
+      outline: none;
+      width: 100%;
+    }
+
+    .view-tab-btn {
+      padding: 6px 14px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .view-tab-btn.active {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: rgba(239, 68, 68, 0.4);
+      color: #f87171;
     }
 
     /* Exam Cards List */
@@ -394,6 +485,73 @@
       flex-shrink: 0;
     }
 
+    /* Table Grid View */
+    .exam-table-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 18px;
+      overflow-x: auto;
+      padding: 12px;
+    }
+
+    .exam-grid-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 580px;
+      font-size: 13px;
+    }
+
+    .exam-grid-table th {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      padding: 12px 14px;
+      text-align: left;
+      font-family: var(--font-display);
+      font-weight: 800;
+      border-bottom: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .exam-grid-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      color: var(--text-main);
+    }
+
+    /* Exam Hall Guidelines Accordion */
+    .rules-card {
+      background: rgba(18, 26, 43, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: 18px;
+      padding: 18px 22px;
+    }
+
+    .rules-title {
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .rules-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .rules-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      line-height: 1.5;
+    }
+
     /* Fixed Bottom Nav */
     .bottom-nav {
       position: fixed;
@@ -401,7 +559,7 @@
       left: 50%;
       transform: translateX(-50%);
       width: 100%;
-      max-width: 640px;
+      max-width: 680px;
       height: 70px;
       background: var(--bg-nav);
       backdrop-filter: blur(20px);
@@ -451,9 +609,9 @@
 
     @media print {
       body { background: white !important; color: black !important; }
-      .bg-glow-top, .bg-glow-bottom, .app-header, .bottom-nav, .dept-pills-row, .controls-row { display: none !important; }
+      .bg-glow-top, .bg-glow-bottom, .app-header, .bottom-nav, .dept-pills-row, .controls-row, .filter-bar-card, .action-buttons-group { display: none !important; }
       .web-app-container { max-width: 100% !important; padding: 0 !important; }
-      .hero-card, .exam-card-item { background: white !important; color: black !important; border: 1px solid #ccc !important; box-shadow: none !important; }
+      .hero-card, .exam-card-item, .exam-table-container { background: white !important; color: black !important; border: 1px solid #ccc !important; box-shadow: none !important; }
     }
   </style>
 </head>
@@ -522,10 +680,22 @@
             </select>
           </div>
 
-          <button class="btn-print" onclick="window.print()" title="Print Exam Timetable">
-            <i data-lucide="printer" style="width: 14px; height: 14px;"></i>
-            <span>Print Timetable</span>
-          </button>
+          <div class="action-buttons-group">
+            <button class="btn-action-custom btn-action-rose" onclick="exportExamAnimePNG()" title="Export HD Anime Routine Wallpaper">
+              <i data-lucide="image" style="width: 14px; height: 14px;"></i>
+              <span>Export HD PNG</span>
+            </button>
+
+            <button class="btn-action-custom btn-action-purple" onclick="downloadExamJson()" title="Download JSON Routine">
+              <i data-lucide="download-cloud" style="width: 14px; height: 14px;"></i>
+              <span>Export JSON</span>
+            </button>
+
+            <button class="btn-action-custom btn-action-emerald" onclick="window.print()" title="Print Timetable">
+              <i data-lucide="printer" style="width: 14px; height: 14px;"></i>
+              <span>Print</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -547,9 +717,50 @@
         </div>
       </div>
 
+      <!-- Search & View Mode Switcher -->
+      <div class="filter-bar-card">
+        <div class="search-input-box">
+          <i data-lucide="search" style="width: 16px; height: 16px; color: var(--text-muted);"></i>
+          <input type="text" id="exam-search-input" placeholder="Search subject name or code..." onkeyup="filterExamScheduleList()">
+        </div>
+
+        <div style="display: flex; gap: 6px; background: rgba(0,0,0,0.3); padding: 3px; border-radius: 12px; border: 1px solid var(--border-color);">
+          <button id="view-tab-cards" class="view-tab-btn active" onclick="switchExamViewMode('cards')">
+            <i data-lucide="layout-grid" style="width: 14px; height: 14px;"></i>
+            <span>Cards</span>
+          </button>
+          <button id="view-tab-table" class="view-tab-btn" onclick="switchExamViewMode('table')">
+            <i data-lucide="table" style="width: 14px; height: 14px;"></i>
+            <span>Table</span>
+          </button>
+        </div>
+      </div>
+
       <!-- Schedule List Container -->
       <div id="exam-schedule-container" style="display: flex; flex-direction: column; gap: 14px;">
         <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Exam Rules & Guidelines Card -->
+      <div class="rules-card">
+        <div class="rules-title">
+          <i data-lucide="info" style="width: 18px; height: 18px; color: #ef4444;"></i>
+          <span>BTEB Exam Hall Rules & Instructions</span>
+        </div>
+        <ul class="rules-list">
+          <li>
+            <i data-lucide="check-circle-2" style="width: 14px; height: 14px; color: #34d399; flex-shrink: 0; margin-top: 2px;"></i>
+            <span>Bring original Admit Card and Registration Card to the exam hall every day.</span>
+          </li>
+          <li>
+            <i data-lucide="check-circle-2" style="width: 14px; height: 14px; color: #34d399; flex-shrink: 0; margin-top: 2px;"></i>
+            <span>Be seated in the exam hall at least 30 minutes before the scheduled exam start time.</span>
+          </li>
+          <li>
+            <i data-lucide="check-circle-2" style="width: 14px; height: 14px; color: #34d399; flex-shrink: 0; margin-top: 2px;"></i>
+            <span>Mobile phones, smartwatches, and programmable calculators are strictly prohibited.</span>
+          </li>
+        </ul>
       </div>
 
     </div>
@@ -598,6 +809,10 @@
     let db = null;
     let activeDept = "CST";
     let activeSem = "1st";
+    let currentScheduleList = [];
+    let currentExamTitle = "Diploma in Engineering Exam-2025/2026";
+    let activeViewMode = "cards"; // "cards" or "table"
+    let countdownInterval = null;
 
     document.addEventListener("DOMContentLoaded", () => {
       lucide.createIcons();
@@ -635,6 +850,13 @@
     function changeExamSem(sem) {
       activeSem = sem;
       fetchExamSchedule();
+    }
+
+    function switchExamViewMode(mode) {
+      activeViewMode = mode;
+      document.getElementById("view-tab-cards").classList.toggle("active", mode === "cards");
+      document.getElementById("view-tab-table").classList.toggle("active", mode === "table");
+      renderExamScheduleView();
     }
 
     async function fetchExamSchedule() {
@@ -690,6 +912,7 @@
         }
       }
 
+      currentExamTitle = examTitle;
       if (titleEl) titleEl.textContent = examTitle;
 
       if (!scheduleList || scheduleList.length === 0) {
@@ -702,52 +925,119 @@
         ];
       }
 
-      renderScheduleList(scheduleList, container);
-      updateCountdownBanner(scheduleList);
+      currentScheduleList = scheduleList;
+      renderExamScheduleView();
+      startCountdownTimer(scheduleList);
     }
 
-    function renderScheduleList(list, container) {
-      let cardsHtml = "";
+    function filterExamScheduleList() {
+      renderExamScheduleView();
+    }
 
-      list.forEach((item, idx) => {
-        const dateVal = item.date_display || item.date || "TBA";
-        const dayVal = item.day || "Exam Day";
-        const timeVal = item.time || item.time_24_hour || "02:00 PM";
-        const subjectVal = item.subject_name || item.subject || "Subject";
-        const codeVal = item.subject_code || item.code || "N/A";
-        const serialVal = item.serial ? `#${item.serial}` : `#${idx + 1}`;
+    function renderExamScheduleView() {
+      const container = document.getElementById("exam-schedule-container");
+      if (!container) return;
 
-        cardsHtml += `
-          <div class="exam-card-item">
-            <div style="display: flex; align-items: center; gap: 14px;">
-              <div class="serial-badge">${serialVal}</div>
-              <div>
-                <div style="font-size: 15px; font-weight: 800; color: #ffffff; margin-bottom: 4px;">${subjectVal}</div>
-                <div style="font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
-                  <span style="color: #f472b6; background: rgba(244, 114, 182, 0.15); padding: 2px 8px; border-radius: 6px; font-weight: 800; font-size: 11px;">Subject Code: ${codeVal}</span>
+      const query = (document.getElementById("exam-search-input") ? document.getElementById("exam-search-input").value : "").toLowerCase().trim();
+
+      const list = currentScheduleList.filter(item => {
+        const name = (item.subject_name || item.subject || "").toLowerCase();
+        const code = (item.subject_code || item.code || "").toLowerCase();
+        return !query || name.includes(query) || code.includes(query);
+      });
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 40px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 18px;">
+            <i data-lucide="file-x-2" style="width: 32px; height: 32px; color: var(--text-muted); margin-bottom: 8px;"></i>
+            <p style="color: var(--text-muted); font-size: 13px;">No subjects found for "${query}"</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      if (activeViewMode === "cards") {
+        let cardsHtml = "";
+        list.forEach((item, idx) => {
+          const dateVal = item.date_display || item.date || "TBA";
+          const dayVal = item.day || "Exam Day";
+          const timeVal = item.time || item.time_24_hour || "02:00 PM";
+          const subjectVal = item.subject_name || item.subject || "Subject";
+          const codeVal = item.subject_code || item.code || "N/A";
+          const serialVal = item.serial ? `#${item.serial}` : `#${idx + 1}`;
+
+          cardsHtml += `
+            <div class="exam-card-item">
+              <div style="display: flex; align-items: center; gap: 14px;">
+                <div class="serial-badge">${serialVal}</div>
+                <div>
+                  <div style="font-size: 15px; font-weight: 800; color: #ffffff; margin-bottom: 4px;">${subjectVal}</div>
+                  <div style="font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
+                    <span style="color: #f472b6; background: rgba(244, 114, 182, 0.15); padding: 2px 8px; border-radius: 6px; font-weight: 800; font-size: 11px;">Subject Code: ${codeVal}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+                <div style="font-weight: 800; color: #ffffff; font-size: 13px; display: flex; align-items: center; gap: 6px;">
+                  <i data-lucide="calendar" style="width: 14px; height: 14px; color: #ef4444;"></i>
+                  <span>${dateVal}</span>
+                </div>
+                <div style="display: flex; gap: 6px; align-items: center;">
+                  <span style="font-size: 11px; color: #ef4444; font-weight: 800;">${dayVal}</span>
+                  <span style="font-size: 10px; font-weight: 800; color: #a5b4fc; background: rgba(99, 102, 241, 0.15); padding: 2px 8px; border-radius: 6px;">${timeVal}</span>
                 </div>
               </div>
             </div>
+          `;
+        });
+        container.innerHTML = cardsHtml;
+      } else {
+        // Render Table View
+        let tableHtml = `
+          <div class="exam-table-container">
+            <table class="exam-grid-table">
+              <thead>
+                <tr>
+                  <th style="width: 60px;">Sl#</th>
+                  <th>Subject Name</th>
+                  <th style="width: 110px;">Code</th>
+                  <th style="width: 140px;">Exam Date</th>
+                  <th style="width: 100px;">Day</th>
+                  <th style="width: 120px;">Time</th>
+                </tr>
+              </thead>
+              <tbody>
+        `;
 
-            <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
-              <div style="font-weight: 800; color: #ffffff; font-size: 13px; display: flex; align-items: center; gap: 6px;">
-                <i data-lucide="calendar" style="width: 14px; height: 14px; color: #ef4444;"></i>
-                <span>${dateVal}</span>
-              </div>
-              <div style="display: flex; gap: 6px; align-items: center;">
-                <span style="font-size: 11px; color: #ef4444; font-weight: 800;">${dayVal}</span>
-                <span style="font-size: 10px; font-weight: 800; color: #a5b4fc; background: rgba(99, 102, 241, 0.15); padding: 2px 8px; border-radius: 6px;">${timeVal}</span>
-              </div>
-            </div>
+        list.forEach((item, idx) => {
+          tableHtml += `
+            <tr>
+              <td style="font-weight: 800; color: #f87171;">#${item.serial || idx + 1}</td>
+              <td style="font-weight: 800; color: #ffffff;">${item.subject_name || item.subject || 'Subject'}</td>
+              <td><span style="color: #f472b6; background: rgba(244, 114, 182, 0.15); padding: 2px 8px; border-radius: 6px; font-weight: 800; font-size: 11px;">${item.subject_code || item.code || 'N/A'}</span></td>
+              <td>${item.date_display || item.date || 'TBA'}</td>
+              <td style="color: #ef4444; font-weight: 700;">${item.day || 'Day'}</td>
+              <td><span style="color: #a5b4fc; background: rgba(99, 102, 241, 0.15); padding: 2px 8px; border-radius: 6px; font-weight: 800; font-size: 11px;">${item.time || '02:00 PM'}</span></td>
+            </tr>
+          `;
+        });
+
+        tableHtml += `
+              </tbody>
+            </table>
           </div>
         `;
-      });
+        container.innerHTML = tableHtml;
+      }
 
-      container.innerHTML = cardsHtml;
       lucide.createIcons();
     }
 
-    function updateCountdownBanner(list) {
+    function startCountdownTimer(list) {
+      if (countdownInterval) clearInterval(countdownInterval);
+
       const title = document.getElementById("next-exam-title");
       const details = document.getElementById("next-exam-details");
       const timerText = document.getElementById("next-exam-timer-text");
@@ -760,7 +1050,126 @@
 
       if (title) title.textContent = `${subjectVal} (${firstItem.subject_code || ''})`;
       if (details) details.textContent = `Scheduled on ${dateVal} at ${firstItem.time || '02:00 PM'}`;
-      if (timerText) timerText.textContent = `Upcoming`;
+
+      let targetDate = new Date(firstItem.date || "2026-08-09T14:00:00");
+      if (isNaN(targetDate.getTime())) {
+        targetDate = new Date("2026-08-09T14:00:00");
+      }
+
+      function updateClock() {
+        const now = new Date();
+        const diffMs = targetDate - now;
+
+        if (diffMs <= 0) {
+          if (timerText) timerText.textContent = "EXAM TODAY";
+          return;
+        }
+
+        const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const mins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+
+        if (timerText) timerText.textContent = `${days}d ${hours}h ${mins}m`;
+      }
+
+      updateClock();
+      countdownInterval = setInterval(updateClock, 30000);
+    }
+
+    function downloadExamJson() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
+        exam_title: currentExamTitle,
+        department: activeDept,
+        semester: activeSem,
+        routine: currentScheduleList
+      }, null, 2));
+
+      const downloadAnchor = document.createElement("a");
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `CNGPI_Exam_Routine_${activeDept}_${activeSem}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function exportExamAnimePNG() {
+      const tempContainer = document.createElement("div");
+      tempContainer.style.cssText = "position: absolute; top: -9999px; left: -9999px; width: 1600px; height: 900px; background: url('assets/anime_bg.jpg') center/cover no-repeat; padding: 40px; box-sizing: border-box; font-family: 'Inter', sans-serif; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden;";
+
+      let tableRowsHtml = "";
+      currentScheduleList.forEach((item, idx) => {
+        tableRowsHtml += `
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);">
+            <td style="padding: 10px; font-weight: 900; color: #f87171;">#${item.serial || idx + 1}</td>
+            <td style="padding: 10px; font-weight: 800; color: #ffffff;">${item.subject_name || item.subject}</td>
+            <td style="padding: 10px; color: #f472b6; font-weight: 800;">${item.subject_code || item.code}</td>
+            <td style="padding: 10px; color: #ffffff;">${item.date_display || item.date}</td>
+            <td style="padding: 10px; color: #ef4444; font-weight: 800;">${item.day}</td>
+            <td style="padding: 10px; color: #a5b4fc; font-weight: 800;">${item.time || '02:00 PM'}</td>
+          </tr>
+        `;
+      });
+
+      tempContainer.innerHTML = `
+        <div style="background: rgba(9, 13, 22, 0.88); backdrop-filter: blur(24px); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 24px; padding: 28px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);">
+          
+          <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid rgba(239, 68, 68, 0.4); padding-bottom: 16px; margin-bottom: 16px;">
+            <div>
+              <div style="font-size: 11px; font-weight: 800; color: #f87171; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px;">Chapainawabganj Polytechnic Institute • BTEB Examination</div>
+              <h1 style="font-family: 'Outfit', sans-serif; font-size: 30px; font-weight: 900; color: #ffffff; margin: 0;">${currentExamTitle}</h1>
+              <div style="font-size: 13px; color: #94a3b8; margin-top: 4px; font-weight: 500;">${activeDept} Department • ${activeSem} Semester Exam Routine</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="background: linear-gradient(135deg, #ef4444 0%, #f43f5e 100%); color: #ffffff; padding: 10px 22px; border-radius: 16px; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 900; box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);">
+                BTEB Official Timetable
+              </div>
+            </div>
+          </div>
+
+          <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+            <table style="width: 100%; border-collapse: collapse; color: white; font-size: 14px;">
+              <thead>
+                <tr style="background: rgba(239, 68, 68, 0.2); color: #f87171; text-align: left; border-bottom: 2px solid rgba(239, 68, 68, 0.4);">
+                  <th style="padding: 10px;">Sl#</th>
+                  <th style="padding: 10px;">Subject Name</th>
+                  <th style="padding: 10px;">Code</th>
+                  <th style="padding: 10px;">Exam Date</th>
+                  <th style="padding: 10px;">Day</th>
+                  <th style="padding: 10px;">Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${tableRowsHtml}
+              </tbody>
+            </table>
+          </div>
+
+          <div style="margin-top: 16px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #94a3b8; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px;">
+            <span style="font-weight: 600;">CNGPI Official Exam Schedule • BTEB HD Wallpaper Edition</span>
+            <span style="color: #f87171; font-weight: 700;">https://cngpi.web.app</span>
+          </div>
+
+        </div>
+      `;
+
+      document.body.appendChild(tempContainer);
+
+      html2canvas(tempContainer, {
+        scale: 2,
+        backgroundColor: null,
+        useCORS: true,
+        logging: false
+      }).then(canvas => {
+        const imgData = canvas.toDataURL("image/png", 1.0);
+        const downloadLink = document.createElement("a");
+        downloadLink.download = `CNGPI_Exam_Routine_${activeDept}_${activeSem}_16x9_HD.png`;
+        downloadLink.href = imgData;
+        downloadLink.click();
+        document.body.removeChild(tempContainer);
+      }).catch(err => {
+        console.error("HD PNG export error:", err);
+        document.body.removeChild(tempContainer);
+      });
     }
   </script>
 </body>
