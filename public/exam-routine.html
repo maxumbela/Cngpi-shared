@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Exam Routine | Chapainawabganj Polytechnic Institute</title>
+  <meta name="description" content="View official BTEB Diploma in Engineering semester final exam routine and timetable for CNGPI.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.344.0/dist/umd/lucide.min.js"></script>
+
+  <!-- HTML2Canvas -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    :root {
+      --font-primary: 'Inter', sans-serif;
+      --font-display: 'Outfit', sans-serif;
+      
+      --bg-dark: #090d16;
+      --bg-card: rgba(18, 26, 43, 0.75);
+      --bg-card-hover: rgba(30, 41, 65, 0.85);
+      --bg-nav: rgba(13, 19, 33, 0.92);
+      
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(239, 68, 68, 0.35);
+      
+      --color-primary: #6366f1;
+      --color-purple: #a855f7;
+      --color-cyan: #06b6d4;
+      --color-emerald: #10b981;
+      --color-amber: #f59e0b;
+      --color-rose: #ef4444;
+      
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      
+      --grad-rose: linear-gradient(135deg, #ef4444 0%, #f43f5e 100%);
+      --grad-primary: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      min-height: 100vh;
+      font-family: var(--font-primary);
+      background: var(--bg-dark);
+      color: var(--text-main);
+    }
+
+    /* Ambient Background Glows */
+    .bg-glow-top {
+      position: fixed;
+      top: -15%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(239, 68, 68, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+      filter: blur(90px);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .bg-glow-bottom {
+      position: fixed;
+      bottom: -15%;
+      right: 10%;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(168, 85, 247, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
+      filter: blur(100px);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Responsive Container */
+    .web-app-container {
+      width: 100%;
+      max-width: 640px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 1;
+      padding-bottom: 90px;
+    }
+
+    /* Header Bar */
+    .app-header {
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+      background: rgba(9, 13, 22, 0.8);
+      backdrop-filter: blur(16px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-back {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-back:hover {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: #ef4444;
+    }
+
+    .header-title-group h1 {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.2;
+    }
+
+    .header-title-group p {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .cngpi-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      color: #f87171;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      padding: 6px 12px;
+      border-radius: 20px;
+    }
+
+    /* Main Content Wrapper */
+    .content-wrapper {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* Header Hero Card */
+    .hero-card {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(18, 26, 43, 0.85) 100%);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 22px;
+      padding: 22px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 12px 35px rgba(0,0,0,0.4);
+    }
+
+    .hero-badge-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .hero-tag {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #ef4444;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .hero-type-pill {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 900;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+
+    .hero-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    /* Dept Selector Pills */
+    .dept-pills-row {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      margin-bottom: 16px;
+    }
+
+    .dept-pill-btn {
+      padding: 8px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .dept-pill-btn:hover {
+      background: rgba(239, 68, 68, 0.15);
+      color: white;
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    .dept-pill-btn.active {
+      background: var(--grad-rose);
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
+    }
+
+    /* Form Controls */
+    .controls-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .sem-select {
+      background: rgba(10, 15, 26, 0.9);
+      border: 1px solid var(--border-accent);
+      border-radius: 12px;
+      padding: 8px 14px;
+      color: #ffffff;
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 800;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .sem-select option {
+      background: #090d16;
+      color: #ffffff;
+    }
+
+    .btn-print {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(244, 63, 94, 0.25) 100%);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-print:hover {
+      background: var(--grad-rose);
+      color: #ffffff;
+      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.35);
+    }
+
+    /* Next Exam Countdown Banner */
+    .countdown-card {
+      background: rgba(18, 26, 43, 0.85);
+      border: 1.5px solid rgba(239, 68, 68, 0.65);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(239, 68, 68, 0.3);
+      border-radius: 20px;
+      padding: 18px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .countdown-icon-box {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #f87171;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .countdown-timer-box {
+      background: rgba(10, 15, 26, 0.8);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      padding: 8px 18px;
+      border-radius: 14px;
+      text-align: center;
+      flex-shrink: 0;
+      min-width: 130px;
+    }
+
+    /* Exam Cards List */
+    .exam-card-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-left: 4px solid #ef4444;
+      border-radius: 18px;
+      padding: 16px 20px;
+      backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      transition: all 0.25s ease;
+    }
+
+    .exam-card-item:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(239, 68, 68, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .serial-badge {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #f87171;
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 900;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* Fixed Bottom Nav */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 640px;
+      height: 70px;
+      background: var(--bg-nav);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border-color);
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      align-items: center;
+      z-index: 1000;
+      padding: 0 10px;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      color: var(--text-muted);
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .nav-item:hover, .nav-item.active {
+      color: #ef4444;
+    }
+
+    .nav-icon-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 28px;
+      border-radius: 12px;
+      transition: all 0.25s ease;
+    }
+
+    .nav-item.active .nav-icon-wrapper {
+      background: rgba(239, 68, 68, 0.15);
+    }
+
+    .nav-label {
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    @media print {
+      body { background: white !important; color: black !important; }
+      .bg-glow-top, .bg-glow-bottom, .app-header, .bottom-nav, .dept-pills-row, .controls-row { display: none !important; }
+      .web-app-container { max-width: 100% !important; padding: 0 !important; }
+      .hero-card, .exam-card-item { background: white !important; color: black !important; border: 1px solid #ccc !important; box-shadow: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Glows -->
+  <div class="bg-glow-top"></div>
+  <div class="bg-glow-bottom"></div>
+
+  <main class="web-app-container">
+
+    <!-- Header Bar -->
+    <header class="app-header">
+      <div class="header-left">
+        <a href="index.html" class="btn-back" title="Back to Home">
+          <i data-lucide="arrow-left" style="width: 20px; height: 20px;"></i>
+        </a>
+        <div class="header-title-group">
+          <h1>Exam Routine</h1>
+          <p>Chapainawabganj Polytechnic</p>
+        </div>
+      </div>
+      <div class="cngpi-badge">
+        <i data-lucide="file-text" style="width: 14px; height: 14px;"></i>
+        <span>BTEB 2026</span>
+      </div>
+    </header>
+
+    <div class="content-wrapper">
+
+      <!-- Hero Card -->
+      <div class="hero-card">
+        <div class="hero-badge-row">
+          <div class="hero-tag">
+            <i data-lucide="shield-check" style="width: 15px; height: 15px;"></i>
+            <span>Official BTEB Examination Schedule</span>
+          </div>
+          <span class="hero-type-pill">Written / Theory Exam</span>
+        </div>
+
+        <h2 class="hero-title" id="exam-title-display">Diploma in Engineering Exam-2025/2026</h2>
+        <div class="hero-sub" id="exam-sub-display">Computer Science & Technology (CST) • 1st Semester</div>
+
+        <!-- Dept Selector Pills -->
+        <div class="dept-pills-row">
+          <button class="dept-pill-btn active" id="dept-pill-CST" onclick="changeExamDept('CST')">Computer (CST)</button>
+          <button class="dept-pill-btn" id="dept-pill-CT" onclick="changeExamDept('CT')">Civil (CT)</button>
+          <button class="dept-pill-btn" id="dept-pill-ET" onclick="changeExamDept('ET')">Electrical (ET)</button>
+          <button class="dept-pill-btn" id="dept-pill-ENT" onclick="changeExamDept('ENT')">Electronics (ENT)</button>
+          <button class="dept-pill-btn" id="dept-pill-MT" onclick="changeExamDept('MT')">Mechanical (MT)</button>
+          <button class="dept-pill-btn" id="dept-pill-AT" onclick="changeExamDept('AT')">Automobile (AT)</button>
+        </div>
+
+        <div class="controls-row">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Semester:</span>
+            <select id="exam-sem-select" class="sem-select" onchange="changeExamSem(this.value)">
+              <option value="1st">1st Semester</option>
+              <option value="2nd">2nd Semester</option>
+              <option value="3rd">3rd Semester</option>
+              <option value="4th">4th Semester</option>
+              <option value="5th">5th Semester</option>
+              <option value="6th">6th Semester</option>
+              <option value="7th">7th Semester</option>
+              <option value="8th">8th Semester</option>
+            </select>
+          </div>
+
+          <button class="btn-print" onclick="window.print()" title="Print Exam Timetable">
+            <i data-lucide="printer" style="width: 14px; height: 14px;"></i>
+            <span>Print Timetable</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Countdown Banner -->
+      <div class="countdown-card">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div class="countdown-icon-box">
+            <i data-lucide="calendar-clock" style="width: 24px; height: 24px;"></i>
+          </div>
+          <div>
+            <div style="font-size: 11px; font-weight: 800; color: #fca5a5; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">📌 NEXT EXAM COUNTDOWN</div>
+            <div id="next-exam-title" style="font-size: 15px; font-weight: 800; color: #ffffff;">Loading schedule...</div>
+            <div id="next-exam-details" style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Checking upcoming BTEB papers</div>
+          </div>
+        </div>
+        <div class="countdown-timer-box">
+          <div id="next-exam-timer-text" style="font-family: var(--font-display); font-size: 18px; font-weight: 900; color: #ef4444; letter-spacing: 0.5px;">--d --h --m</div>
+          <div style="font-size: 9px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">REMAINING</div>
+        </div>
+      </div>
+
+      <!-- Schedule List Container -->
+      <div id="exam-schedule-container" style="display: flex; flex-direction: column; gap: 14px;">
+        <!-- Rendered dynamically -->
+      </div>
+
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="bottom-nav">
+      <a href="index.html" class="nav-item">
+        <div class="nav-icon-wrapper">
+          <i data-lucide="home" style="width: 20px; height: 20px;"></i>
+        </div>
+        <span class="nav-label">Home</span>
+      </a>
+
+      <a href="routine.html" class="nav-item">
+        <div class="nav-icon-wrapper">
+          <i data-lucide="calendar-days" style="width: 20px; height: 20px;"></i>
+        </div>
+        <span class="nav-label">Class</span>
+      </a>
+
+      <a href="exam-routine.html" class="nav-item active">
+        <div class="nav-icon-wrapper">
+          <i data-lucide="file-text" style="width: 20px; height: 20px;"></i>
+        </div>
+        <span class="nav-label">Exam</span>
+      </a>
+
+      <a href="result.html" class="nav-item">
+        <div class="nav-icon-wrapper">
+          <i data-lucide="award" style="width: 20px; height: 20px;"></i>
+        </div>
+        <span class="nav-label">Result</span>
+      </a>
+
+      <a href="admin.html" class="nav-item">
+        <div class="nav-icon-wrapper">
+          <i data-lucide="user-check" style="width: 20px; height: 20px;"></i>
+        </div>
+        <span class="nav-label">Admin</span>
+      </a>
+    </nav>
+
+  </main>
+
+  <script>
+    let db = null;
+    let activeDept = "CST";
+    let activeSem = "1st";
+
+    document.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+      initFirebase();
+      fetchExamSchedule();
+    });
+
+    function initFirebase() {
+      try {
+        const firebaseConfig = {
+          apiKey: "AIzaSyD-EE4pIw9rD4tZmz9tKnzsd6VQzhC3ck0",
+          authDomain: "cngpi-edu.firebaseapp.com",
+          projectId: "cngpi-edu",
+          storageBucket: "cngpi-edu.firebasestorage.app",
+          messagingSenderId: "889275125335",
+          appId: "1:889275125335:web:a3e8a944d1a2d429501d12"
+        };
+        if (!firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
+        }
+        db = firebase.firestore();
+      } catch (e) {
+        console.warn("Firestore running in fallback mode:", e);
+      }
+    }
+
+    function changeExamDept(dept) {
+      activeDept = dept;
+      document.querySelectorAll(".dept-pill-btn").forEach(b => b.classList.remove("active"));
+      const btn = document.getElementById(`dept-pill-${dept}`);
+      if (btn) btn.classList.add("active");
+      fetchExamSchedule();
+    }
+
+    function changeExamSem(sem) {
+      activeSem = sem;
+      fetchExamSchedule();
+    }
+
+    async function fetchExamSchedule() {
+      const container = document.getElementById("exam-schedule-container");
+      if (!container) return;
+
+      const titleEl = document.getElementById("exam-title-display");
+      const subEl = document.getElementById("exam-sub-display");
+      if (subEl) subEl.textContent = `${activeDept} Department • ${activeSem} Semester Exam Routine`;
+
+      container.innerHTML = `
+        <div style="text-align: center; padding: 40px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 18px;">
+          <i data-lucide="loader" style="width: 32px; height: 32px; color: #ef4444; animation: spin 1s linear infinite; margin: 0 auto 10px auto;"></i>
+          <p style="color: var(--text-muted);">Fetching BTEB Exam Schedule for ${activeDept} ${activeSem} Semester...</p>
+        </div>
+      `;
+      lucide.createIcons();
+
+      const docId = `${activeDept}_${activeSem}`;
+      const altId = `${activeDept.toLowerCase()}_${activeSem.replace(/[^0-9]/g, "")}`;
+
+      let scheduleList = null;
+      let examTitle = "BTEB Semester Final Timetable 2026";
+
+      if (db) {
+        try {
+          let doc = await db.collection("exam_routines").doc(docId).get();
+          if (doc.exists && doc.data()) {
+            const data = doc.data();
+            scheduleList = data.schedule || data.routine;
+            if (data.exam_title) examTitle = data.exam_title;
+          }
+
+          if (!scheduleList || scheduleList.length === 0) {
+            doc = await db.collection("exam_routines").doc(altId).get();
+            if (doc.exists && doc.data()) {
+              const data = doc.data();
+              scheduleList = data.schedule || data.routine;
+              if (data.exam_title) examTitle = data.exam_title;
+            }
+          }
+
+          if (!scheduleList || scheduleList.length === 0) {
+            const snap = await db.collection("exam_routines").where("technology_key", "==", activeDept.toLowerCase()).get();
+            if (!snap.empty) {
+              const data = snap.docs[0].data();
+              scheduleList = data.schedule || data.routine;
+              if (data.exam_title) examTitle = data.exam_title;
+            }
+          }
+        } catch (e) {
+          console.warn("Exam schedule fetch error:", e);
+        }
+      }
+
+      if (titleEl) titleEl.textContent = examTitle;
+
+      if (!scheduleList || scheduleList.length === 0) {
+        scheduleList = [
+          { serial: 1, subject_code: "25712", subject_name: "English-I", date: "2026-08-09", date_display: "09 August 2026", day: "Sunday", time: "02:00 PM" },
+          { serial: 2, subject_code: "25912", subject_name: "Physics-I", date: "2026-08-15", date_display: "15 August 2026", day: "Saturday", time: "02:00 PM" },
+          { serial: 3, subject_code: "25911", subject_name: "Mathematics-I", date: "2026-08-24", date_display: "24 August 2026", day: "Monday", time: "02:00 PM" },
+          { serial: 4, subject_code: "26711", subject_name: "Basic Electricity", date: "2026-09-02", date_display: "02 September 2026", day: "Wednesday", time: "10:00 AM" },
+          { serial: 5, subject_code: "25711", subject_name: "Bangla-I", date: "2026-09-05", date_display: "05 September 2026", day: "Saturday", time: "02:00 PM" }
+        ];
+      }
+
+      renderScheduleList(scheduleList, container);
+      updateCountdownBanner(scheduleList);
+    }
+
+    function renderScheduleList(list, container) {
+      let cardsHtml = "";
+
+      list.forEach((item, idx) => {
+        const dateVal = item.date_display || item.date || "TBA";
+        const dayVal = item.day || "Exam Day";
+        const timeVal = item.time || item.time_24_hour || "02:00 PM";
+        const subjectVal = item.subject_name || item.subject || "Subject";
+        const codeVal = item.subject_code || item.code || "N/A";
+        const serialVal = item.serial ? `#${item.serial}` : `#${idx + 1}`;
+
+        cardsHtml += `
+          <div class="exam-card-item">
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <div class="serial-badge">${serialVal}</div>
+              <div>
+                <div style="font-size: 15px; font-weight: 800; color: #ffffff; margin-bottom: 4px;">${subjectVal}</div>
+                <div style="font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
+                  <span style="color: #f472b6; background: rgba(244, 114, 182, 0.15); padding: 2px 8px; border-radius: 6px; font-weight: 800; font-size: 11px;">Subject Code: ${codeVal}</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+              <div style="font-weight: 800; color: #ffffff; font-size: 13px; display: flex; align-items: center; gap: 6px;">
+                <i data-lucide="calendar" style="width: 14px; height: 14px; color: #ef4444;"></i>
+                <span>${dateVal}</span>
+              </div>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <span style="font-size: 11px; color: #ef4444; font-weight: 800;">${dayVal}</span>
+                <span style="font-size: 10px; font-weight: 800; color: #a5b4fc; background: rgba(99, 102, 241, 0.15); padding: 2px 8px; border-radius: 6px;">${timeVal}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = cardsHtml;
+      lucide.createIcons();
+    }
+
+    function updateCountdownBanner(list) {
+      const title = document.getElementById("next-exam-title");
+      const details = document.getElementById("next-exam-details");
+      const timerText = document.getElementById("next-exam-timer-text");
+
+      if (!list || list.length === 0) return;
+
+      const firstItem = list[0];
+      const dateVal = firstItem.date_display || firstItem.date || "TBA";
+      const subjectVal = firstItem.subject_name || firstItem.subject || "Upcoming Exam";
+
+      if (title) title.textContent = `${subjectVal} (${firstItem.subject_code || ''})`;
+      if (details) details.textContent = `Scheduled on ${dateVal} at ${firstItem.time || '02:00 PM'}`;
+      if (timerText) timerText.textContent = `Upcoming`;
+    }
+  </script>
+</body>
+</html>

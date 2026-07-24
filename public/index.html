@@ -1537,47 +1537,47 @@
     </div>
 
     <!-- Fixed Bottom Navigation Bar -->
-    <nav class="bottom-nav">
+    <nav class="bottom-nav" style="grid-template-columns: repeat(5, 1fr);">
 
       <!-- Home Tab -->
-      <div class="nav-item active" id="nav-home" onclick="selectNav('home')">
+      <a href="index.html" class="nav-item active" style="text-decoration: none;">
         <div class="nav-icon-wrapper">
           <i data-lucide="home" style="width: 20px; height: 20px;"></i>
         </div>
         <span class="nav-label">Home</span>
-      </div>
+      </a>
 
-      <!-- Routine Tab -->
-      <div class="nav-item" id="nav-routine" onclick="selectNav('routine')">
+      <!-- Class Routine Tab -->
+      <a href="routine.html" class="nav-item" style="text-decoration: none;">
         <div class="nav-icon-wrapper">
           <i data-lucide="calendar-days" style="width: 20px; height: 20px;"></i>
         </div>
-        <span class="nav-label">Routine</span>
-      </div>
+        <span class="nav-label">Class</span>
+      </a>
+
+      <!-- Exam Routine Tab -->
+      <a href="exam-routine.html" class="nav-item" style="text-decoration: none;">
+        <div class="nav-icon-wrapper">
+          <i data-lucide="file-text" style="width: 20px; height: 20px;"></i>
+        </div>
+        <span class="nav-label">Exam</span>
+      </a>
 
       <!-- Result Tab -->
-      <div class="nav-item" id="nav-result" onclick="selectNav('result')">
+      <a href="result.html" class="nav-item" style="text-decoration: none;">
         <div class="nav-icon-wrapper">
           <i data-lucide="award" style="width: 20px; height: 20px;"></i>
         </div>
         <span class="nav-label">Result</span>
-      </div>
+      </a>
 
-      <!-- CGPA Calculator Tab -->
-      <div class="nav-item" id="nav-cgpa" onclick="selectNav('cgpa')">
+      <!-- Admin Tab -->
+      <a href="admin.html" class="nav-item" style="text-decoration: none;">
         <div class="nav-icon-wrapper">
-          <i data-lucide="calculator" style="width: 20px; height: 20px;"></i>
+          <i data-lucide="user-check" style="width: 20px; height: 20px;"></i>
         </div>
-        <span class="nav-label">CGPA</span>
-      </div>
-
-      <!-- Book List Tab -->
-      <div class="nav-item" id="nav-books" onclick="selectNav('books')">
-        <div class="nav-icon-wrapper">
-          <i data-lucide="book-open" style="width: 20px; height: 20px;"></i>
-        </div>
-        <span class="nav-label">Book List</span>
-      </div>
+        <span class="nav-label">Admin</span>
+      </a>
 
     </nav>
 
