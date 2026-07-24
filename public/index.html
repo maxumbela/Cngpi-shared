@@ -1612,7 +1612,13 @@
               <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Subject Name, Code, Exam Date & Time Schedule</p>
             </div>
           </div>
-          <button type="button" class="btn-secondary-action" onclick="closeExamRoutineModal()" style="border: none; background: rgba(255,255,255,0.08); width: 32px; height: 32px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center; color: white; cursor: pointer;">&times;</button>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button type="button" onclick="exportExamRoutineFromIndex()" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(244, 63, 94, 0.25) 100%); border: 1.5px solid rgba(239, 68, 68, 0.5); color: #f87171; padding: 7px 14px; border-radius: 12px; font-weight: 800; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.25); transition: all 0.2s ease;">
+              <i data-lucide="download" style="width: 14px; height: 14px;"></i>
+              <span>Export Routine</span>
+            </button>
+            <button type="button" class="btn-secondary-action" onclick="closeExamRoutineModal()" style="border: none; background: rgba(255,255,255,0.08); width: 32px; height: 32px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center; color: white; cursor: pointer;">&times;</button>
+          </div>
         </div>
 
         <div style="padding-top: 4px;">
@@ -2495,6 +2501,66 @@
           document.body.removeChild(tempContainer);
         });
       }, 400);
+    }
+
+    function exportExamRoutineFromIndex() {
+      const scheduleContainer = document.getElementById("exam-schedule-container");
+      if (!scheduleContainer) return;
+
+      const deptName = activeExamDept || "CST";
+      const semName = activeExamSem || "7th";
+      const examTitleText = `${deptName} Department • ${semName} Semester Exam Routine`;
+
+      const tempContainer = document.createElement("div");
+      tempContainer.style.cssText = "position: absolute; top: -9999px; left: -9999px; width: 1600px; height: 900px; background: url('assets/anime_bg.jpg') center/cover no-repeat; padding: 40px; box-sizing: border-box; font-family: 'Inter', sans-serif; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden;";
+
+      tempContainer.innerHTML = `
+        <div style="background: rgba(9, 13, 22, 0.88); backdrop-filter: blur(24px); border: 2px solid rgba(239, 68, 68, 0.45); border-radius: 24px; padding: 28px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);">
+          
+          <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid rgba(239, 68, 68, 0.4); padding-bottom: 16px; margin-bottom: 16px;">
+            <div>
+              <div style="font-size: 11px; font-weight: 800; color: #f87171; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px;">Chapainawabganj Polytechnic Institute • BTEB Exam Portal</div>
+              <h1 style="font-family: 'Outfit', sans-serif; font-size: 32px; font-weight: 900; color: #ffffff; margin: 0; text-shadow: 0 4px 20px rgba(239, 68, 68, 0.5);">BTEB Exam Routine & Schedule</h1>
+              <div style="font-size: 14px; color: #fca5a5; margin-top: 4px; font-weight: 700;">${examTitleText}</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="background: linear-gradient(135deg, #ef4444 0%, #f43f5e 100%); color: #ffffff; padding: 10px 22px; border-radius: 16px; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 900; box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);">
+                16:9 HD Exam Edition 2026
+              </div>
+            </div>
+          </div>
+
+          <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; overflow: hidden;">
+            ${scheduleContainer.outerHTML}
+          </div>
+
+          <div style="margin-top: 16px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #94a3b8; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px;">
+            <span style="font-weight: 600;">CNGPI Official Exam Schedule • 16:9 Anime Wallpaper Edition</span>
+            <span style="color: #f87171; font-weight: 700;">https://cngpi-edu.web.app</span>
+          </div>
+
+        </div>
+      `;
+
+      document.body.appendChild(tempContainer);
+
+      html2canvas(tempContainer, {
+        scale: 2, // 2x scale for 3200x1800 Ultra High-Res PNG
+        backgroundColor: null,
+        useCORS: true,
+        logging: false
+      }).then(canvas => {
+        const imgData = canvas.toDataURL("image/png", 1.0);
+        const downloadLink = document.createElement("a");
+        downloadLink.download = `CNGPI_Exam_Routine_${deptName}_${semName}_16x9_AnimeTheme.png`;
+        downloadLink.href = imgData;
+        downloadLink.click();
+
+        document.body.removeChild(tempContainer);
+      }).catch(err => {
+        console.error("PNG exam export error:", err);
+        document.body.removeChild(tempContainer);
+      });
     }
 
     // Render Day Tabs
