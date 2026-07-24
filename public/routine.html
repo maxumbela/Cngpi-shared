@@ -1410,12 +1410,11 @@
       if (!deptString) return "cst";
       const str = deptString.toLowerCase();
       if (str.includes("computer") || str.includes("cst")) return "cst";
-      if (str.includes("civil") || str.includes("ct")) return "ct";
       if (str.includes("electrical") || str.includes("et")) return "et";
       if (str.includes("electronics") || str.includes("ent")) return "ent";
-      if (str.includes("mechanical") || str.includes("mt")) return "mt";
-      if (str.includes("architecture") || str.includes("at")) return "at";
-      if (str.includes("telecommunication") || str.includes("tnt")) return "tnt";
+      if (str.includes("mechatronics") || str.includes("mt") || str.includes("mechanical")) return "mt";
+      if (str.includes("refrigeration") || str.includes("rac") || str.includes("air conditioning")) return "rac";
+      if (str.includes("food") || str.includes("ft")) return "ft";
 
       const match = deptString.match(/\(([^)]+)\)/);
       if (match) return match[1].toLowerCase();

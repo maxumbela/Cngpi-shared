@@ -1618,11 +1618,11 @@
             <select id="select-department" class="form-select" required>
               <option value="" disabled selected>Select Department</option>
               <option value="Computer Science & Technology">Computer Science & Technology (CST)</option>
-              <option value="Civil Technology">Civil Technology (CT)</option>
               <option value="Electrical Technology">Electrical Technology (ET)</option>
               <option value="Electronics Technology">Electronics Technology (ENT)</option>
-              <option value="Mechanical Technology">Mechanical Technology (MT)</option>
-              <option value="Architecture Technology">Architecture Technology (AT)</option>
+              <option value="Mechatronics Technology">Mechatronics Technology (MT)</option>
+              <option value="Refrigeration & Air Conditioning Technology">Refrigeration & Air Conditioning (RAC)</option>
+              <option value="Food Technology">Food Technology (FT)</option>
             </select>
           </div>
 
@@ -1682,11 +1682,11 @@
           <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">Select Department:</div>
           <div class="exam-dept-bar">
             <button class="exam-dept-btn active" id="exam-dept-CST" onclick="setExamDept('CST')">CST</button>
-            <button class="exam-dept-btn" id="exam-dept-CT" onclick="setExamDept('CT')">Civil (CT)</button>
             <button class="exam-dept-btn" id="exam-dept-ET" onclick="setExamDept('ET')">Electrical (ET)</button>
             <button class="exam-dept-btn" id="exam-dept-ENT" onclick="setExamDept('ENT')">Electronics (ENT)</button>
-            <button class="exam-dept-btn" id="exam-dept-MT" onclick="setExamDept('MT')">Mechanical (MT)</button>
-            <button class="exam-dept-btn" id="exam-dept-AT" onclick="setExamDept('AT')">Automobile (AT)</button>
+            <button class="exam-dept-btn" id="exam-dept-MT" onclick="setExamDept('MT')">Mechatronics (MT)</button>
+            <button class="exam-dept-btn" id="exam-dept-RAC" onclick="setExamDept('RAC')">RAC</button>
+            <button class="exam-dept-btn" id="exam-dept-FT" onclick="setExamDept('FT')">Food (FT)</button>
           </div>
 
           <!-- Semester Selector Bar -->
@@ -1739,11 +1739,11 @@
           <div class="exam-dept-bar">
             <button class="exam-dept-btn active" id="teacher-dept-ALL" onclick="filterTeacherDept('ALL')" style="background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%); border-color: #a855f7;">All Depts</button>
             <button class="exam-dept-btn" id="teacher-dept-CST" onclick="filterTeacherDept('CST')">CST</button>
-            <button class="exam-dept-btn" id="teacher-dept-CT" onclick="filterTeacherDept('CT')">Civil (CT)</button>
             <button class="exam-dept-btn" id="teacher-dept-ET" onclick="filterTeacherDept('ET')">Electrical (ET)</button>
             <button class="exam-dept-btn" id="teacher-dept-ENT" onclick="filterTeacherDept('ENT')">Electronics (ENT)</button>
-            <button class="exam-dept-btn" id="teacher-dept-MT" onclick="filterTeacherDept('MT')">Mechanical (MT)</button>
-            <button class="exam-dept-btn" id="teacher-dept-AT" onclick="filterTeacherDept('AT')">Automobile (AT)</button>
+            <button class="exam-dept-btn" id="teacher-dept-MT" onclick="filterTeacherDept('MT')">Mechatronics (MT)</button>
+            <button class="exam-dept-btn" id="teacher-dept-RAC" onclick="filterTeacherDept('RAC')">RAC</button>
+            <button class="exam-dept-btn" id="teacher-dept-FT" onclick="filterTeacherDept('FT')">Food (FT)</button>
           </div>
 
           <!-- Search Bar -->
@@ -2387,12 +2387,11 @@
       if (!deptString) return "cst";
       const str = deptString.toLowerCase();
       if (str.includes("computer") || str.includes("cst")) return "cst";
-      if (str.includes("civil") || str.includes("ct")) return "ct";
       if (str.includes("electrical") || str.includes("et")) return "et";
       if (str.includes("electronics") || str.includes("ent")) return "ent";
-      if (str.includes("mechanical") || str.includes("mt")) return "mt";
-      if (str.includes("architecture") || str.includes("at")) return "at";
-      if (str.includes("telecommunication") || str.includes("tnt")) return "tnt";
+      if (str.includes("mechatronics") || str.includes("mt") || str.includes("mechanical")) return "mt";
+      if (str.includes("refrigeration") || str.includes("rac") || str.includes("air conditioning")) return "rac";
+      if (str.includes("food") || str.includes("ft")) return "ft";
 
       const match = deptString.match(/\(([^)]+)\)/);
       if (match) return match[1].toLowerCase();

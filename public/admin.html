@@ -1015,12 +1015,11 @@
                 <select id="result-dept" class="form-select" required>
                   <option value="All Departments">All Departments</option>
                   <option value="Computer Science & Technology">Computer Science & Technology (CST)</option>
-                  <option value="Civil Technology">Civil Technology (CT)</option>
                   <option value="Electrical Technology">Electrical Technology (ET)</option>
                   <option value="Electronics Technology">Electronics Technology (ENT)</option>
-                  <option value="Mechanical Technology">Mechanical Technology (MT)</option>
-                  <option value="Architecture Technology">Architecture Technology (AT)</option>
-                  <option value="Telecommunication Technology">Telecommunication Technology (TNT)</option>
+                  <option value="Mechatronics Technology">Mechatronics Technology (MT)</option>
+                  <option value="Refrigeration & Air Conditioning Technology">Refrigeration & Air Conditioning (RAC)</option>
+                  <option value="Food Technology">Food Technology (FT)</option>
                 </select>
               </div>
 
@@ -1128,10 +1127,11 @@
                 <label for="admin-student-dept">Department</label>
                 <select id="admin-student-dept" class="form-select" required>
                   <option value="Computer Science & Technology">Computer Science & Tech (CST)</option>
-                  <option value="Civil Technology">Civil Technology (CT)</option>
                   <option value="Electrical Technology">Electrical Technology (ET)</option>
                   <option value="Electronics Technology">Electronics Tech (ENT)</option>
-                  <option value="Mechanical Technology">Mechanical Technology (MT)</option>
+                  <option value="Mechatronics Technology">Mechatronics Tech (MT)</option>
+                  <option value="Refrigeration & Air Conditioning Technology">Refrigeration & Air Conditioning (RAC)</option>
+                  <option value="Food Technology">Food Technology (FT)</option>
                 </select>
               </div>
 
@@ -1223,11 +1223,11 @@
             <label for="book-manage-dept">Department</label>
             <select id="book-manage-dept" class="form-select" onchange="loadAdminBooksList()">
               <option value="CST">Computer Science & Technology (CST)</option>
-              <option value="CT">Civil Technology (CT)</option>
               <option value="ET">Electrical Technology (ET)</option>
               <option value="ENT">Electronics Technology (ENT)</option>
-              <option value="MT">Mechanical Technology (MT)</option>
-              <option value="AT">Architecture Technology (AT)</option>
+              <option value="MT">Mechatronics Technology (MT)</option>
+              <option value="RAC">Refrigeration & Air Conditioning (RAC)</option>
+              <option value="FT">Food Technology (FT)</option>
             </select>
           </div>
 
@@ -1345,13 +1345,13 @@
           <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
             <div>
               <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Department</label>
-              <select id="admin-exam-dept" class="form-input" style="padding: 8px 12px; width: 150px; font-weight: 700;" onchange="loadAdminExamSchedule()">
+              <select id="admin-exam-dept" class="form-input" style="padding: 8px 12px; width: 160px; font-weight: 700;" onchange="loadAdminExamSchedule()">
                 <option value="CST">Computer (CST)</option>
-                <option value="CT">Civil (CT)</option>
                 <option value="ET">Electrical (ET)</option>
                 <option value="ENT">Electronics (ENT)</option>
-                <option value="MT">Mechanical (MT)</option>
-                <option value="AT">Automobile (AT)</option>
+                <option value="MT">Mechatronics (MT)</option>
+                <option value="RAC">RAC Tech (RAC)</option>
+                <option value="FT">Food Tech (FT)</option>
               </select>
             </div>
 
@@ -2962,14 +2962,14 @@
     function formatRoutinePayload(jsonObj) {
       const rawTech = jsonObj.technology_short_name || jsonObj.technology_key || jsonObj.technology || "CST";
       let deptShortCode = String(rawTech).toUpperCase().replace(/[^A-Z]/g, '');
-      if (!deptShortCode || deptShortCode.length > 5) {
-        if (String(rawTech).toLowerCase().includes("cst") || String(rawTech).toLowerCase().includes("computer")) deptShortCode = "CST";
-        else if (String(rawTech).toLowerCase().includes("civil") || String(rawTech).toLowerCase().includes("ct")) deptShortCode = "CT";
-        else if (String(rawTech).toLowerCase().includes("electrical") || String(rawTech).toLowerCase().includes("et")) deptShortCode = "ET";
-        else if (String(rawTech).toLowerCase().includes("electronics") || String(rawTech).toLowerCase().includes("ent")) deptShortCode = "ENT";
-        else if (String(rawTech).toLowerCase().includes("mechanical") || String(rawTech).toLowerCase().includes("mt")) deptShortCode = "MT";
-        else deptShortCode = "CST";
-      }
+      const lower = String(rawTech).toLowerCase();
+      if (lower.includes("cst") || lower.includes("computer")) deptShortCode = "CST";
+      else if (lower.includes("electrical") || lower.includes("et")) deptShortCode = "ET";
+      else if (lower.includes("electronics") || lower.includes("ent")) deptShortCode = "ENT";
+      else if (lower.includes("mechatronics") || lower.includes("mt") || lower.includes("mechanical")) deptShortCode = "MT";
+      else if (lower.includes("refrigeration") || lower.includes("rac") || lower.includes("air conditioning")) deptShortCode = "RAC";
+      else if (lower.includes("food") || lower.includes("ft")) deptShortCode = "FT";
+      else if (!["CST", "ET", "ENT", "MT", "RAC", "FT"].includes(deptShortCode)) deptShortCode = "CST";
 
       const semRaw = jsonObj.semester_name || (jsonObj.semester ? jsonObj.semester + "st" : "1st");
       let semCode = String(semRaw).toLowerCase();
