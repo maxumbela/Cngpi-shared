@@ -764,6 +764,38 @@
 
   <main>
 
+    <!-- Batch Upload Progress Overlay Modal -->
+    <div id="batch-upload-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(9, 13, 22, 0.88); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); z-index: 99999; align-items: center; justify-content: center;">
+      <div style="background: rgba(18, 26, 43, 0.96); border: 1.5px solid rgba(239, 68, 68, 0.6); box-shadow: 0 25px 60px rgba(0,0,0,0.85), 0 0 35px rgba(239, 68, 68, 0.35); border-radius: 24px; padding: 28px; width: 90%; max-width: 520px; text-align: center;">
+        <div style="width: 56px; height: 56px; border-radius: 18px; background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px auto;">
+          <i data-lucide="cloud-upload" style="width: 28px; height: 28px;"></i>
+        </div>
+        
+        <h3 style="font-family: var(--font-display); font-size: 20px; font-weight: 800; color: #ffffff; margin-bottom: 4px;">Batch Routine Importer</h3>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 18px;" id="batch-modal-subtitle">Publishing routines one by one to Firestore...</p>
+
+        <!-- Progress Bar Container -->
+        <div style="background: rgba(0, 0, 0, 0.5); border: 1px solid var(--border-color); border-radius: 14px; padding: 4px; margin-bottom: 12px; position: relative; overflow: hidden;">
+          <div id="batch-progress-bar-fill" style="height: 18px; width: 0%; background: linear-gradient(90deg, #ef4444 0%, #f43f5e 50%, #a855f7 100%); border-radius: 10px; transition: width 0.3s ease; box-shadow: 0 0 15px rgba(239, 68, 68, 0.6);"></div>
+        </div>
+
+        <!-- Percentage and Status Log -->
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 800; margin-bottom: 14px;">
+          <span id="batch-progress-status-text" style="color: #fca5a5;">Starting batch upload...</span>
+          <span id="batch-progress-percent-text" style="color: #ffffff; font-family: var(--font-display); font-size: 14px;">0%</span>
+        </div>
+
+        <!-- Item-by-Item File Progress List -->
+        <div id="batch-progress-item-list" style="max-height: 170px; overflow-y: auto; text-align: left; background: rgba(0,0,0,0.35); border: 1px solid var(--border-color); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px; font-size: 12px;">
+          <!-- Dynamically populated progress items -->
+        </div>
+
+        <button type="button" id="batch-modal-close-btn" onclick="closeBatchUploadModal()" style="display: none; margin-top: 18px; width: 100%; padding: 12px; border-radius: 12px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; color: white; font-weight: 800; font-size: 13px; cursor: pointer; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);">
+          Done & Close Progress Bar
+        </button>
+      </div>
+    </div>
+
     <!-- ADMIN LOGIN PANEL -->
     <div class="glass-card login-container" id="login-panel">
       <div class="login-header">
@@ -2893,7 +2925,7 @@
 
     function parseRoutineJsonData(rawContent) {
       if (!rawContent) throw new Error("Empty content provided");
-      if (typeof rawContent === 'object') return rawContent;
+      if (typeof rawContent === 'object') return Array.isArray(rawContent) ? rawContent : [rawContent];
 
       let str = String(rawContent)
         .replace(/^\uFEFF/, '') // Strip UTF-8 BOM
@@ -2901,24 +2933,30 @@
         .replace(/```/g, '')
         .trim();
 
-      // Extract JSON object if file contains headers or text surrounding {...}
+      const firstBracket = str.indexOf('[');
+      const lastBracket = str.lastIndexOf(']');
       const firstBrace = str.indexOf('{');
       const lastBrace = str.lastIndexOf('}');
-      if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+
+      if (firstBracket !== -1 && lastBracket !== -1 && (firstBrace === -1 || firstBracket < firstBrace)) {
+        str = str.substring(firstBracket, lastBracket + 1);
+      } else if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
         str = str.substring(firstBrace, lastBrace + 1);
       }
 
+      let parsedObj;
       try {
-        return JSON.parse(str);
+        parsedObj = JSON.parse(str);
       } catch (err) {
         try {
-          // Remove trailing commas before parse retry
           const cleaned = str.replace(/,\s*([\]}])/g, '$1');
-          return JSON.parse(cleaned);
+          parsedObj = JSON.parse(cleaned);
         } catch (err2) {
           throw new Error("Invalid JSON structure: " + err.message);
         }
       }
+
+      return Array.isArray(parsedObj) ? parsedObj : [parsedObj];
     }
 
     function formatRoutinePayload(jsonObj) {
@@ -2989,16 +3027,17 @@
 
       if (textVal) {
         try {
-          const parsed = parseRoutineJsonData(textVal);
-          const formatted = formatRoutinePayload(parsed);
-          
-          if (document.getElementById("admin-exam-dept")) document.getElementById("admin-exam-dept").value = formatted.data.department;
-          if (document.getElementById("admin-exam-sem")) document.getElementById("admin-exam-sem").value = formatted.data.semester;
-          if (document.getElementById("admin-exam-title")) document.getElementById("admin-exam-title").value = formatted.data.exam_title;
+          const parsedList = parseRoutineJsonData(textVal);
+          if (parsedList.length > 0) {
+            const formatted = formatRoutinePayload(parsedList[0]);
+            if (document.getElementById("admin-exam-dept")) document.getElementById("admin-exam-dept").value = formatted.data.department;
+            if (document.getElementById("admin-exam-sem")) document.getElementById("admin-exam-sem").value = formatted.data.semester;
+            if (document.getElementById("admin-exam-title")) document.getElementById("admin-exam-title").value = formatted.data.exam_title;
 
-          currentAdminExamSchedule = formatted.data.schedule;
-          renderAdminExamScheduleTable();
-          showToast(`Parsed "${formatted.data.exam_title}" (${formatted.data.schedule.length} subjects)! Preview loaded below.`, "success");
+            currentAdminExamSchedule = formatted.data.schedule;
+            renderAdminExamScheduleTable();
+            showToast(`Parsed "${formatted.data.exam_title}" (${formatted.data.schedule.length} subjects)! Preview loaded below.`, "success");
+          }
         } catch (err) {
           showToast("Failed to parse JSON text: " + err.message, "error");
         }
@@ -3009,20 +3048,32 @@
         const file = pendingJsonFiles[0];
         try {
           const content = await readFileAsTextPromise(file);
-          const parsed = parseRoutineJsonData(content);
-          const formatted = formatRoutinePayload(parsed);
-          
-          if (document.getElementById("admin-exam-dept")) document.getElementById("admin-exam-dept").value = formatted.data.department;
-          if (document.getElementById("admin-exam-sem")) document.getElementById("admin-exam-sem").value = formatted.data.semester;
-          if (document.getElementById("admin-exam-title")) document.getElementById("admin-exam-title").value = formatted.data.exam_title;
+          const parsedList = parseRoutineJsonData(content);
+          if (parsedList.length > 0) {
+            const formatted = formatRoutinePayload(parsedList[0]);
+            if (document.getElementById("admin-exam-dept")) document.getElementById("admin-exam-dept").value = formatted.data.department;
+            if (document.getElementById("admin-exam-sem")) document.getElementById("admin-exam-sem").value = formatted.data.semester;
+            if (document.getElementById("admin-exam-title")) document.getElementById("admin-exam-title").value = formatted.data.exam_title;
 
-          currentAdminExamSchedule = formatted.data.schedule;
-          renderAdminExamScheduleTable();
-          showToast(`Parsed file "${file.name}" (${formatted.data.schedule.length} subjects)! Preview loaded below.`, "success");
+            currentAdminExamSchedule = formatted.data.schedule;
+            renderAdminExamScheduleTable();
+            showToast(`Parsed file "${file.name}" (${formatted.data.schedule.length} subjects)! Preview loaded below.`, "success");
+          }
         } catch (err) {
           showToast(`Failed to parse "${file.name}": ` + err.message, "error");
         }
       }
+    }
+
+    function openBatchUploadModal() {
+      const modal = document.getElementById("batch-upload-modal");
+      if (modal) modal.style.display = "flex";
+      lucide.createIcons();
+    }
+
+    function closeBatchUploadModal() {
+      const modal = document.getElementById("batch-upload-modal");
+      if (modal) modal.style.display = "none";
     }
 
     async function uploadAdminJsonRoutinesToFirestore() {
@@ -3032,8 +3083,8 @@
 
       if (textVal) {
         try {
-          const parsed = parseRoutineJsonData(textVal);
-          itemsToUpload.push(formatRoutinePayload(parsed));
+          const parsedList = parseRoutineJsonData(textVal);
+          parsedList.forEach(obj => itemsToUpload.push(formatRoutinePayload(obj)));
         } catch (err) {
           showToast("Error in pasted JSON text: " + err.message, "error");
           return;
@@ -3044,8 +3095,8 @@
         for (const file of pendingJsonFiles) {
           try {
             const content = await readFileAsTextPromise(file);
-            const parsed = parseRoutineJsonData(content);
-            itemsToUpload.push(formatRoutinePayload(parsed));
+            const parsedList = parseRoutineJsonData(content);
+            parsedList.forEach(obj => itemsToUpload.push(formatRoutinePayload(obj)));
           } catch (err) {
             showToast(`Error parsing file "${file.name}": ` + err.message, "error");
           }
@@ -3057,16 +3108,59 @@
         return;
       }
 
-      showToast(`Uploading ${itemsToUpload.length} routine(s) to Firestore...`, "info");
+      // Open Batch Upload Modal & Prepare Progress UI
+      openBatchUploadModal();
 
+      const barFill = document.getElementById("batch-progress-bar-fill");
+      const percentText = document.getElementById("batch-progress-percent-text");
+      const statusText = document.getElementById("batch-progress-status-text");
+      const subtitle = document.getElementById("batch-modal-subtitle");
+      const itemListContainer = document.getElementById("batch-progress-item-list");
+      const closeBtn = document.getElementById("batch-modal-close-btn");
+
+      if (barFill) barFill.style.width = "0%";
+      if (percentText) percentText.textContent = "0%";
+      if (statusText) statusText.textContent = "Starting batch upload...";
+      if (subtitle) subtitle.textContent = `Publishing ${itemsToUpload.length} routine(s) one-by-one to Firestore...`;
+      if (closeBtn) closeBtn.style.display = "none";
+
+      // Render Item Progress Rows
+      if (itemListContainer) {
+        itemListContainer.innerHTML = itemsToUpload.map((item, idx) => `
+          <div id="batch-row-${idx}" style="display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: rgba(255,255,255,0.04); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+            <div>
+              <span style="font-weight: 800; color: #ffffff;">#${idx + 1} ${item.data.department} (${item.data.semester})</span>
+              <span style="color: var(--text-muted); font-size: 11px; margin-left: 6px;">${item.data.total_exams} Subjects</span>
+            </div>
+            <span id="batch-badge-${idx}" style="color: #fbbf24; font-weight: 800; font-size: 11px;">⏳ Pending</span>
+          </div>
+        `).join('');
+      }
+
+      const total = itemsToUpload.length;
       let successCount = 0;
-      for (const item of itemsToUpload) {
+
+      // Process and Upload One-by-One with live progress updates
+      for (let i = 0; i < total; i++) {
+        const item = itemsToUpload[i];
+        const currentPct = Math.round((i / total) * 100);
+
+        if (barFill) barFill.style.width = `${currentPct}%`;
+        if (percentText) percentText.textContent = `${currentPct}%`;
+        if (statusText) statusText.textContent = `[${i + 1}/${total}] Uploading ${item.data.department} ${item.data.semester}...`;
+
+        const badgeEl = document.getElementById(`batch-badge-${i}`);
+        if (badgeEl) {
+          badgeEl.style.color = "#38bdf8";
+          badgeEl.textContent = "🚀 Uploading...";
+        }
+
         try {
           if (db) {
             // Write to exam_routines under main docId (e.g. CST_1st)
             await db.collection("exam_routines").doc(item.docId).set(item.data);
             
-            // Also write under lower case alt key (e.g. cst_1) for fallback lookup
+            // Also write under lower case alt key (e.g. cst_1)
             if (item.altDocId) {
               await db.collection("exam_routines").doc(item.altDocId).set(item.data);
             }
@@ -3075,21 +3169,44 @@
             if (item.data.technology_key) {
               await db.collection("exam_routines").doc(item.data.technology_key).set(item.data);
             }
+
+            // Write under techCodeDocId (e.g. 85_1)
+            if (item.techCodeDocId) {
+              await db.collection("exam_routines").doc(item.techCodeDocId).set(item.data);
+            }
             
-            // Also write under routines collection if routine list is populated
+            // Write under routines collection for total compatibility
             await db.collection("routines").doc(item.docId).set(item.data);
             if (item.altDocId) {
               await db.collection("routines").doc(item.altDocId).set(item.data);
             }
           }
+          
           successCount++;
+          if (badgeEl) {
+            badgeEl.style.color = "#34d399";
+            badgeEl.textContent = "✅ Published";
+          }
         } catch (err) {
           console.error("Firestore routine save error:", err);
+          if (badgeEl) {
+            badgeEl.style.color = "#f87171";
+            badgeEl.textContent = "❌ Error";
+          }
           showToast(`Save error for ${item.docId}: ` + err.message, "error");
         }
+
+        // 250ms smooth delay so progress bar transition is visible
+        await new Promise(r => setTimeout(r, 250));
       }
 
-      showToast(`Successfully published ${successCount}/${itemsToUpload.length} routine(s) to Firestore!`, "success");
+      // Complete
+      if (barFill) barFill.style.width = "100%";
+      if (percentText) percentText.textContent = "100%";
+      if (statusText) statusText.textContent = `🎉 Batch Upload Completed (${successCount}/${total} successful)!`;
+      if (closeBtn) closeBtn.style.display = "block";
+
+      showToast(`Successfully published ${successCount}/${total} routine(s) to Firestore!`, "success");
       
       // Reset inputs
       if (document.getElementById("admin-json-text-input")) document.getElementById("admin-json-text-input").value = "";
@@ -3103,6 +3220,11 @@
         currentAdminExamSchedule = last.data.schedule;
         renderAdminExamScheduleTable();
       }
+
+      // Auto close modal after 1.5s
+      setTimeout(() => {
+        closeBatchUploadModal();
+      }, 1800);
     }
 
     // ================= HOLIDAY MANAGER JS LOGIC =================
