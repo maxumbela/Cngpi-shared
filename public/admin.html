@@ -2931,32 +2931,59 @@
         .replace(/^\uFEFF/, '') // Strip UTF-8 BOM
         .replace(/```json/gi, '')
         .replace(/```/g, '')
+        .replace(/[“”]/g, '"')   // Clean smart double quotes
+        .replace(/[‘’]/g, "'")   // Clean smart single quotes
         .trim();
 
+      // Check if it's a JSON array [...]
       const firstBracket = str.indexOf('[');
       const lastBracket = str.lastIndexOf(']');
       const firstBrace = str.indexOf('{');
-      const lastBrace = str.lastIndexOf('}');
-
+      
       if (firstBracket !== -1 && lastBracket !== -1 && (firstBrace === -1 || firstBracket < firstBrace)) {
-        str = str.substring(firstBracket, lastBracket + 1);
-      } else if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-        str = str.substring(firstBrace, lastBrace + 1);
-      }
-
-      let parsedObj;
-      try {
-        parsedObj = JSON.parse(str);
-      } catch (err) {
+        const arrStr = str.substring(firstBracket, lastBracket + 1);
         try {
-          const cleaned = str.replace(/,\s*([\]}])/g, '$1');
-          parsedObj = JSON.parse(cleaned);
-        } catch (err2) {
-          throw new Error("Invalid JSON structure: " + err.message);
+          return JSON.parse(arrStr);
+        } catch (e) {
+          try {
+            return JSON.parse(arrStr.replace(/,\s*([\]}])/g, '$1'));
+          } catch (e2) {}
         }
       }
 
-      return Array.isArray(parsedObj) ? parsedObj : [parsedObj];
+      // Check single JSON object { ... }
+      if (firstBrace !== -1) {
+        const lastBrace = str.lastIndexOf('}');
+        if (lastBrace > firstBrace) {
+          const objStr = str.substring(firstBrace, lastBrace + 1);
+          try {
+            const p = JSON.parse(objStr);
+            return Array.isArray(p) ? p : [p];
+          } catch (err) {
+            try {
+              const cleaned = objStr.replace(/,\s*([\]}])/g, '$1');
+              const p = JSON.parse(cleaned);
+              return Array.isArray(p) ? p : [p];
+            } catch (err2) {}
+          }
+        }
+      }
+
+      // Regex fallback for multiple concatenated JSON objects { ... } { ... }
+      const objects = [];
+      const regex = /\{[\s\S]*?\}(?=\s*\{|\s*$)/g;
+      let match;
+      while ((match = regex.exec(str)) !== null) {
+        try {
+          const cleanObj = match[0].replace(/,\s*([\]}])/g, '$1');
+          const p = JSON.parse(cleanObj);
+          objects.push(p);
+        } catch (e) {}
+      }
+
+      if (objects.length > 0) return objects;
+
+      throw new Error("Could not parse valid JSON format from file or text.");
     }
 
     function formatRoutinePayload(jsonObj) {
@@ -3021,8 +3048,25 @@
 
     async function previewAndParseAdminJsonRoutine() {
       const textVal = document.getElementById("admin-json-text-input") ? document.getElementById("admin-json-text-input").value.trim() : "";
-      if (!textVal && pendingJsonFiles.length === 0) {
-        showToast("Please select a JSON/TXT file or paste JSON text first.", "warning");
+      
+      if (pendingJsonFiles.length > 0) {
+        const file = pendingJsonFiles[0];
+        try {
+          const content = await readFileAsTextPromise(file);
+          const parsedList = parseRoutineJsonData(content);
+          if (parsedList.length > 0) {
+            const formatted = formatRoutinePayload(parsedList[0]);
+            if (document.getElementById("admin-exam-dept")) document.getElementById("admin-exam-dept").value = formatted.data.department;
+            if (document.getElementById("admin-exam-sem")) document.getElementById("admin-exam-sem").value = formatted.data.semester;
+            if (document.getElementById("admin-exam-title")) document.getElementById("admin-exam-title").value = formatted.data.exam_title;
+
+            currentAdminExamSchedule = formatted.data.schedule;
+            renderAdminExamRows();
+            showToast(`Parsed file "${file.name}" [${formatted.routineCode}] (${formatted.data.schedule.length} subjects)! Preview loaded below.`, "success");
+          }
+        } catch (err) {
+          showToast(`Failed to parse "${file.name}": ` + err.message, "error");
+        }
         return;
       }
 
@@ -3036,7 +3080,7 @@
             if (document.getElementById("admin-exam-title")) document.getElementById("admin-exam-title").value = formatted.data.exam_title;
 
             currentAdminExamSchedule = formatted.data.schedule;
-            renderAdminExamScheduleTable();
+            renderAdminExamRows();
             showToast(`Parsed "${formatted.routineCode}" - ${formatted.data.exam_title} (${formatted.data.schedule.length} subjects)! Preview loaded below.`, "success");
           }
         } catch (err) {
@@ -3045,25 +3089,7 @@
         return;
       }
 
-      if (pendingJsonFiles.length > 0) {
-        const file = pendingJsonFiles[0];
-        try {
-          const content = await readFileAsTextPromise(file);
-          const parsedList = parseRoutineJsonData(content);
-          if (parsedList.length > 0) {
-            const formatted = formatRoutinePayload(parsedList[0]);
-            if (document.getElementById("admin-exam-dept")) document.getElementById("admin-exam-dept").value = formatted.data.department;
-            if (document.getElementById("admin-exam-sem")) document.getElementById("admin-exam-sem").value = formatted.data.semester;
-            if (document.getElementById("admin-exam-title")) document.getElementById("admin-exam-title").value = formatted.data.exam_title;
-
-            currentAdminExamSchedule = formatted.data.schedule;
-            renderAdminExamScheduleTable();
-            showToast(`Parsed file "${file.name}" [${formatted.routineCode}] (${formatted.data.schedule.length} subjects)! Preview loaded below.`, "success");
-          }
-        } catch (err) {
-          showToast(`Failed to parse "${file.name}": ` + err.message, "error");
-        }
-      }
+      showToast("Please select a JSON/TXT file or paste JSON text first.", "warning");
     }
 
     function openBatchUploadModal() {
@@ -3082,16 +3108,6 @@
       
       let itemsToUpload = [];
 
-      if (textVal) {
-        try {
-          const parsedList = parseRoutineJsonData(textVal);
-          parsedList.forEach(obj => itemsToUpload.push(formatRoutinePayload(obj)));
-        } catch (err) {
-          showToast("Error in pasted JSON text: " + err.message, "error");
-          return;
-        }
-      }
-
       if (pendingJsonFiles.length > 0) {
         for (const file of pendingJsonFiles) {
           try {
@@ -3102,10 +3118,18 @@
             showToast(`Error parsing file "${file.name}": ` + err.message, "error");
           }
         }
+      } else if (textVal) {
+        try {
+          const parsedList = parseRoutineJsonData(textVal);
+          parsedList.forEach(obj => itemsToUpload.push(formatRoutinePayload(obj)));
+        } catch (err) {
+          showToast("Error in pasted JSON text: " + err.message, "error");
+          return;
+        }
       }
 
       if (itemsToUpload.length === 0) {
-        showToast("No valid routine JSON found to upload.", "warning");
+        showToast("No valid routine JSON found to upload. Please check your file or pasted text.", "warning");
         return;
       }
 
@@ -3122,16 +3146,16 @@
       if (barFill) barFill.style.width = "0%";
       if (percentText) percentText.textContent = "0%";
       if (statusText) statusText.textContent = "Starting batch upload...";
-      if (subtitle) subtitle.textContent = `Publishing ${itemsToUpload.length} routine(s) one-by-one to Firestore...`;
+      if (subtitle) subtitle.textContent = `Publishing ${itemsToUpload.length} routine(s) to Firestore...`;
       if (closeBtn) closeBtn.style.display = "none";
 
       // Render Item Progress Rows
       if (itemListContainer) {
         itemListContainer.innerHTML = itemsToUpload.map((item, idx) => `
-          <div id="batch-row-${idx}" style="display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: rgba(255,255,255,0.04); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+          <div id="batch-row-${idx}" style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(255,255,255,0.04); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 6px;">
             <div>
-              <span style="font-weight: 800; color: #ffffff;">#${idx + 1} ${item.routineCode} (${item.data.department} ${item.data.semester})</span>
-              <span style="color: var(--text-muted); font-size: 11px; margin-left: 6px;">${item.data.total_exams} Subjects</span>
+              <span style="font-weight: 800; color: #ffffff; font-size: 13px;">#${idx + 1} ${item.routineCode}</span>
+              <span style="color: var(--text-muted); font-size: 11px; margin-left: 6px;">(${item.data.department} ${item.data.semester} • ${item.data.total_exams} Subjects)</span>
             </div>
             <span id="batch-badge-${idx}" style="color: #fbbf24; font-weight: 800; font-size: 11px;">⏳ Pending</span>
           </div>
@@ -3141,67 +3165,72 @@
       const total = itemsToUpload.length;
       let successCount = 0;
 
-      // Process and Upload One-by-One with live progress updates
+      // Process and Upload Fast using Firestore Write Batch
       for (let i = 0; i < total; i++) {
         const item = itemsToUpload[i];
-        const currentPct = Math.round((i / total) * 100);
+        const currentPct = Math.round(((i + 1) / total) * 100);
 
-        if (barFill) barFill.style.width = `${currentPct}%`;
-        if (percentText) percentText.textContent = `${currentPct}%`;
-        if (statusText) statusText.textContent = `[${i + 1}/${total}] Uploading ${item.routineCode} (${item.data.department} ${item.data.semester})...`;
+        if (statusText) statusText.textContent = `[${i + 1}/${total}] Publishing ${item.routineCode} (${item.data.department} ${item.data.semester})...`;
 
         const badgeEl = document.getElementById(`batch-badge-${i}`);
         if (badgeEl) {
           badgeEl.style.color = "#38bdf8";
-          badgeEl.textContent = "🚀 Uploading...";
+          badgeEl.textContent = "🚀 Publishing...";
         }
 
         try {
           if (db) {
+            const batch = db.batch();
+
             // 1. Primary write under routine_code (e.g. ET-4, CST-1)
-            await db.collection("exam_routines").doc(item.routineCode).set(item.data);
+            batch.set(db.collection("exam_routines").doc(item.routineCode), item.data);
             
             // 2. Lowercase routine_code (e.g. et-4, cst-1)
-            await db.collection("exam_routines").doc(item.lowerRoutineCode).set(item.data);
+            batch.set(db.collection("exam_routines").doc(item.lowerRoutineCode), item.data);
 
             // 3. Main docId (e.g. ET_4th)
-            await db.collection("exam_routines").doc(item.docId).set(item.data);
+            batch.set(db.collection("exam_routines").doc(item.docId), item.data);
 
             // 4. Alt key (e.g. et_4)
             if (item.altDocId) {
-              await db.collection("exam_routines").doc(item.altDocId).set(item.data);
+              batch.set(db.collection("exam_routines").doc(item.altDocId), item.data);
             }
 
             // 5. Tech code key (e.g. 67_4)
             if (item.techCodeDocId) {
-              await db.collection("exam_routines").doc(item.techCodeDocId).set(item.data);
+              batch.set(db.collection("exam_routines").doc(item.techCodeDocId), item.data);
             }
 
             // Also mirror under routines collection for total compatibility
-            await db.collection("routines").doc(item.routineCode).set(item.data);
-            await db.collection("routines").doc(item.lowerRoutineCode).set(item.data);
-            await db.collection("routines").doc(item.docId).set(item.data);
+            batch.set(db.collection("routines").doc(item.routineCode), item.data);
+            batch.set(db.collection("routines").doc(item.lowerRoutineCode), item.data);
+            batch.set(db.collection("routines").doc(item.docId), item.data);
             if (item.altDocId) {
-              await db.collection("routines").doc(item.altDocId).set(item.data);
+              batch.set(db.collection("routines").doc(item.altDocId), item.data);
             }
+
+            // Commit atomic batch write
+            await batch.commit();
           }
           
           successCount++;
+          if (barFill) barFill.style.width = `${currentPct}%`;
+          if (percentText) percentText.textContent = `${currentPct}%`;
           if (badgeEl) {
             badgeEl.style.color = "#34d399";
             badgeEl.textContent = "✅ Published";
           }
         } catch (err) {
-          console.error("Firestore routine save error:", err);
+          console.error("Firestore batch upload error:", err);
           if (badgeEl) {
             badgeEl.style.color = "#f87171";
-            badgeEl.textContent = "❌ Error";
+            badgeEl.textContent = "❌ Error: " + err.message;
           }
           showToast(`Save error for ${item.routineCode}: ` + err.message, "error");
         }
 
-        // 250ms smooth delay so progress bar transition is visible
-        await new Promise(r => setTimeout(r, 250));
+        // 150ms smooth transition delay
+        await new Promise(r => setTimeout(r, 150));
       }
 
       // Complete
@@ -3218,11 +3247,11 @@
       if (document.getElementById("admin-selected-files-list")) document.getElementById("admin-selected-files-list").textContent = "";
       pendingJsonFiles = [];
 
-      // Load preview for last uploaded
+      // Load preview into table editor for last uploaded
       if (itemsToUpload.length > 0) {
         const last = itemsToUpload[itemsToUpload.length - 1];
         currentAdminExamSchedule = last.data.schedule;
-        renderAdminExamScheduleTable();
+        renderAdminExamRows();
       }
 
       // Auto close modal after 1.8s
