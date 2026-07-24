@@ -525,42 +525,59 @@
 
       const rollStr = String(rawRoll);
       const rollNum = Number(rawRoll);
+      const possibleRolls = [rollStr];
+      if (!isNaN(rollNum)) possibleRolls.push(rollNum);
 
       if (db) {
         try {
-          // 1. Doc ID in student_results
-          let doc = await db.collection("student_results").doc(rollStr).get();
-          if (doc.exists) { renderStudentResult(doc.data()); return; }
+          const collections = ["student_results", "results"];
+          const fields = ["roll", "studentRoll", "student_roll", "rollNo", "roll_no", "boardRoll", "rollNumber"];
 
-          // 2. String field "roll" in student_results
-          let snap = await db.collection("student_results").where("roll", "==", rollStr).get();
-          if (!snap.empty) { renderStudentResult(snap.docs[0].data()); return; }
-
-          // 3. Numeric field "roll" in student_results (if stored as number 200029)
-          if (!isNaN(rollNum)) {
-            snap = await db.collection("student_results").where("roll", "==", rollNum).get();
-            if (!snap.empty) { renderStudentResult(snap.docs[0].data()); return; }
+          // 1. Direct Document ID lookup
+          for (const col of collections) {
+            const doc = await db.collection(col).doc(rollStr).get();
+            if (doc.exists && doc.data()) {
+              renderStudentResult(doc.data(), rollStr);
+              return;
+            }
           }
 
-          // 4. Doc ID in results
-          doc = await db.collection("results").doc(rollStr).get();
-          if (doc.exists && doc.data().roll) { renderStudentResult(doc.data()); return; }
+          // 2. Field equality queries across all field name variants
+          for (const col of collections) {
+            for (const field of fields) {
+              for (const val of possibleRolls) {
+                const snap = await db.collection(col).where(field, "==", val).get();
+                if (!snap.empty) {
+                  renderStudentResult(snap.docs[0].data(), rollStr);
+                  return;
+                }
+              }
+            }
+          }
 
-          // 5. String field "roll" in results
-          snap = await db.collection("results").where("roll", "==", rollStr).get();
-          if (!snap.empty) { renderStudentResult(snap.docs[0].data()); return; }
-
-          // 6. Numeric field "roll" in results
-          if (!isNaN(rollNum)) {
-            snap = await db.collection("results").where("roll", "==", rollNum).get();
-            if (!snap.empty) { renderStudentResult(snap.docs[0].data()); return; }
+          // 3. Fallback scan across student_results collection
+          const allDocsSnap = await db.collection("student_results").limit(500).get();
+          if (!allDocsSnap.empty) {
+            for (const doc of allDocsSnap.docs) {
+              const d = doc.data();
+              if (doc.id === rollStr) {
+                renderStudentResult(d, rollStr);
+                return;
+              }
+              for (const f of fields) {
+                if (d[f] && String(d[f]).trim() === rollStr) {
+                  renderStudentResult(d, rollStr);
+                  return;
+                }
+              }
+            }
           }
         } catch (err) {
-          console.warn("Firestore search error, trying fallbacks:", err);
+          console.warn("Firestore search warning, trying local server fallbacks:", err);
         }
       }
 
-      // 7. Fallback Local API Search
+      // 4. Fallback Local API Search
       fetchFallbackLocalApi(rollStr);
     }
 
@@ -569,18 +586,18 @@
         let res = await fetch(`/api/result/${encodeURIComponent(rollStr)}`);
         let data = await res.json();
         if (data.ok && data.results && data.results.length > 0) {
-          renderStudentResult(data.results[0]);
+          renderStudentResult(data.results[0], rollStr);
           return;
         }
         if (data.success && data.result) {
-          renderStudentResult(data.result);
+          renderStudentResult(data.result, rollStr);
           return;
         }
 
         res = await fetch(`/api/result?roll=${encodeURIComponent(rollStr)}`);
         data = await res.json();
         if (data.success && data.result) {
-          renderStudentResult(data.result);
+          renderStudentResult(data.result, rollStr);
           return;
         }
       } catch (e) {
@@ -590,10 +607,11 @@
       renderNotFound(rollStr);
     }
 
-    function renderStudentResult(data) {
+    function renderStudentResult(data, searchRoll) {
       const outputArea = document.getElementById("result-output-area");
       outputArea.style.display = "block";
 
+      const displayRoll = data.roll || data.studentRoll || data.student_roll || data.rollNo || data.boardRoll || searchRoll || "N/A";
       const statusKey = (data.status || "pass").toLowerCase();
       const statusLabel = data.statusLabel || (statusKey === "pass" ? "Passed" : statusKey === "referred" ? "Referred" : "Failed");
       
@@ -602,21 +620,23 @@
         statusBadge = `<span class="status-badge-referred"><i data-lucide="alert-triangle" style="width:14px;height:14px;display:inline;margin-right:4px;"></i>${statusLabel}</span>`;
       }
 
-      const instName = data.instituteName || "Chapainawabganj Polytechnic Institute";
-      const instCode = data.instituteCode ? ` (${data.instituteCode})` : "";
+      const instName = data.instituteName || data.institute_name || "Chapainawabganj Polytechnic Institute";
+      const instCode = data.instituteCode || data.institute_code ? ` (${data.instituteCode || data.institute_code})` : "";
 
-      const gpa1Text = data.gpa1 === "ref" ? "Referred" : (data.gpa1 !== null && data.gpa1 !== undefined) ? Number(data.gpa1).toFixed(2) : "N/A";
+      const gpaVal = data.gpa || data.cgpa;
+      const gpa1Text = data.gpa1 === "ref" ? "Referred" : (data.gpa1 !== null && data.gpa1 !== undefined) ? Number(data.gpa1).toFixed(2) : (gpaVal !== undefined && gpaVal !== null ? Number(gpaVal).toFixed(2) : "N/A");
       const gpa2Text = data.gpa2 === "ref" ? "Referred" : (data.gpa2 !== null && data.gpa2 !== undefined) ? Number(data.gpa2).toFixed(2) : "N/A";
 
+      const rawFailed = data.failedSubjects || data.subjects || [];
       let failedSubjectsHTML = "";
-      if (data.failedSubjects && data.failedSubjects.length > 0) {
-        const subItems = data.failedSubjects.map(s => `
+      if (rawFailed && rawFailed.length > 0) {
+        const subItems = rawFailed.map(s => `
           <div style="background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.3); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
             <div>
-              <span style="font-weight: 800; color: #fb7185; font-size: 13px;">${s.code} - ${s.name}</span>
-              <div style="font-size: 11px; color: var(--text-muted);">${s.semester || 'Referred'}</div>
+              <span style="font-weight: 800; color: #fb7185; font-size: 13px;">${s.code || s.subjectCode || ''} - ${s.name || s.subjectName || 'Subject ' + (s.code || '')}</span>
+              <div style="font-size: 11px; color: var(--text-muted);">${s.semester || s.component_label || 'Referred'}</div>
             </div>
-            <span style="background: rgba(244, 63, 94, 0.3); color: white; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px;">${s.componentLabel || 'Failed'}</span>
+            <span style="background: rgba(244, 63, 94, 0.3); color: white; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px;">${s.componentLabel || s.component_label || 'Referred'}</span>
           </div>
         `).join("");
 
@@ -624,7 +644,7 @@
           <div style="margin-top: 14px;">
             <h4 style="font-size: 13px; color: #fb7185; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
               <i data-lucide="alert-circle" style="width: 16px; height: 16px;"></i>
-              <span>Referred / Failed Subjects (${data.failedSubjects.length}):</span>
+              <span>Referred / Failed Subjects (${rawFailed.length}):</span>
             </h4>
             <div style="display: flex; flex-direction: column; gap: 8px;">
               ${subItems}
@@ -638,7 +658,7 @@
           <div class="result-card-top">
             <div>
               <span class="info-label">Student Board Roll</span>
-              <div class="student-roll-badge">${data.roll}</div>
+              <div class="student-roll-badge">${displayRoll}</div>
             </div>
             ${statusBadge}
           </div>
