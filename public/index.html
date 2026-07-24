@@ -3177,12 +3177,31 @@
 
       if (db) {
         db.collection("exam_routines").doc(docId).get().then(doc => {
-          if (doc.exists && doc.data().schedule && doc.data().schedule.length > 0) {
-            displayExamScheduleList(doc.data().schedule, container);
-          } else {
+          if (doc.exists) {
+            const data = doc.data();
+            const list = data.schedule || data.routine || [];
+            if (list && list.length > 0) {
+              displayExamScheduleList(list, container);
+              return;
+            }
+          }
+          
+          const altId = `${activeExamDept.toLowerCase()}_${activeExamSem.replace(/[^0-9]/g, "")}`;
+          db.collection("exam_routines").doc(altId).get().then(altDoc => {
+            if (altDoc.exists) {
+              const data = altDoc.data();
+              const list = data.schedule || data.routine || [];
+              if (list && list.length > 0) {
+                displayExamScheduleList(list, container);
+                return;
+              }
+            }
             const fallback = SAMPLE_EXAM_SCHEDULES[docId] || [];
             displayExamScheduleList(fallback, container);
-          }
+          }).catch(() => {
+            const fallback = SAMPLE_EXAM_SCHEDULES[docId] || [];
+            displayExamScheduleList(fallback, container);
+          });
         }).catch(err => {
           console.error("Firestore exam fetch error:", err);
           const fallback = SAMPLE_EXAM_SCHEDULES[docId] || [];
@@ -3222,20 +3241,26 @@
       `;
 
       list.forEach(item => {
+        const dateVal = item.date_display || item.date || "TBA";
+        const dayVal = item.day || "Day";
+        const timeVal = item.time || item.time_24_hour || "02:00 PM";
+        const subjectVal = item.subject_name || item.subject || "Subject";
+        const codeVal = item.subject_code || item.code || "N/A";
+
         html += `
           <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
             <td style="padding: 10px; vertical-align: middle;">
-              <div style="font-weight: 800; color: #ffffff; font-size: 12px;">${item.date}</div>
-              <div style="font-size: 10px; color: #ef4444; font-weight: 700;">${item.day}</div>
+              <div style="font-weight: 800; color: #ffffff; font-size: 12px;">${dateVal}</div>
+              <div style="font-size: 10px; color: #ef4444; font-weight: 700;">${dayVal}</div>
             </td>
             <td style="padding: 10px; vertical-align: middle;">
-              <div style="font-size: 10px; font-weight: 800; color: #a5b4fc; background: rgba(99, 102, 241, 0.15); padding: 4px 8px; border-radius: 8px; width: fit-content;">${item.time}</div>
+              <div style="font-size: 10px; font-weight: 800; color: #a5b4fc; background: rgba(99, 102, 241, 0.15); padding: 4px 8px; border-radius: 8px; width: fit-content;">${timeVal}</div>
             </td>
             <td style="padding: 10px; vertical-align: middle;">
-              <div style="font-weight: 800; color: #ffffff; font-size: 12px;">${item.subject_name}</div>
+              <div style="font-weight: 800; color: #ffffff; font-size: 12px;">${subjectVal}</div>
             </td>
             <td style="padding: 10px; text-align: center; vertical-align: middle;">
-              <span style="font-size: 10px; font-weight: 800; color: #f472b6; background: rgba(244, 114, 182, 0.15); padding: 4px 8px; border-radius: 8px;">${item.subject_code}</span>
+              <span style="font-size: 10px; font-weight: 800; color: #f472b6; background: rgba(244, 114, 182, 0.15); padding: 4px 8px; border-radius: 8px;">${codeVal}</span>
             </td>
           </tr>
         `;

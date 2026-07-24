@@ -1348,6 +1348,53 @@
               <i data-lucide="plus" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle;"></i>
               Add Subject Schedule
             </button>
+        <!-- Fast JSON Routine Upload / Paste Box -->
+        <div style="background: rgba(239, 68, 68, 0.05); border: 1px dashed rgba(239, 68, 68, 0.3); padding: 20px; border-radius: 18px; margin-bottom: 24px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <h3 style="font-size: 15px; font-weight: 800; color: #fff; margin: 0; display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="file-json" style="width: 18px; height: 18px; color: #ef4444;"></i>
+                JSON Format Routine Upload (.json / .txt / Raw Text Paste)
+              </h3>
+              <p style="font-size: 12px; color: var(--text-muted); margin: 4px 0 0 0;">Upload single/multiple JSON or TXT routine files or paste raw JSON text to parse and publish directly to Firestore.</p>
+            </div>
+            <span style="background: rgba(239, 68, 68, 0.2); color: #f87171; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(239, 68, 68, 0.3);">
+              ✨ Multi-File Batch Import Enabled
+            </span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 16px;">
+            <!-- Upload File Option -->
+            <div style="background: rgba(0,0,0,0.25); border: 1px solid var(--border-color); border-radius: 14px; padding: 16px; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+              <i data-lucide="upload-cloud" style="width: 32px; height: 32px; color: #ef4444; margin-bottom: 8px;"></i>
+              <div style="font-size: 13px; font-weight: 800; color: #fff; margin-bottom: 4px;">Upload File(s) (.json or .txt)</div>
+              <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">Select one or multiple JSON/TXT routine files</div>
+              <input type="file" id="admin-json-file-input" accept=".json,.txt" multiple style="display: none;" onchange="handleAdminJsonFileSelect(event)">
+              <button type="button" class="btn-primary-action" onclick="document.getElementById('admin-json-file-input').click()" style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); color: white; padding: 8px 18px; border-radius: 10px; font-weight: 700; font-size: 12px; cursor: pointer;">
+                Browse File(s)
+              </button>
+              <div id="admin-selected-files-list" style="font-size: 11px; color: #38bdf8; margin-top: 8px; font-weight: 600;"></div>
+            </div>
+
+            <!-- Paste Raw JSON Option -->
+            <div style="background: rgba(0,0,0,0.25); border: 1px solid var(--border-color); border-radius: 14px; padding: 16px;">
+              <label style="font-size: 12px; font-weight: 800; color: #fff; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+                <span>Or Paste JSON Format Text</span>
+                <a href="javascript:void(0)" onclick="loadSampleRoutineJsonText()" style="font-size: 11px; color: #ef4444; font-weight: 700; text-decoration: none;">Load Example JSON</a>
+              </label>
+              <textarea id="admin-json-text-input" class="form-textarea" placeholder="Paste JSON format routine here..." style="min-height: 90px; font-family: monospace; font-size: 11px; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.1);"></textarea>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap;">
+            <button type="button" onclick="previewAndParseAdminJsonRoutine()" style="background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); color: white; padding: 10px 18px; border-radius: 10px; font-weight: 700; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+              <i data-lucide="eye" style="width: 14px; height: 14px;"></i>
+              <span>Preview in Table Editor</span>
+            </button>
+            <button type="button" onclick="uploadAdminJsonRoutinesToFirestore()" style="background: linear-gradient(135deg, #ef4444 0%, #f43f5e 100%); border: none; color: white; padding: 10px 22px; border-radius: 10px; font-weight: 800; font-size: 12px; cursor: pointer; box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35); display: flex; align-items: center; gap: 6px;">
+              <i data-lucide="cloud-upload" style="width: 14px; height: 14px;"></i>
+              <span>Parse & Upload to Firestore</span>
+            </button>
           </div>
         </div>
 
@@ -2734,6 +2781,296 @@
         });
       } else {
         showToast("Database offline. Exam routine saved locally!", "success");
+      }
+    }
+
+    // ================= JSON ROUTINE IMPORTER & BATCH UPLOADER LOGIC =================
+    let pendingJsonFiles = [];
+
+    function handleAdminJsonFileSelect(event) {
+      pendingJsonFiles = Array.from(event.target.files);
+      const listEl = document.getElementById("admin-selected-files-list");
+      if (!listEl) return;
+      if (pendingJsonFiles.length === 0) {
+        listEl.textContent = "";
+        return;
+      }
+      listEl.textContent = `Selected (${pendingJsonFiles.length}): ` + pendingJsonFiles.map(f => f.name).join(", ");
+    }
+
+    function loadSampleRoutineJsonText() {
+      const sample = {
+        "exam_title": "Diploma in Engineering and Tourism Exam-2025",
+        "exam_year_as_published": 2025,
+        "exam_schedule_year": 2026,
+        "regulation": 2022,
+        "exam_category": "Written/Theory",
+        "technology": "Computer Science & Technology (CST)",
+        "technology_key": "cst",
+        "technology_short_name": "CST",
+        "technology_code": "85",
+        "semester": 1,
+        "semester_name": "1st Semester",
+        "date_range": {
+          "start": "2026-08-06",
+          "end": "2026-09-07"
+        },
+        "timezone": "Asia/Dhaka",
+        "total_exams": 5,
+        "routine": [
+          {
+            "serial": 1,
+            "subject_code": "25712",
+            "subject_name": "English-I",
+            "date": "2026-08-09",
+            "date_display": "09 August 2026",
+            "day": "Sunday",
+            "time": "02:00 PM",
+            "time_24_hour": "14:00",
+            "timezone": "Asia/Dhaka"
+          },
+          {
+            "serial": 2,
+            "subject_code": "25912",
+            "subject_name": "Physics-I",
+            "date": "2026-08-15",
+            "date_display": "15 August 2026",
+            "day": "Saturday",
+            "time": "02:00 PM",
+            "time_24_hour": "14:00",
+            "timezone": "Asia/Dhaka"
+          },
+          {
+            "serial": 3,
+            "subject_code": "25911",
+            "subject_name": "Mathematics-I",
+            "date": "2026-08-24",
+            "date_display": "24 August 2026",
+            "day": "Monday",
+            "time": "02:00 PM",
+            "time_24_hour": "14:00",
+            "timezone": "Asia/Dhaka"
+          },
+          {
+            "serial": 4,
+            "subject_code": "26711",
+            "subject_name": "Basic Electricity",
+            "date": "2026-09-02",
+            "date_display": "02 September 2026",
+            "day": "Wednesday",
+            "time": "10:00 AM",
+            "time_24_hour": "10:00",
+            "timezone": "Asia/Dhaka"
+          },
+          {
+            "serial": 5,
+            "subject_code": "25711",
+            "subject_name": "Bangla-I",
+            "date": "2026-09-05",
+            "date_display": "05 September 2026",
+            "day": "Saturday",
+            "time": "02:00 PM",
+            "time_24_hour": "14:00",
+            "timezone": "Asia/Dhaka"
+          }
+        ]
+      };
+      const textInput = document.getElementById("admin-json-text-input");
+      if (textInput) {
+        textInput.value = JSON.stringify(sample, null, 2);
+        showToast("Sample BTEB JSON routine loaded into text area!", "info");
+      }
+    }
+
+    function parseRoutineJsonData(rawContent) {
+      if (typeof rawContent === 'object') return rawContent;
+      try {
+        let cleaned = String(rawContent).replace(/```json/gi, '').replace(/```/g, '').trim();
+        return JSON.parse(cleaned);
+      } catch (err) {
+        throw new Error("Invalid JSON format: " + err.message);
+      }
+    }
+
+    function formatRoutinePayload(jsonObj) {
+      const rawTech = jsonObj.technology_short_name || jsonObj.technology_key || jsonObj.technology || "CST";
+      let deptShortCode = String(rawTech).toUpperCase().replace(/[^A-Z]/g, '');
+      if (!deptShortCode || deptShortCode.length > 5) {
+        if (String(rawTech).toLowerCase().includes("cst") || String(rawTech).toLowerCase().includes("computer")) deptShortCode = "CST";
+        else if (String(rawTech).toLowerCase().includes("civil") || String(rawTech).toLowerCase().includes("ct")) deptShortCode = "CT";
+        else if (String(rawTech).toLowerCase().includes("electrical") || String(rawTech).toLowerCase().includes("et")) deptShortCode = "ET";
+        else if (String(rawTech).toLowerCase().includes("electronics") || String(rawTech).toLowerCase().includes("ent")) deptShortCode = "ENT";
+        else if (String(rawTech).toLowerCase().includes("mechanical") || String(rawTech).toLowerCase().includes("mt")) deptShortCode = "MT";
+        else deptShortCode = "CST";
+      }
+
+      const semRaw = jsonObj.semester_name || (jsonObj.semester ? jsonObj.semester + "st" : "1st");
+      let semCode = String(semRaw).toLowerCase();
+      if (!semCode.includes("st") && !semCode.includes("nd") && !semCode.includes("rd") && !semCode.includes("th")) {
+        const num = semCode.replace(/[^0-9]/g, "") || "1";
+        semCode = num === "1" ? "1st" : num === "2" ? "2nd" : num === "3" ? "3rd" : num + "th";
+      } else {
+        const num = semCode.replace(/[^0-9]/g, "") || "1";
+        semCode = num === "1" ? "1st" : num === "2" ? "2nd" : num === "3" ? "3rd" : num + "th";
+      }
+
+      const routineList = jsonObj.routine || jsonObj.weekly_schedule || jsonObj.schedule || [];
+      
+      const scheduleItems = routineList.map((item, idx) => ({
+        serial: item.serial || idx + 1,
+        subject: item.subject_name || item.subject || "Subject",
+        code: item.subject_code || item.code || "N/A",
+        date: item.date_display || item.date || "TBA",
+        day: item.day || "Day",
+        time: item.time || item.time_24_hour || "02:00 PM"
+      }));
+
+      const semNumOnly = (jsonObj.semester || semCode.replace(/[^0-9]/g, "") || "1");
+
+      return {
+        docId: `${deptShortCode}_${semCode}`,
+        altDocId: `${deptShortCode.toLowerCase()}_${semNumOnly}`,
+        techCodeDocId: jsonObj.technology_code ? `${jsonObj.technology_code}_${semNumOnly}` : null,
+        data: {
+          exam_title: jsonObj.exam_title || "BTEB Semester Final 2026",
+          department: deptShortCode,
+          semester: semCode,
+          technology: jsonObj.technology || deptShortCode,
+          technology_key: (jsonObj.technology_key || deptShortCode).toLowerCase(),
+          technology_code: jsonObj.technology_code || "",
+          regulation: jsonObj.regulation || 2022,
+          exam_category: jsonObj.exam_category || "Written/Theory",
+          date_range: jsonObj.date_range || {},
+          total_exams: scheduleItems.length,
+          schedule: scheduleItems,
+          routine: routineList,
+          raw_json: jsonObj,
+          updatedAt: new Date().toISOString(),
+          updatedBy: ADMIN_USER
+        }
+      };
+    }
+
+    function previewAndParseAdminJsonRoutine() {
+      const textVal = document.getElementById("admin-json-text-input") ? document.getElementById("admin-json-text-input").value.trim() : "";
+      if (!textVal && pendingJsonFiles.length === 0) {
+        showToast("Please select a JSON/TXT file or paste JSON text first.", "warning");
+        return;
+      }
+
+      if (textVal) {
+        try {
+          const parsed = parseRoutineJsonData(textVal);
+          const formatted = formatRoutinePayload(parsed);
+          
+          if (document.getElementById("admin-exam-dept")) document.getElementById("admin-exam-dept").value = formatted.data.department;
+          if (document.getElementById("admin-exam-sem")) document.getElementById("admin-exam-sem").value = formatted.data.semester;
+          if (document.getElementById("admin-exam-title")) document.getElementById("admin-exam-title").value = formatted.data.exam_title;
+
+          currentAdminExamSchedule = formatted.data.schedule;
+          renderAdminExamScheduleTable();
+          showToast(`Parsed "${formatted.data.exam_title}" (${formatted.data.schedule.length} subjects)! Preview loaded below.`, "success");
+        } catch (err) {
+          showToast("Failed to parse JSON text: " + err.message, "error");
+        }
+        return;
+      }
+
+      if (pendingJsonFiles.length > 0) {
+        const file = pendingJsonFiles[0];
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const parsed = parseRoutineJsonData(e.target.result);
+            const formatted = formatRoutinePayload(parsed);
+            
+            if (document.getElementById("admin-exam-dept")) document.getElementById("admin-exam-dept").value = formatted.data.department;
+            if (document.getElementById("admin-exam-sem")) document.getElementById("admin-exam-sem").value = formatted.data.semester;
+            if (document.getElementById("admin-exam-title")) document.getElementById("admin-exam-title").value = formatted.data.exam_title;
+
+            currentAdminExamSchedule = formatted.data.schedule;
+            renderAdminExamScheduleTable();
+            showToast(`Parsed file "${file.name}" (${formatted.data.schedule.length} subjects)! Preview loaded below.`, "success");
+          } catch (err) {
+            showToast(`Failed to parse "${file.name}": ` + err.message, "error");
+          }
+        };
+        reader.readAsText(file);
+      }
+    }
+
+    async function uploadAdminJsonRoutinesToFirestore() {
+      const textVal = document.getElementById("admin-json-text-input") ? document.getElementById("admin-json-text-input").value.trim() : "";
+      
+      let itemsToUpload = [];
+
+      if (textVal) {
+        try {
+          const parsed = parseRoutineJsonData(textVal);
+          itemsToUpload.push(formatRoutinePayload(parsed));
+        } catch (err) {
+          showToast("Error in pasted JSON text: " + err.message, "error");
+          return;
+        }
+      }
+
+      if (pendingJsonFiles.length > 0) {
+        for (const file of pendingJsonFiles) {
+          try {
+            const content = await file.text();
+            const parsed = parseRoutineJsonData(content);
+            itemsToUpload.push(formatRoutinePayload(parsed));
+          } catch (err) {
+            showToast(`Error parsing file "${file.name}": ` + err.message, "error");
+          }
+        }
+      }
+
+      if (itemsToUpload.length === 0) {
+        showToast("No valid routine JSON found to upload.", "warning");
+        return;
+      }
+
+      showToast(`Uploading ${itemsToUpload.length} routine(s) to Firestore...`, "info");
+
+      let successCount = 0;
+      for (const item of itemsToUpload) {
+        try {
+          if (db) {
+            // Write to exam_routines under main docId (e.g. CST_1st)
+            await db.collection("exam_routines").doc(item.docId).set(item.data);
+            
+            // Also write under lower case alt key (e.g. cst_1) for fallback lookup
+            if (item.altDocId) {
+              await db.collection("exam_routines").doc(item.altDocId).set(item.data);
+            }
+            
+            // Also write under routines collection if routine list is populated
+            await db.collection("routines").doc(item.docId).set(item.data);
+            if (item.altDocId) {
+              await db.collection("routines").doc(item.altDocId).set(item.data);
+            }
+          }
+          successCount++;
+        } catch (err) {
+          console.error("Firestore routine save error:", err);
+          showToast(`Save error for ${item.docId}: ` + err.message, "error");
+        }
+      }
+
+      showToast(`Successfully published ${successCount}/${itemsToUpload.length} routine(s) to Firestore!`, "success");
+      
+      // Reset inputs
+      if (document.getElementById("admin-json-text-input")) document.getElementById("admin-json-text-input").value = "";
+      if (document.getElementById("admin-json-file-input")) document.getElementById("admin-json-file-input").value = "";
+      if (document.getElementById("admin-selected-files-list")) document.getElementById("admin-selected-files-list").textContent = "";
+      pendingJsonFiles = [];
+
+      // Load preview for last uploaded
+      if (itemsToUpload.length > 0) {
+        const last = itemsToUpload[itemsToUpload.length - 1];
+        currentAdminExamSchedule = last.data.schedule;
+        renderAdminExamScheduleTable();
       }
     }
 
