@@ -1288,8 +1288,8 @@
           </div>
 
           <!-- Result App Icon -->
-          <div class="app-icon-card" onclick="openComingSoon('Result', 'award')">
-            <span class="status-pill pill-soon">Soon</span>
+          <div class="app-icon-card" onclick="window.location.href='result.html'">
+            <span class="status-pill pill-active">Available</span>
             <div class="icon-shape icon-result">
               <i data-lucide="award" style="width: 28px; height: 28px;"></i>
             </div>
@@ -2758,8 +2758,7 @@
       } else if (target === 'routine') {
         window.location.href = 'routine.html';
       } else if (target === 'result') {
-        document.getElementById('screen-home').classList.add('active');
-        openComingSoon('Result', 'award');
+        window.location.href = 'result.html';
       } else if (target === 'cgpa') {
         window.location.href = 'calculator.html';
       } else if (target === 'books') {

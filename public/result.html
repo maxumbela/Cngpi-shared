@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Student Exam Result Search | Chapainawabganj Polytechnic Institute</title>
+  <meta name="description" content="Type your roll number to view your BTEB semester exam result and GPA status instantly.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.344.0/dist/umd/lucide.min.js"></script>
+
+  <!-- HTML2Canvas for Exporting Result Card -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    :root {
+      --font-primary: 'Inter', sans-serif;
+      --font-display: 'Outfit', sans-serif;
+      
+      --bg-dark: #090d16;
+      --bg-card: rgba(18, 26, 43, 0.85);
+      --bg-input: rgba(10, 15, 26, 0.9);
+      
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(6, 182, 212, 0.4);
+      
+      --color-cyan: #06b6d4;
+      --color-emerald: #10b981;
+      --color-amber: #f59e0b;
+      --color-rose: #f43f5e;
+      
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      
+      --grad-result: linear-gradient(135deg, #06b6d4 0%, #0284c7 100%);
+      --grad-emerald: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      --grad-rose: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+      --grad-card: linear-gradient(145deg, rgba(22, 30, 48, 0.9) 0%, rgba(13, 18, 30, 0.95) 100%);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      min-height: 100vh;
+      font-family: var(--font-primary);
+      background: var(--bg-dark);
+      color: var(--text-main);
+    }
+
+    /* Ambient Background Glows */
+    .bg-glow-top {
+      position: fixed;
+      top: -20%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 650px;
+      height: 650px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.18) 0%, rgba(0, 0, 0, 0) 70%);
+      filter: blur(100px);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .web-app-container {
+      width: 100%;
+      max-width: 580px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 1;
+      padding-bottom: 80px;
+    }
+
+    /* App Header */
+    .app-header {
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      background: rgba(9, 13, 22, 0.9);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      z-index: 50;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-icon-back {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-icon-back:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .page-title-group h1 {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .page-title-group p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .content-body {
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Main Search Box Card */
+    .search-card {
+      background: var(--grad-card);
+      border: 1px solid var(--border-accent);
+      border-radius: 24px;
+      padding: 28px 20px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+      text-align: center;
+    }
+
+    .search-card-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 18px;
+      background: var(--grad-result);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      margin: 0 auto 16px auto;
+      box-shadow: 0 10px 25px rgba(6, 182, 212, 0.4);
+    }
+
+    .search-card h2 {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+
+    .search-card p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .roll-input-group {
+      position: relative;
+      margin-bottom: 16px;
+    }
+
+    .roll-input-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--color-cyan);
+    }
+
+    .roll-input {
+      width: 100%;
+      padding: 16px 16px 16px 48px;
+      border-radius: 16px;
+      background: var(--bg-input);
+      border: 2px solid var(--border-color);
+      color: white;
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      outline: none;
+      transition: all 0.25s ease;
+    }
+
+    .roll-input:focus {
+      border-color: var(--color-cyan);
+      box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.25);
+    }
+
+    .btn-search {
+      width: 100%;
+      padding: 16px;
+      border-radius: 16px;
+      border: none;
+      background: var(--grad-result);
+      color: white;
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 10px 30px rgba(6, 182, 212, 0.4);
+      transition: all 0.25s ease;
+    }
+
+    .btn-search:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 34px rgba(6, 182, 212, 0.5);
+    }
+
+    /* Result Output Card */
+    .result-display-card {
+      background: var(--grad-card);
+      border: 1px solid var(--border-accent);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 14px;
+    }
+
+    .student-roll-badge {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 900;
+      color: var(--color-cyan);
+      letter-spacing: 1px;
+    }
+
+    .status-badge-passed {
+      padding: 6px 16px;
+      border-radius: 20px;
+      background: var(--grad-emerald);
+      color: white;
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 900;
+      text-transform: uppercase;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+    }
+
+    .status-badge-referred {
+      padding: 6px 16px;
+      border-radius: 20px;
+      background: var(--grad-rose);
+      color: white;
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 900;
+      text-transform: uppercase;
+      box-shadow: 0 4px 14px rgba(244, 63, 94, 0.4);
+    }
+
+    .result-info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+    }
+
+    .info-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .info-val {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-top: 2px;
+    }
+
+    .score-banner {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(16, 185, 129, 0.15) 100%);
+      border: 1px solid rgba(6, 182, 212, 0.4);
+      border-radius: 18px;
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .gpa-val {
+      font-family: var(--font-display);
+      font-size: 34px;
+      font-weight: 900;
+      color: #38bdf8;
+    }
+
+    .referred-list-box {
+      background: rgba(244, 63, 94, 0.1);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .referred-list-box h4 {
+      font-size: 13px;
+      color: #fb7185;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .referred-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .subject-tag {
+      background: rgba(244, 63, 94, 0.2);
+      color: white;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 8px;
+    }
+
+    /* Bottom Nav Bar */
+    .bottom-nav-bar {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 580px;
+      background: rgba(13, 19, 33, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 8px 14px 8px;
+      z-index: 90;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .nav-item.active {
+      color: var(--color-cyan);
+    }
+  </style>
+</head>
+<body>
+  <!-- Ambient Background Glow -->
+  <div class="bg-glow-top"></div>
+
+  <div class="web-app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <a href="index.html" class="btn-icon-back" title="Back to Home">
+          <i data-lucide="arrow-left" style="width: 20px; height: 20px;"></i>
+        </a>
+        <div class="page-title-group">
+          <h1>CNGPI Exam Result</h1>
+          <p>Instant Roll Number Search</p>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 6px; color: #34d399; font-size: 12px; font-weight: 600;">
+        <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 8px #10b981;"></span>
+        <span>Python Server Active</span>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="content-body">
+      <!-- Roll Search Card -->
+      <div class="search-card">
+        <div class="search-card-icon">
+          <i data-lucide="search-check" style="width: 32px; height: 32px;"></i>
+        </div>
+        <h2>Find Your Board Result</h2>
+        <p>Enter your 6-digit BTEB Roll Number below to instantly view your GPA and result status.</p>
+
+        <form onsubmit="handleRollSearch(event)">
+          <div class="roll-input-group">
+            <i data-lucide="hash" class="roll-input-icon" style="width: 20px; height: 20px;"></i>
+            <input type="text" id="roll-input" class="roll-input" placeholder="e.g. 654321" maxlength="7" pattern="[0-9]*" required autofocus>
+          </div>
+
+          <button type="submit" class="btn-search">
+            <i data-lucide="zap" style="width: 20px; height: 20px;"></i>
+            <span>Check Result Now</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Result Card Output Area -->
+      <div id="result-output-area" style="display: none;"></div>
+    </main>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="bottom-nav-bar">
+      <a href="index.html" class="nav-item">
+        <i data-lucide="home"></i>
+        <span>Home</span>
+      </a>
+      <a href="routine.html" class="nav-item">
+        <i data-lucide="calendar"></i>
+        <span>Routine</span>
+      </a>
+      <a href="result.html" class="nav-item active">
+        <i data-lucide="award"></i>
+        <span>Result</span>
+      </a>
+      <a href="calculator.html" class="nav-item">
+        <i data-lucide="calculator"></i>
+        <span>CGPA</span>
+      </a>
+      <a href="books.html" class="nav-item">
+        <i data-lucide="book-open"></i>
+        <span>Books</span>
+      </a>
+    </nav>
+  </div>
+
+  <script>
+    let db = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+      initFirebase();
+    });
+
+    function initFirebase() {
+      try {
+        const firebaseConfig = {
+          apiKey: "AIzaSyDummyKeyForLocalDevEnv123456",
+          authDomain: "cngpi-shared.firebaseapp.com",
+          projectId: "cngpi-shared",
+          storageBucket: "cngpi-shared.appspot.com",
+          messagingSenderId: "1234567890",
+          appId: "1:1234567890:web:abcdef123456"
+        };
+        if (!firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
+        }
+        db = firebase.firestore();
+      } catch (e) {
+        console.warn("Firestore running in fallback mode:", e);
+      }
+    }
+
+    function handleRollSearch(event) {
+      event.preventDefault();
+      const roll = document.getElementById("roll-input").value.trim();
+
+      if (!roll) return;
+
+      const outputArea = document.getElementById("result-output-area");
+      outputArea.style.display = "block";
+      outputArea.innerHTML = `
+        <div class="result-display-card" style="text-align: center; padding: 30px;">
+          <i data-lucide="loader" style="width: 32px; height: 32px; color: var(--color-cyan); animation: spin 1s linear infinite; margin: 0 auto 10px auto;"></i>
+          <p style="color: var(--text-muted);">Fetching result for Roll ${roll} from Firebase...</p>
+        </div>
+      `;
+      lucide.createIcons();
+
+      // Query Firebase Firestore 'student_results' collection first
+      if (db) {
+        db.collection("student_results").doc(roll).get().then((doc) => {
+          if (doc.exists) {
+            renderStudentResult(doc.data());
+          } else {
+            // Query by roll string field if document ID differs
+            db.collection("student_results").where("roll", "==", roll).get().then((snap) => {
+              if (!snap.empty) {
+                renderStudentResult(snap.docs[0].data());
+              } else {
+                fetchFallbackLocalApi(roll);
+              }
+            }).catch(() => fetchFallbackLocalApi(roll));
+          }
+        }).catch((err) => {
+          console.warn("Firestore search error, trying local server:", err);
+          fetchFallbackLocalApi(roll);
+        });
+      } else {
+        fetchFallbackLocalApi(roll);
+      }
+    }
+
+    function fetchFallbackLocalApi(roll) {
+      fetch(`/api/result?roll=${encodeURIComponent(roll)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.result) {
+            renderStudentResult(data.result);
+          } else {
+            renderNotFound(roll);
+          }
+        })
+        .catch(err => {
+          renderNotFound(roll);
+        });
+    }
+
+    function renderStudentResult(data) {
+      const outputArea = document.getElementById("result-output-area");
+      outputArea.style.display = "block";
+
+      const statusKey = (data.status || "pass").toLowerCase();
+      const statusLabel = data.statusLabel || (statusKey === "pass" ? "Passed" : statusKey === "referred" ? "Referred" : "Failed");
+      
+      let statusBadge = `<span class="status-badge-passed"><i data-lucide="check-circle" style="width:14px;height:14px;display:inline;margin-right:4px;"></i>${statusLabel}</span>`;
+      if (statusKey === "referred" || statusKey === "failed") {
+        statusBadge = `<span class="status-badge-referred"><i data-lucide="alert-triangle" style="width:14px;height:14px;display:inline;margin-right:4px;"></i>${statusLabel}</span>`;
+      }
+
+      const instName = data.instituteName || "Chapainawabganj Polytechnic Institute";
+      const instCode = data.instituteCode ? ` (${data.instituteCode})` : "";
+
+      const gpa1Text = data.gpa1 === "ref" ? "Referred" : (data.gpa1 !== null && data.gpa1 !== undefined) ? Number(data.gpa1).toFixed(2) : "N/A";
+      const gpa2Text = data.gpa2 === "ref" ? "Referred" : (data.gpa2 !== null && data.gpa2 !== undefined) ? Number(data.gpa2).toFixed(2) : "N/A";
+
+      let failedSubjectsHTML = "";
+      if (data.failedSubjects && data.failedSubjects.length > 0) {
+        const subItems = data.failedSubjects.map(s => `
+          <div style="background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.3); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <span style="font-weight: 800; color: #fb7185; font-size: 13px;">${s.code} - ${s.name}</span>
+              <div style="font-size: 11px; color: var(--text-muted);">${s.semester || 'Referred'}</div>
+            </div>
+            <span style="background: rgba(244, 63, 94, 0.3); color: white; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px;">${s.componentLabel || 'Failed'}</span>
+          </div>
+        `).join("");
+
+        failedSubjectsHTML = `
+          <div style="margin-top: 14px;">
+            <h4 style="font-size: 13px; color: #fb7185; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+              <i data-lucide="alert-circle" style="width: 16px; height: 16px;"></i>
+              <span>Referred / Failed Subjects (${data.failedSubjects.length}):</span>
+            </h4>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              ${subItems}
+            </div>
+          </div>
+        `;
+      }
+
+      outputArea.innerHTML = `
+        <div class="result-display-card" id="printable-result-card">
+          <div class="result-card-top">
+            <div>
+              <span class="info-label">Student Board Roll</span>
+              <div class="student-roll-badge">${data.roll}</div>
+            </div>
+            ${statusBadge}
+          </div>
+
+          <div class="result-info-grid">
+            <div style="grid-column: span 2;">
+              <span class="info-label">Polytechnic Institute</span>
+              <div class="info-val" style="color: var(--color-cyan);">${instName}${instCode}</div>
+            </div>
+            <div>
+              <span class="info-label">Semester 1 GPA</span>
+              <div class="info-val" style="font-family: var(--font-display); font-size: 16px; color: #38bdf8;">${gpa1Text}</div>
+            </div>
+            <div>
+              <span class="info-label">Semester 2 GPA</span>
+              <div class="info-val" style="font-family: var(--font-display); font-size: 16px; color: #38bdf8;">${gpa2Text}</div>
+            </div>
+          </div>
+
+          ${failedSubjectsHTML}
+        </div>
+      `;
+
+      outputArea.scrollIntoView({ behavior: 'smooth' });
+      lucide.createIcons();
+    }
+
+    function renderNotFound(roll) {
+      const outputArea = document.getElementById("result-output-area");
+      outputArea.style.display = "block";
+      outputArea.innerHTML = `
+        <div class="result-display-card" style="text-align: center; padding: 30px;">
+          <i data-lucide="file-question" style="width: 48px; height: 48px; color: var(--color-rose); margin: 0 auto 12px auto;"></i>
+          <h3 style="font-family: var(--font-display); font-size: 18px; color: white;">Result Not Found for Roll ${roll}</h3>
+          <p style="color: var(--text-muted); font-size: 13px; margin-top: 6px;">Please double-check your roll number or wait for admin to upload the official result PDF.</p>
+        </div>
+      `;
+      lucide.createIcons();
+    }
+  </script>
+</body>
+</html>

@@ -952,93 +952,222 @@
             </div>
             <div>
               <h2 class="dash-title">Semester Result PDF Management</h2>
-              <p class="dash-subtitle">Upload and publish official BTEB semester exam result PDFs for CNGPI students</p>
+              <p class="dash-subtitle">Upload and publish official BTEB result PDFs & individual student marksheets to Firestore</p>
             </div>
           </div>
         </div>
 
-        <!-- Upload Form -->
-        <form onsubmit="handleResultPdfUpload(event)" style="margin-bottom: 30px;">
-          <div class="form-group">
-            <label for="result-title">Result Title / Examination Name</label>
-            <input type="text" id="result-title" class="form-input" placeholder="e.g. 1st Semester Board Final Result 2026" required>
-          </div>
-
-          <div class="form-grid-2">
-            <div class="form-group">
-              <label for="result-dept">Department / Technology</label>
-              <select id="result-dept" class="form-select" required>
-                <option value="All Departments">All Departments</option>
-                <option value="Computer Science & Technology">Computer Science & Technology (CST)</option>
-                <option value="Civil Technology">Civil Technology (CT)</option>
-                <option value="Electrical Technology">Electrical Technology (ET)</option>
-                <option value="Electronics Technology">Electronics Technology (ENT)</option>
-                <option value="Mechanical Technology">Mechanical Technology (MT)</option>
-                <option value="Architecture Technology">Architecture Technology (AT)</option>
-                <option value="Telecommunication Technology">Telecommunication Technology (TNT)</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="result-semester">Semester</label>
-              <select id="result-semester" class="form-select" required>
-                <option value="All Semesters">All Semesters</option>
-                <option value="1st Semester">1st Semester</option>
-                <option value="2nd Semester">2nd Semester</option>
-                <option value="3rd Semester">3rd Semester</option>
-                <option value="4th Semester">4th Semester</option>
-                <option value="5th Semester">5th Semester</option>
-                <option value="6th Semester">6th Semester</option>
-                <option value="7th Semester">7th Semester</option>
-                <option value="8th Semester">8th Semester</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>Upload PDF Document</label>
-            <input type="file" id="pdf-file-input" accept="application/pdf,.pdf" style="display: none;" onchange="onPdfFileSelected(event)">
-            <div class="file-drop-area" onclick="document.getElementById('pdf-file-input').click()">
-              <i data-lucide="upload-cloud" class="file-drop-icon" style="width: 32px; height: 32px;"></i>
-              <div class="file-drop-text" id="pdf-file-label">Click or Drag to Select Result PDF File</div>
-              <div class="file-drop-subtext">PDF files supported</div>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="result-pdf-url">Or PDF Document Link (URL)</label>
-            <input type="url" id="result-pdf-url" class="form-input" placeholder="https://example.com/results/cst_1st_sem.pdf">
-          </div>
-
-          <button type="submit" class="btn-submit" style="background: var(--grad-cyan); box-shadow: 0 8px 24px rgba(6, 182, 212, 0.3);">
-            <i data-lucide="cloud-upload" style="width: 18px; height: 18px;"></i>
-            <span>Publish Result PDF to Portal</span>
+        <!-- Mode Toggle Bar -->
+        <div style="display: flex; gap: 10px; margin-bottom: 24px;">
+          <button type="button" class="btn-submit" id="admin-result-subtab-pdf" onclick="switchAdminResultSubtab('pdf')" style="flex: 1; background: var(--grad-cyan); font-size: 13px; padding: 10px;">
+            <i data-lucide="file-up" style="width: 16px; height: 16px;"></i>
+            <span>Upload PDF Result Sheet</span>
           </button>
-        </form>
+          <button type="button" class="btn-submit" id="admin-result-subtab-student" onclick="switchAdminResultSubtab('student')" style="flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: var(--text-muted); font-size: 13px; padding: 10px; box-shadow: none;">
+            <i data-lucide="user-plus" style="width: 16px; height: 16px;"></i>
+            <span>Publish Individual Student Marks</span>
+          </button>
+        </div>
 
-        <!-- Uploaded Results Table -->
-        <h3 style="font-family: var(--font-display); font-size: 16px; color: var(--text-main); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-          <i data-lucide="list" style="width: 18px; height: 18px; color: #22d3ee;"></i>
-          <span>Published Result PDFs</span>
-        </h3>
+        <!-- SUB-PANEL 1: PDF Result Sheet Upload -->
+        <div id="admin-result-panel-pdf">
+          <form onsubmit="handleResultPdfUpload(event)" style="margin-bottom: 30px;">
+            <div class="form-group">
+              <label for="result-title">Result Title / Examination Name</label>
+              <input type="text" id="result-title" class="form-input" placeholder="e.g. 1st Semester Board Final Result 2026" required>
+            </div>
 
-        <div style="overflow-x: auto;">
-          <table class="data-list-table">
-            <thead>
-              <tr>
-                <th>Title / Exam Name</th>
-                <th>Department</th>
-                <th>Semester</th>
-                <th>Published Date</th>
-                <th style="text-align: right;">Action</th>
-              </tr>
-            </thead>
-            <tbody id="results-table-body">
-              <tr>
-                <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">No published results found. Upload your first PDF above.</td>
-              </tr>
-            </tbody>
-          </table>
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label for="result-dept">Department / Technology</label>
+                <select id="result-dept" class="form-select" required>
+                  <option value="All Departments">All Departments</option>
+                  <option value="Computer Science & Technology">Computer Science & Technology (CST)</option>
+                  <option value="Civil Technology">Civil Technology (CT)</option>
+                  <option value="Electrical Technology">Electrical Technology (ET)</option>
+                  <option value="Electronics Technology">Electronics Technology (ENT)</option>
+                  <option value="Mechanical Technology">Mechanical Technology (MT)</option>
+                  <option value="Architecture Technology">Architecture Technology (AT)</option>
+                  <option value="Telecommunication Technology">Telecommunication Technology (TNT)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="result-semester">Semester</label>
+                <select id="result-semester" class="form-select" required>
+                  <option value="All Semesters">All Semesters</option>
+                  <option value="1st Semester">1st Semester</option>
+                  <option value="2nd Semester">2nd Semester</option>
+                  <option value="3rd Semester">3rd Semester</option>
+                  <option value="4th Semester">4th Semester</option>
+                  <option value="5th Semester">5th Semester</option>
+                  <option value="6th Semester">6th Semester</option>
+                  <option value="7th Semester">7th Semester</option>
+                  <option value="8th Semester">8th Semester</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Upload PDF Document</label>
+              <input type="file" id="pdf-file-input" accept="application/pdf,.pdf" style="display: none;" onchange="onPdfFileSelected(event)">
+              <div class="file-drop-area" onclick="document.getElementById('pdf-file-input').click()">
+                <i data-lucide="upload-cloud" class="file-drop-icon" style="width: 32px; height: 32px;"></i>
+                <div class="file-drop-text" id="pdf-file-label">Click or Drag to Select Result PDF File</div>
+                <div class="file-drop-subtext">PDF files supported</div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="result-pdf-url">Or PDF Document Link (URL)</label>
+              <input type="url" id="result-pdf-url" class="form-input" placeholder="https://example.com/results/cst_1st_sem.pdf">
+            </div>
+
+            <button type="submit" class="btn-submit" style="background: var(--grad-cyan); box-shadow: 0 8px 24px rgba(6, 182, 212, 0.3);">
+              <i data-lucide="cloud-upload" style="width: 18px; height: 18px;"></i>
+              <span>Publish & Parse Result PDF to Portal</span>
+            </button>
+
+            <!-- Parsing Progress Bar Box -->
+            <div id="pdf-progress-box" style="display: none; margin-top: 20px; background: rgba(15,23,42,0.85); border: 1px solid var(--border-accent); padding: 20px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.4);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 13px; font-weight: 700;">
+                <span id="pdf-progress-label" style="color: var(--color-cyan); display: flex; align-items: center; gap: 6px;">
+                  <i data-lucide="loader" style="width: 16px; height: 16px; animation: spin 1s linear infinite;"></i>
+                  <span>Parsing BTEB Result PDF...</span>
+                </span>
+                <span id="pdf-progress-percent" style="color: #34d399; font-size: 14px; font-weight: 800;">0%</span>
+              </div>
+
+              <div style="width: 100%; height: 12px; background: rgba(255,255,255,0.08); border-radius: 10px; overflow: hidden; position: relative;">
+                <div id="pdf-progress-bar-fill" style="width: 0%; height: 100%; background: linear-gradient(90deg, #06b6d4 0%, #10b981 100%); transition: width 0.25s ease; border-radius: 10px;"></div>
+              </div>
+
+              <p id="pdf-progress-subtext" style="font-size: 12px; color: var(--text-muted); margin-top: 10px; text-align: center;">Preparing document pages...</p>
+            </div>
+          </form>
+
+          <h3 style="font-family: var(--font-display); font-size: 16px; color: var(--text-main); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="list" style="width: 18px; height: 18px; color: #22d3ee;"></i>
+            <span>Published Result PDFs</span>
+          </h3>
+
+          <div style="overflow-x: auto;">
+            <table class="data-list-table">
+              <thead>
+                <tr>
+                  <th>Title / Exam Name</th>
+                  <th>Department</th>
+                  <th>Semester</th>
+                  <th>Published Date</th>
+                  <th style="text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="results-table-body">
+                <tr>
+                  <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">No published results found. Upload your first PDF above.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- SUB-PANEL 2: Individual Student Marks Upload -->
+        <div id="admin-result-panel-student" style="display: none;">
+          <form onsubmit="handleIndividualStudentResultUpload(event)" style="margin-bottom: 30px;">
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label for="admin-student-roll">Board Roll Number *</label>
+                <input type="text" id="admin-student-roll" class="form-input" placeholder="e.g. 654321" required>
+              </div>
+
+              <div class="form-group">
+                <label for="admin-student-reg">Registration Number *</label>
+                <input type="text" id="admin-student-reg" class="form-input" placeholder="e.g. 1502012345" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="admin-student-name">Student Full Name *</label>
+              <input type="text" id="admin-student-name" class="form-input" placeholder="e.g. Md. Tanvir Hasan" required>
+            </div>
+
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label for="admin-student-dept">Department</label>
+                <select id="admin-student-dept" class="form-select" required>
+                  <option value="Computer Science & Technology">Computer Science & Tech (CST)</option>
+                  <option value="Civil Technology">Civil Technology (CT)</option>
+                  <option value="Electrical Technology">Electrical Technology (ET)</option>
+                  <option value="Electronics Technology">Electronics Tech (ENT)</option>
+                  <option value="Mechanical Technology">Mechanical Technology (MT)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="admin-student-sem">Semester</label>
+                <select id="admin-student-sem" class="form-select" required>
+                  <option value="1st Semester">1st Semester</option>
+                  <option value="2nd Semester">2nd Semester</option>
+                  <option value="3rd Semester">3rd Semester</option>
+                  <option value="4th Semester">4th Semester</option>
+                  <option value="5th Semester">5th Semester</option>
+                  <option value="6th Semester">6th Semester</option>
+                  <option value="7th Semester">7th Semester</option>
+                  <option value="8th Semester">8th Semester</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label for="admin-student-gpa">GPA (0.00 - 4.00) *</label>
+                <input type="number" step="0.01" min="0" max="4.00" id="admin-student-gpa" class="form-input" placeholder="e.g. 3.85" required>
+              </div>
+
+              <div class="form-group">
+                <label for="admin-student-status">Result Status *</label>
+                <select id="admin-student-status" class="form-select" required>
+                  <option value="PASSED">PASSED</option>
+                  <option value="REFERRED">REFERRED</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="admin-student-subjects">Subject Marks & Grades (Format per line: Code, Name, Credit, Grade, Point)</label>
+              <textarea id="admin-student-subjects" class="form-input" rows="4" placeholder="28511, Computer Application & Programming, 3, A+, 4.0&#10;25911, Mathematics-1, 4, A, 3.75&#10;25912, Physics-1, 3, A+, 4.0"></textarea>
+            </div>
+
+            <button type="submit" class="btn-submit" style="background: var(--grad-emerald); box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);">
+              <i data-lucide="user-check" style="width: 18px; height: 18px;"></i>
+              <span>Save & Publish Student Marksheet</span>
+            </button>
+          </form>
+
+          <h3 style="font-family: var(--font-display); font-size: 16px; color: var(--text-main); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="users" style="width: 18px; height: 18px; color: #34d399;"></i>
+            <span>Published Student Marksheets</span>
+          </h3>
+
+          <div style="overflow-x: auto;">
+            <table class="data-list-table">
+              <thead>
+                <tr>
+                  <th>Roll / Reg</th>
+                  <th>Student Name</th>
+                  <th>Dept & Sem</th>
+                  <th>GPA</th>
+                  <th>Status</th>
+                  <th style="text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="student-results-table-body">
+                <tr>
+                  <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 20px;">No student marksheets published yet.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -1882,7 +2011,9 @@
       reader.readAsDataURL(file);
     }
 
-    // Publish Result PDF to Cloud Firestore
+    // Publish Result PDF to Cloud Firestore & Parse Roll Numbers via Python Backend
+    let progressTimer = null;
+
     function handleResultPdfUpload(event) {
       event.preventDefault();
 
@@ -1898,33 +2029,161 @@
         return;
       }
 
-      const payload = {
-        title,
-        department,
-        semester,
-        pdfUrl,
-        createdAt: new Date().toISOString(),
-        publishedBy: ADMIN_USER
-      };
+      // Show Progress Bar
+      const progressBox = document.getElementById("pdf-progress-box");
+      const progressFill = document.getElementById("pdf-progress-bar-fill");
+      const progressPercent = document.getElementById("pdf-progress-percent");
+      const progressLabel = document.getElementById("pdf-progress-label");
+      const progressSubtext = document.getElementById("pdf-progress-subtext");
 
-      if (db) {
-        db.collection("results").add(payload).then(() => {
-          showToast("Result PDF published successfully to Firestore!", "success");
-          document.getElementById("result-title").value = "";
-          document.getElementById("result-pdf-url").value = "";
-          document.getElementById("pdf-file-label").textContent = "Click or Drag to Select Result PDF File";
-          selectedPdfDataUrl = "";
-          loadFirestoreResults();
-        }).catch((err) => {
-          console.error("Result save error:", err);
-          showToast("Failed to publish result PDF.", "error");
-        });
-      } else {
-        showToast("Database offline. Result created in memory.", "success");
-      }
+      progressBox.style.display = "block";
+      progressFill.style.width = "0%";
+      progressPercent.textContent = "0%";
+      progressSubtext.textContent = "Initializing PDF parser engine...";
+
+      // Poll progress every 200ms
+      if (progressTimer) clearInterval(progressTimer);
+      progressTimer = setInterval(() => {
+        fetch("/api/parse-progress")
+          .then(res => res.json())
+          .then(p => {
+            if (p.percentage !== undefined) {
+              progressFill.style.width = `${p.percentage}%`;
+              progressPercent.textContent = `${p.percentage}%`;
+              progressSubtext.textContent = p.message || `Parsing Page ${p.completed_pages} of ${p.total_pages}...`;
+            }
+          }).catch(e => console.warn(e));
+      }, 200);
+
+      showToast("Parsing BTEB PDF and extracting student results...", "info");
+
+      const pdfId = "pdf_" + Date.now();
+
+      // Send to Python PDF Parser API
+      fetch("/api/parse-pdf-upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          filename: title + ".pdf",
+          pdfBase64: selectedPdfDataUrl
+        })
+      })
+      .then(res => res.json())
+      .then(async data => {
+        clearInterval(progressTimer);
+        progressFill.style.width = "100%";
+        progressPercent.textContent = "100%";
+
+        const parsedCount = data.meta ? data.meta.totalResults : 0;
+        progressSubtext.textContent = `Completed! Uploading ${parsedCount} student roll results to Firebase...`;
+
+        // Upload PDF metadata and student roll records to Cloud Firestore
+        if (db) {
+          try {
+            // Determine clean URL (avoid storing huge base64 strings > 100KB in Firestore)
+            let cleanPdfUrl = data.fileUrl || urlInput;
+            if (!cleanPdfUrl || cleanPdfUrl.length > 500000) {
+              cleanPdfUrl = data.fileUrl || (urlInput || `/uploads/${title.replace(/[^a-zA-Z0-9_.-]/g, '_')}.pdf`);
+            }
+
+            // 1. Upload PDF metadata record to Firestore
+            const pdfPayload = {
+              pdfId: pdfId,
+              title: title,
+              department: department,
+              semester: semester,
+              pdfUrl: cleanPdfUrl,
+              totalResults: parsedCount,
+              createdAt: new Date().toISOString(),
+              publishedBy: ADMIN_USER
+            };
+            await db.collection("results").doc(pdfId).set(pdfPayload);
+
+            // 2. High-Speed Parallel Batch Upload of Student Roll Results to Cloud Firestore
+            const resultsMap = data.resultsByRoll || {};
+            const rolls = Object.keys(resultsMap);
+            const totalRolls = rolls.length;
+
+            if (totalRolls > 0) {
+              const uploadStartTime = Date.now();
+              let uploadedRollsCount = 0;
+
+              // Helper function to update Firebase Progress Bar & ETA
+              const updateFirebaseUploadUI = (current, total) => {
+                const elapsedSec = (Date.now() - uploadStartTime) / 1000;
+                const pct = Math.min(100, Math.round((current / total) * 100));
+                
+                // Speed & ETA Math
+                const rollsPerSec = elapsedSec > 0 ? (current / elapsedSec) : 0;
+                const remaining = total - current;
+                const etaSec = rollsPerSec > 0 ? Math.ceil(remaining / rollsPerSec) : 0;
+                
+                const speedText = rollsPerSec > 0 ? `(${Math.round(rollsPerSec)} rolls/sec)` : "";
+                const etaText = etaSec > 0 ? `${etaSec}s remaining` : (remaining === 0 ? "Finishing..." : "Calculating ETA...");
+
+                progressFill.style.width = `${pct}%`;
+                progressPercent.textContent = `${pct}%`;
+                progressLabel.innerHTML = `<i data-lucide="cloud-upload" style="width: 16px; height: 16px; animation: spin 1s linear infinite;"></i> Cloud Firestore Uploading...`;
+                progressSubtext.textContent = `Uploading ${current} of ${total} student rolls to Firebase ${speedText} • ETA: ${etaText}`;
+                lucide.createIcons();
+              };
+
+              updateFirebaseUploadUI(0, totalRolls);
+
+              // Split rolls into chunks of 300
+              const chunkSize = 300;
+              const chunks = [];
+              for (let i = 0; i < totalRolls; i += chunkSize) {
+                chunks.push(rolls.slice(i, i + chunkSize));
+              }
+
+              // Process parallel batch pools (8 concurrent batches at a time)
+              const BATCH_CONCURRENCY = 8;
+              for (let i = 0; i < chunks.length; i += BATCH_CONCURRENCY) {
+                const currentPool = chunks.slice(i, i + BATCH_CONCURRENCY);
+
+                await Promise.all(currentPool.map(async (chunk) => {
+                  const batch = db.batch();
+                  chunk.forEach(roll => {
+                    const item = resultsMap[roll];
+                    const docRef = db.collection("student_results").doc(roll);
+                    batch.set(docRef, { ...item, pdfId: pdfId, uploadedAt: new Date().toISOString() });
+                  });
+                  await batch.commit();
+                  uploadedRollsCount += chunk.length;
+                  updateFirebaseUploadUI(uploadedRollsCount, totalRolls);
+                }));
+              }
+
+              const totalElapsedSec = ((Date.now() - uploadStartTime) / 1000).toFixed(1);
+              progressSubtext.textContent = `🎉 Upload Completed in ${totalElapsedSec}s! ${totalRolls} student rolls live in Firebase.`;
+
+              // Popup alert notification for Firebase upload success
+              alert(`🎉 Success!\nResult PDF "${title}" and ${totalRolls} student roll results uploaded to Firebase in ${totalElapsedSec} seconds!`);
+              showToast(`Result PDF & ${totalRolls} roll results uploaded to Firebase!`, "success");
+            }
+
+            document.getElementById("result-title").value = "";
+            document.getElementById("result-pdf-url").value = "";
+            document.getElementById("pdf-file-label").textContent = "Click or Drag to Select Result PDF File";
+            selectedPdfDataUrl = "";
+            loadFirestoreResults();
+          } catch (fireErr) {
+            console.error("Firestore upload error:", fireErr);
+            showToast("Failed to upload results to Firebase: " + fireErr.message, "error");
+          }
+        } else {
+          showToast("Database offline. Result saved locally.", "success");
+        }
+      })
+      .catch(err => {
+        clearInterval(progressTimer);
+        console.warn("Python parsing error:", err);
+        progressSubtext.textContent = "Error parsing PDF: " + err.message;
+      });
     }
 
-    // Load Published Results List
+    // Load Published Results List from Cloud Firestore
     function loadFirestoreResults() {
       if (!db) return;
 
@@ -1933,7 +2192,7 @@
         tbody.innerHTML = "";
 
         if (snapshot.empty) {
-          tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">No published results found. Upload your first PDF above.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 20px;">No published result PDFs found in Firebase. Upload your first PDF above.</td></tr>`;
           return;
         }
 
@@ -1943,15 +2202,16 @@
           const dateStr = new Date(data.createdAt || Date.now()).toLocaleDateString();
 
           tr.innerHTML = `
-            <td style="font-weight: 700;">${data.title}</td>
+            <td style="font-weight: 700; color: #ffffff;">${data.title}</td>
             <td>${data.department}</td>
             <td>${data.semester}</td>
+            <td><span style="background: rgba(6,182,212,0.15); color: #38bdf8; font-weight: 800; padding: 2px 8px; border-radius: 6px;">${data.totalResults || 0} Rolls</span></td>
             <td>${dateStr}</td>
             <td style="text-align: right;">
               <a href="${data.pdfUrl}" target="_blank" class="btn-action-icon btn-action-view" title="View PDF">
                 <i data-lucide="eye" style="width: 15px; height: 15px;"></i>
               </a>
-              <button type="button" class="btn-action-icon btn-action-delete" title="Delete Result" onclick="deleteResultDoc('${doc.id}')">
+              <button type="button" class="btn-action-icon btn-action-delete" title="Delete Result PDF & Roll Data from Firebase" onclick="deleteResultDoc('${doc.id}')">
                 <i data-lucide="trash-2" style="width: 15px; height: 15px;"></i>
               </button>
             </td>
@@ -1960,21 +2220,187 @@
         });
         lucide.createIcons();
       }).catch((err) => {
-        console.error("Error fetching results:", err);
+        console.error("Error fetching results from Firebase:", err);
       });
     }
 
-    // Delete Result Document
-    function deleteResultDoc(docId) {
-      if (!confirm("Are you sure you want to delete this published result PDF?")) return;
+    // Delete Result Document and associated Roll Results from Cloud Firestore
+    async function deleteResultDoc(docId) {
+      if (!confirm("Are you sure you want to delete this result PDF and ALL associated student roll results from Firebase?")) return;
 
       if (db) {
-        db.collection("results").doc(docId).delete().then(() => {
-          showToast("Result PDF deleted.", "success");
+        try {
+          // 1. Delete PDF metadata record
+          await db.collection("results").doc(docId).delete();
+
+          // 2. Query and delete associated student_results with matching pdfId
+          const snapshot = await db.collection("student_results").where("pdfId", "==", docId).get();
+          if (!snapshot.empty) {
+            const batch = db.batch();
+            snapshot.forEach(doc => {
+              batch.delete(doc.ref);
+            });
+            await batch.commit();
+          }
+
+          // Popup alert confirming Firebase deletion
+          alert(`🗑️ Result PDF and all associated student roll results deleted from Firebase!`);
+          showToast("Result PDF and associated student records deleted from Firebase.", "success");
           loadFirestoreResults();
+        } catch (err) {
+          console.error("Delete error from Firebase:", err);
+          showToast("Failed to delete result PDF from Firebase.", "error");
+        }
+      }
+    }
+
+    // Switch Admin Result Sub-tabs
+    function switchAdminResultSubtab(subKey) {
+      const btnPdf = document.getElementById("admin-result-subtab-pdf");
+      const btnStudent = document.getElementById("admin-result-subtab-student");
+      const panelPdf = document.getElementById("admin-result-panel-pdf");
+      const panelStudent = document.getElementById("admin-result-panel-student");
+
+      if (subKey === "pdf") {
+        btnPdf.style.background = "var(--grad-cyan)";
+        btnPdf.style.color = "white";
+        btnPdf.style.boxShadow = "0 8px 24px rgba(6, 182, 212, 0.3)";
+        btnStudent.style.background = "rgba(255,255,255,0.05)";
+        btnStudent.style.color = "var(--text-muted)";
+        btnStudent.style.boxShadow = "none";
+        panelPdf.style.display = "block";
+        panelStudent.style.display = "none";
+      } else {
+        btnStudent.style.background = "var(--grad-emerald)";
+        btnStudent.style.color = "white";
+        btnStudent.style.boxShadow = "0 8px 24px rgba(16, 185, 129, 0.3)";
+        btnPdf.style.background = "rgba(255,255,255,0.05)";
+        btnPdf.style.color = "var(--text-muted)";
+        btnPdf.style.boxShadow = "none";
+        panelPdf.style.display = "none";
+        panelStudent.style.display = "block";
+        loadFirestoreStudentResults();
+      }
+      lucide.createIcons();
+    }
+
+    // Handle Individual Student Result Upload
+    function handleIndividualStudentResultUpload(event) {
+      event.preventDefault();
+
+      const roll = document.getElementById("admin-student-roll").value.trim();
+      const reg = document.getElementById("admin-student-reg").value.trim();
+      const name = document.getElementById("admin-student-name").value.trim();
+      const department = document.getElementById("admin-student-dept").value;
+      const semester = document.getElementById("admin-student-sem").value;
+      const gpa = parseFloat(document.getElementById("admin-student-gpa").value);
+      const status = document.getElementById("admin-student-status").value;
+      const subjectsText = document.getElementById("admin-student-subjects").value.trim();
+
+      let subjects = [];
+      if (subjectsText) {
+        const lines = subjectsText.split("\n");
+        lines.forEach(line => {
+          const parts = line.split(",");
+          if (parts.length >= 5) {
+            subjects.push({
+              code: parts[0].trim(),
+              name: parts[1].trim(),
+              credit: parseInt(parts[2].trim()) || 3,
+              grade: parts[3].trim(),
+              gp: parseFloat(parts[4].trim()) || 4.0
+            });
+          }
+        });
+      }
+
+      if (!subjects.length) {
+        subjects = [
+          { code: "28511", name: "Core Technology Subject", credit: 4, grade: "A+", gp: 4.0 },
+          { code: "25911", name: "Mathematics", credit: 3, grade: "A", gp: 3.75 }
+        ];
+      }
+
+      const payload = {
+        roll,
+        reg,
+        name,
+        department,
+        semester,
+        gpa,
+        status,
+        subjects,
+        createdAt: new Date().toISOString(),
+        createdBy: ADMIN_USER
+      };
+
+      if (db) {
+        db.collection("student_results").add(payload).then(() => {
+          showToast("Student Marksheet published to Firestore!", "success");
+          document.getElementById("admin-student-roll").value = "";
+          document.getElementById("admin-student-reg").value = "";
+          document.getElementById("admin-student-name").value = "";
+          document.getElementById("admin-student-gpa").value = "";
+          document.getElementById("admin-student-subjects").value = "";
+          loadFirestoreStudentResults();
         }).catch((err) => {
-          console.error("Delete error:", err);
-          showToast("Failed to delete result PDF.", "error");
+          console.error("Student result save error:", err);
+          showToast("Failed to save student marksheets.", "error");
+        });
+      } else {
+        showToast("Database offline. Saved in memory.", "success");
+      }
+    }
+
+    // Load Published Student Results List
+    function loadFirestoreStudentResults() {
+      if (!db) return;
+
+      db.collection("student_results").orderBy("createdAt", "desc").get().then((snapshot) => {
+        const tbody = document.getElementById("student-results-table-body");
+        if (!tbody) return;
+        tbody.innerHTML = "";
+
+        if (snapshot.empty) {
+          tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 20px;">No published student marksheets found.</td></tr>`;
+          return;
+        }
+
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          const tr = document.createElement("tr");
+
+          tr.innerHTML = `
+            <td style="font-weight: 700; color: var(--color-cyan);">${data.roll} / ${data.reg}</td>
+            <td style="font-weight: 600; color: #ffffff;">${data.name}</td>
+            <td>${data.semester} (${data.department.split(' ')[0]})</td>
+            <td style="font-weight: 800; color: #38bdf8;">${data.gpa ? data.gpa.toFixed(2) : 'N/A'}</td>
+            <td><span style="padding: 2px 8px; border-radius: 6px; font-weight: 800; font-size: 11px; background: rgba(16, 185, 129, 0.2); color: #34d399;">${data.status || 'PASSED'}</span></td>
+            <td style="text-align: right;">
+              <button type="button" class="btn-action-icon btn-action-delete" title="Delete Marksheet" onclick="deleteStudentResultDoc('${doc.id}')">
+                <i data-lucide="trash-2" style="width: 15px; height: 15px;"></i>
+              </button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+        lucide.createIcons();
+      }).catch((err) => {
+        console.error("Error fetching student results:", err);
+      });
+    }
+
+    // Delete Student Result Doc
+    function deleteStudentResultDoc(docId) {
+      if (!confirm("Are you sure you want to delete this student marksheet?")) return;
+
+      if (db) {
+        db.collection("student_results").doc(docId).delete().then(() => {
+          showToast("Student Marksheet deleted.", "success");
+          loadFirestoreStudentResults();
+        }).catch((err) => {
+          console.error("Delete student result error:", err);
+          showToast("Failed to delete marksheet.", "error");
         });
       }
     }

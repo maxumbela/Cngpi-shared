@@ -32,3 +32,5 @@ dist/
 build/
 .cache/
 .temp/
+public/uploads/
+
