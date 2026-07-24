@@ -2882,13 +2882,42 @@
       }
     }
 
+    function readFileAsTextPromise(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = (e) => reject(new Error("Failed to read file: " + file.name));
+        reader.readAsText(file);
+      });
+    }
+
     function parseRoutineJsonData(rawContent) {
+      if (!rawContent) throw new Error("Empty content provided");
       if (typeof rawContent === 'object') return rawContent;
+
+      let str = String(rawContent)
+        .replace(/^\uFEFF/, '') // Strip UTF-8 BOM
+        .replace(/```json/gi, '')
+        .replace(/```/g, '')
+        .trim();
+
+      // Extract JSON object if file contains headers or text surrounding {...}
+      const firstBrace = str.indexOf('{');
+      const lastBrace = str.lastIndexOf('}');
+      if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+        str = str.substring(firstBrace, lastBrace + 1);
+      }
+
       try {
-        let cleaned = String(rawContent).replace(/```json/gi, '').replace(/```/g, '').trim();
-        return JSON.parse(cleaned);
+        return JSON.parse(str);
       } catch (err) {
-        throw new Error("Invalid JSON format: " + err.message);
+        try {
+          // Remove trailing commas before parse retry
+          const cleaned = str.replace(/,\s*([\]}])/g, '$1');
+          return JSON.parse(cleaned);
+        } catch (err2) {
+          throw new Error("Invalid JSON structure: " + err.message);
+        }
       }
     }
 
@@ -2951,7 +2980,7 @@
       };
     }
 
-    function previewAndParseAdminJsonRoutine() {
+    async function previewAndParseAdminJsonRoutine() {
       const textVal = document.getElementById("admin-json-text-input") ? document.getElementById("admin-json-text-input").value.trim() : "";
       if (!textVal && pendingJsonFiles.length === 0) {
         showToast("Please select a JSON/TXT file or paste JSON text first.", "warning");
@@ -2978,24 +3007,21 @@
 
       if (pendingJsonFiles.length > 0) {
         const file = pendingJsonFiles[0];
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          try {
-            const parsed = parseRoutineJsonData(e.target.result);
-            const formatted = formatRoutinePayload(parsed);
-            
-            if (document.getElementById("admin-exam-dept")) document.getElementById("admin-exam-dept").value = formatted.data.department;
-            if (document.getElementById("admin-exam-sem")) document.getElementById("admin-exam-sem").value = formatted.data.semester;
-            if (document.getElementById("admin-exam-title")) document.getElementById("admin-exam-title").value = formatted.data.exam_title;
+        try {
+          const content = await readFileAsTextPromise(file);
+          const parsed = parseRoutineJsonData(content);
+          const formatted = formatRoutinePayload(parsed);
+          
+          if (document.getElementById("admin-exam-dept")) document.getElementById("admin-exam-dept").value = formatted.data.department;
+          if (document.getElementById("admin-exam-sem")) document.getElementById("admin-exam-sem").value = formatted.data.semester;
+          if (document.getElementById("admin-exam-title")) document.getElementById("admin-exam-title").value = formatted.data.exam_title;
 
-            currentAdminExamSchedule = formatted.data.schedule;
-            renderAdminExamScheduleTable();
-            showToast(`Parsed file "${file.name}" (${formatted.data.schedule.length} subjects)! Preview loaded below.`, "success");
-          } catch (err) {
-            showToast(`Failed to parse "${file.name}": ` + err.message, "error");
-          }
-        };
-        reader.readAsText(file);
+          currentAdminExamSchedule = formatted.data.schedule;
+          renderAdminExamScheduleTable();
+          showToast(`Parsed file "${file.name}" (${formatted.data.schedule.length} subjects)! Preview loaded below.`, "success");
+        } catch (err) {
+          showToast(`Failed to parse "${file.name}": ` + err.message, "error");
+        }
       }
     }
 
@@ -3017,7 +3043,7 @@
       if (pendingJsonFiles.length > 0) {
         for (const file of pendingJsonFiles) {
           try {
-            const content = await file.text();
+            const content = await readFileAsTextPromise(file);
             const parsed = parseRoutineJsonData(content);
             itemsToUpload.push(formatRoutinePayload(parsed));
           } catch (err) {
@@ -3043,6 +3069,11 @@
             // Also write under lower case alt key (e.g. cst_1) for fallback lookup
             if (item.altDocId) {
               await db.collection("exam_routines").doc(item.altDocId).set(item.data);
+            }
+
+            // Write under technology_key doc (e.g. cst)
+            if (item.data.technology_key) {
+              await db.collection("exam_routines").doc(item.data.technology_key).set(item.data);
             }
             
             // Also write under routines collection if routine list is populated
