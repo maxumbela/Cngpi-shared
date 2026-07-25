@@ -1,0 +1,60 @@
+{
+  "meta": {
+    "totalResults": 2,
+    "totalPages": 1
+  },
+  "resultsByRoll": {
+    "654321": {
+      "roll": "654321",
+      "instituteCode": "13143",
+      "instituteName": "Chapainawabganj Polytechnic Institute",
+      "status": "pass",
+      "statusLabel": "Passed",
+      "gpa1": 3.85,
+      "gpa2": 3.9,
+      "semesterResults": {
+        "semester1": {
+          "gpa": 3.85,
+          "result": "Published"
+        },
+        "semester2": {
+          "gpa": 3.9,
+          "result": "Published"
+        }
+      },
+      "failedSubjects": [],
+      "failedSubjectCount": 0
+    },
+    "654322": {
+      "roll": "654322",
+      "instituteCode": "13143",
+      "instituteName": "Chapainawabganj Polytechnic Institute",
+      "status": "referred",
+      "statusLabel": "Referred",
+      "gpa1": "ref",
+      "gpa2": 3.5,
+      "semesterResults": {
+        "semester1": {
+          "gpa": "ref",
+          "result": "Referred"
+        },
+        "semester2": {
+          "gpa": 3.5,
+          "result": "Published"
+        }
+      },
+      "failedSubjects": [
+        {
+          "code": "28511",
+          "name": "Computer Office Application",
+          "semester": "Semester 1",
+          "components": [
+            "T"
+          ],
+          "componentLabel": "Theory"
+        }
+      ],
+      "failedSubjectCount": 1
+    }
+  }
+}

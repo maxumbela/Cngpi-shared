@@ -2384,7 +2384,7 @@
       return results;
     }
 
-    // Publish Result PDF to Cloud Firestore & Parse Chapainawabganj (20015) Student Rolls In-Browser
+    // Publish Result PDF to Cloud Firestore & Parse Chapainawabganj (20015) Student Rolls via Python Backend
     async function handleResultPdfUpload(event) {
       event.preventDefault();
 
@@ -2398,7 +2398,7 @@
         return;
       }
 
-      // Show Progress Bar
+      // Show Progress Bar UI Box
       const progressBox = document.getElementById("pdf-progress-box");
       const progressFill = document.getElementById("pdf-progress-bar-fill");
       const progressPercent = document.getElementById("pdf-progress-percent");
@@ -2408,84 +2408,109 @@
       progressBox.style.display = "block";
       progressFill.style.width = "5%";
       progressPercent.textContent = "5%";
-      progressLabel.innerHTML = `<i data-lucide="loader" style="width: 16px; height: 16px; animation: spin 1s linear infinite;"></i> 📖 Reading PDF Document...`;
-      progressSubtext.textContent = "Initializing PDF parser engine in browser...";
+      progressLabel.innerHTML = `<i data-lucide="loader" style="width: 16px; height: 16px; animation: spin 1s linear infinite;"></i> 🐍 Python BTEB Parser Running...`;
+      progressSubtext.textContent = "Connecting to Python server and extracting Chapainawabganj (20015) student rolls...";
       lucide.createIcons();
 
+      // Poll progress every 250ms from Python server
+      let progressPollTimer = setInterval(() => {
+        fetch("/api/parse-progress")
+          .then(res => res.json())
+          .then(p => {
+            if (p && p.percentage !== undefined) {
+              const pct = Math.min(95, Math.round(p.percentage * 0.7)); // 0% to 70%
+              progressFill.style.width = `${pct}%`;
+              progressPercent.textContent = `${pct}%`;
+              progressSubtext.textContent = p.message || `Python Parser: Page ${p.completed_pages} of ${p.total_pages}...`;
+            }
+          }).catch(() => {});
+      }, 250);
+
       try {
-        let arrayBuffer;
-        if (selectedPdfFileObject) {
-          arrayBuffer = await selectedPdfFileObject.arrayBuffer();
-        } else if (selectedPdfDataUrl && selectedPdfDataUrl.startsWith("data:")) {
-          const base64Str = selectedPdfDataUrl.split(',')[1];
-          const binaryStr = atob(base64Str);
-          const len = binaryStr.length;
-          const bytes = new Uint8Array(len);
-          for (let i = 0; i < len; i++) {
-            bytes[i] = binaryStr.charCodeAt(i);
+        let extractedMap = null;
+        let pdfId = "pdf_" + Date.now();
+        let cleanPdfUrl = urlInput || `/uploads/${title.replace(/[^a-zA-Z0-9_.-]/g, '_')}.pdf`;
+
+        // 1. Send to Python Backend Server (/api/parse-pdf-upload)
+        try {
+          const res = await fetch("/api/parse-pdf-upload", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              filename: title + ".pdf",
+              pdfBase64: selectedPdfDataUrl
+            })
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            if (data.success && data.resultsByRoll) {
+              extractedMap = data.resultsByRoll;
+              if (data.fileUrl) cleanPdfUrl = data.fileUrl;
+            }
           }
-          arrayBuffer = bytes.buffer;
-        } else if (urlInput) {
-          const res = await fetch(urlInput);
-          arrayBuffer = await res.arrayBuffer();
+        } catch (pyErr) {
+          console.warn("Python server endpoint unavailable, switching to browser engine:", pyErr);
         }
 
-        if (!arrayBuffer) throw new Error("Could not load PDF document bytes.");
+        clearInterval(progressPollTimer);
 
-        // Check if PDF.js is loaded
-        if (typeof pdfjsLib === "undefined") {
-          throw new Error("PDF.js library failed to load. Please check internet connection.");
+        // 2. Client-side fallback if Python server was unreachable
+        if (!extractedMap) {
+          progressLabel.innerHTML = `<i data-lucide="loader" style="width: 16px; height: 16px; animation: spin 1s linear infinite;"></i> 📖 Reading PDF Document...`;
+          progressSubtext.textContent = "Parsing PDF in browser...";
+
+          let arrayBuffer;
+          if (selectedPdfFileObject) {
+            arrayBuffer = await selectedPdfFileObject.arrayBuffer();
+          } else if (selectedPdfDataUrl && selectedPdfDataUrl.startsWith("data:")) {
+            const base64Str = selectedPdfDataUrl.split(',')[1];
+            const binaryStr = atob(base64Str);
+            const len = binaryStr.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+              bytes[i] = binaryStr.charCodeAt(i);
+            }
+            arrayBuffer = bytes.buffer;
+          }
+
+          if (arrayBuffer && typeof pdfjsLib !== "undefined") {
+            const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+            const pdfDoc = await loadingTask.promise;
+            const totalPages = pdfDoc.numPages;
+
+            let fullPdfText = "";
+            for (let i = 1; i <= totalPages; i++) {
+              const page = await pdfDoc.getPage(i);
+              const textContent = await page.getTextContent();
+              const pageStr = textContent.items.map(item => item.str).join(" ");
+              fullPdfText += `\n--- PAGE ${i} ---\n` + pageStr;
+
+              const pct = Math.round((i / totalPages) * 60);
+              progressFill.style.width = `${pct}%`;
+              progressPercent.textContent = `${pct}%`;
+              progressSubtext.textContent = `Reading PDF Text (Page ${i} of ${totalPages})...`;
+            }
+
+            extractedMap = parseCngpiStudentResultsFromText(fullPdfText, { title, department, semester });
+          }
         }
 
-        // Load document via PDF.js
-        const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
-        const pdfDoc = await loadingTask.promise;
-        const totalPages = pdfDoc.numPages;
-
-        let fullPdfText = "";
-        for (let i = 1; i <= totalPages; i++) {
-          const page = await pdfDoc.getPage(i);
-          const textContent = await page.getTextContent();
-          const pageStr = textContent.items.map(item => item.str).join(" ");
-          fullPdfText += `\n--- PAGE ${i} ---\n` + pageStr;
-
-          const pct = Math.round((i / totalPages) * 45); // 0% to 45%
-          progressFill.style.width = `${pct}%`;
-          progressPercent.textContent = `${pct}%`;
-          progressSubtext.textContent = `Reading PDF Pages (${i} of ${totalPages})...`;
-        }
-
-        // Stage 2: Filtering Chapainawabganj Polytechnic (20015) students
-        progressLabel.innerHTML = `<i data-lucide="filter" style="width: 16px; height: 16px;"></i> 🔍 Filtering Chapainawabganj (20015) Student Rolls...`;
-        progressFill.style.width = "50%";
-        progressPercent.textContent = "50%";
-        progressSubtext.textContent = "Detecting student rolls for Chapainawabganj Polytechnic Institute (Code: 20015)...";
-        lucide.createIcons();
-
-        const extractedMap = parseCngpiStudentResultsFromText(fullPdfText, {
-          title,
-          department,
-          semester
-        });
-
-        const rolls = Object.keys(extractedMap);
+        const rolls = extractedMap ? Object.keys(extractedMap) : [];
         const totalRolls = rolls.length;
 
         if (totalRolls === 0) {
           progressFill.style.width = "100%";
           progressPercent.textContent = "100%";
-          progressSubtext.textContent = "⚠️ No student rolls detected in this PDF for Chapainawabganj Polytechnic (20015).";
-          showToast("No Chapainawabganj Polytechnic (20015) student rolls detected.", "warning");
+          progressSubtext.textContent = "⚠️ No Chapainawabganj Polytechnic (20015) student rolls detected.";
+          showToast("No Chapainawabganj Polytechnic (20015) student rolls detected in PDF.", "warning");
           return;
         }
 
-        // Stage 3: Uploading to Cloud Firestore
+        // 3. Stage: Uploading Filtered CNGPI Results to Cloud Firestore
         progressLabel.innerHTML = `<i data-lucide="cloud-upload" style="width: 16px; height: 16px; animation: spin 1s linear infinite;"></i> 🚀 Uploading to Cloud Firestore...`;
-        progressSubtext.textContent = `Found ${totalRolls} Chapainawabganj student results! Publishing to Firebase...`;
+        progressSubtext.textContent = `Filtered ${totalRolls} Chapainawabganj (20015) student results. Publishing to Firebase...`;
         lucide.createIcons();
-
-        const pdfId = "pdf_" + Date.now();
-        let cleanPdfUrl = urlInput || `/uploads/${title.replace(/[^a-zA-Z0-9_.-]/g, '_')}.pdf`;
 
         if (db) {
           // 1. Upload PDF metadata record
@@ -2503,7 +2528,7 @@
 
           await db.collection("results").doc(pdfId).set(pdfPayload);
 
-          // 2. Upload student results in batch chunks of 200
+          // 2. Batch upload to student_results collection
           const chunkSize = 200;
           let uploadedCount = 0;
 
@@ -2516,12 +2541,13 @@
               const cleanItem = sanitizeFirestoreData({
                 ...item,
                 pdfId: pdfId,
+                department: department,
+                semester: semester,
                 uploadedAt: new Date().toISOString()
               });
               const docRef = db.collection("student_results").doc(roll);
               batch.set(docRef, cleanItem);
 
-              // Also save to results collection by roll for lookup backwards compatibility
               const altRef = db.collection("results").doc(`roll_${roll}`);
               batch.set(altRef, cleanItem);
             });
@@ -2529,20 +2555,20 @@
             await batch.commit();
             uploadedCount += chunk.length;
 
-            const pct = 50 + Math.round((uploadedCount / totalRolls) * 50); // 50% to 100%
+            const pct = 70 + Math.round((uploadedCount / totalRolls) * 30); // 70% to 100%
             progressFill.style.width = `${pct}%`;
             progressPercent.textContent = `${pct}%`;
-            progressSubtext.textContent = `Uploaded ${uploadedCount} of ${totalRolls} Chapainawabganj student rolls to Firestore...`;
+            progressSubtext.textContent = `Uploaded ${uploadedCount} of ${totalRolls} CNGPI student rolls to Firestore...`;
           }
 
           progressFill.style.width = "100%";
           progressPercent.textContent = "100%";
-          progressSubtext.textContent = `🎉 Completed! Published ${totalRolls} Chapainawabganj (20015) student roll results to Firebase.`;
+          progressSubtext.textContent = `🎉 Success! Published ${totalRolls} Chapainawabganj (20015) student roll results to Firebase.`;
 
-          alert(`🎉 Success!\nParsed PDF and published ${totalRolls} Chapainawabganj Polytechnic (20015) student results to Cloud Firestore!`);
+          alert(`🎉 Success!\nPython Parser filtered and published ${totalRolls} Chapainawabganj Polytechnic (20015) student results to Cloud Firestore!`);
           showToast(`Published ${totalRolls} CNGPI student results to Firebase!`, "success");
 
-          // Reset inputs
+          // Reset form fields
           document.getElementById("result-title").value = "";
           document.getElementById("result-pdf-url").value = "";
           document.getElementById("pdf-file-label").textContent = "Click or Drag to Select Result PDF File";
@@ -2554,10 +2580,11 @@
           showToast("Database offline. Extracted results locally.", "warning");
         }
       } catch (err) {
-        console.error("PDF parse/upload error:", err);
+        clearInterval(progressPollTimer);
+        console.error("PDF upload error:", err);
         progressFill.style.width = "100%";
         progressPercent.textContent = "Error";
-        progressSubtext.textContent = "Error parsing PDF: " + err.message;
+        progressSubtext.textContent = "Error: " + err.message;
         showToast("PDF parsing error: " + err.message, "error");
       }
     }

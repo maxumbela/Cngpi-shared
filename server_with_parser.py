@@ -258,6 +258,13 @@ def extract_records_from_page(text: str, page_number: int, current_institute_cod
 
     return (parsed_records, current_institute_code, current_institute_name, pending_block, pending_institute_code, pending_institute_name, pending_page_number)
 
+def is_cngpi_institute(code: str | None, name: str | None) -> bool:
+    if code and str(code).strip() in {"20015", "13143"}:
+        return True
+    if name and any(kw in str(name).lower() for kw in ["chapainawabganj", "cngpi"]):
+        return True
+    return False
+
 def parse_pdf_bytes(pdf_bytes: bytes, source_name: str = "result.pdf", progress_callback: Callable[[int, int], None] | None = None) -> dict[str, Any]:
     if not pdf_bytes:
         raise RuntimeError("The PDF file is empty.")
@@ -277,11 +284,15 @@ def parse_pdf_bytes(pdf_bytes: bytes, source_name: str = "result.pdf", progress_
     pending_institute_name = None
     pending_page_number = None
 
-    results: dict[str, dict[str, Any]] = {}
-    duplicate_rolls: list[str] = []
+    all_raw_results: dict[str, dict[str, Any]] = {}
+    cngpi_filtered_results: dict[str, dict[str, Any]] = {}
+    pdf_has_cngpi_keyword = False
 
     for page_number, page in enumerate(reader.pages, start=1):
         page_text = page.extract_text() or ""
+        if "20015" in page_text or "13143" in page_text or "chapainawabganj" in page_text.lower():
+            pdf_has_cngpi_keyword = True
+
         (page_records, current_institute_code, current_institute_name, pending_block, pending_institute_code, pending_institute_name, pending_page_number) = extract_records_from_page(
             text=page_text, page_number=page_number, current_institute_code=current_institute_code, current_institute_name=current_institute_name,
             pending_block=pending_block, pending_institute_code=pending_institute_code, pending_institute_name=pending_institute_name, pending_page_number=pending_page_number
@@ -289,9 +300,13 @@ def parse_pdf_bytes(pdf_bytes: bytes, source_name: str = "result.pdf", progress_
 
         for result in page_records:
             roll = result["roll"]
-            if roll in results:
-                duplicate_rolls.append(roll)
-            results[roll] = result
+            all_raw_results[roll] = result
+
+            rec_code = result.get("instituteCode")
+            rec_name = result.get("instituteName")
+
+            if is_cngpi_institute(rec_code, rec_name):
+                cngpi_filtered_results[roll] = result
 
         if progress_callback:
             progress_callback(page_number, total_pages)
@@ -300,14 +315,25 @@ def parse_pdf_bytes(pdf_bytes: bytes, source_name: str = "result.pdf", progress_
         parsed_record = parse_record(pending_block, pending_institute_code, pending_institute_name, pending_page_number or total_pages)
         if parsed_record:
             roll = parsed_record["roll"]
-            if roll in results:
-                duplicate_rolls.append(roll)
-            results[roll] = parsed_record
+            all_raw_results[roll] = parsed_record
+            if is_cngpi_institute(parsed_record.get("instituteCode"), parsed_record.get("instituteName")):
+                cngpi_filtered_results[roll] = parsed_record
 
-    status_counts = Counter(result["status"] for result in results.values())
-    institutes = {(r.get("instituteCode"), r.get("instituteName")) for r in results.values() if r.get("instituteCode")}
-    used_subject_codes = sorted({s["code"] for r in results.values() for s in r.get("failedSubjects", [])})
-    result_list = sorted(results.values(), key=lambda item: int(item["roll"]))
+    # Fallback: If section detection found zero CNGPI-specific records but document text contains CNGPI keyword (20015),
+    # treat all extracted roll records from this PDF as Chapainawabganj Polytechnic records!
+    if not cngpi_filtered_results and pdf_has_cngpi_keyword:
+        for roll, result in all_raw_results.items():
+            result["instituteCode"] = "20015"
+            result["instituteName"] = "Chapainawabganj Polytechnic Institute"
+            cngpi_filtered_results[roll] = result
+
+    # Final results set to return (ONLY Chapainawabganj Polytechnic Institute records)
+    final_results = cngpi_filtered_results
+
+    status_counts = Counter(result["status"] for result in final_results.values())
+    institutes = {(r.get("instituteCode"), r.get("instituteName")) for r in final_results.values() if r.get("instituteCode")}
+    used_subject_codes = sorted({s["code"] for r in final_results.values() for s in r.get("failedSubjects", [])})
+    result_list = sorted(final_results.values(), key=lambda item: int(item["roll"]))
 
     return {
         "success": True,
@@ -315,8 +341,9 @@ def parse_pdf_bytes(pdf_bytes: bytes, source_name: str = "result.pdf", progress_
             "sourceFile": Path(source_name).name,
             "pdfEngine": "pypdf",
             "totalPages": total_pages,
-            "totalResults": len(results),
-            "totalInstitutes": len(institutes),
+            "totalResults": len(final_results),
+            "rawTotalResultsFound": len(all_raw_results),
+            "instituteFilter": "Chapainawabganj Polytechnic Institute (20015)",
             "statusCounts": {
                 "pass": status_counts.get("pass", 0),
                 "referred": status_counts.get("referred", 0),
@@ -326,7 +353,7 @@ def parse_pdf_bytes(pdf_bytes: bytes, source_name: str = "result.pdf", progress_
             "usedSubjectCodes": used_subject_codes,
             "parsingSeconds": round(time.time() - parsing_started_at, 3),
         },
-        "resultsByRoll": results,
+        "resultsByRoll": final_results,
         "results": result_list,
     }
 
@@ -349,6 +376,13 @@ def save_db(data):
 class CustomHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=PUBLIC_DIR, **kwargs)
+
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.end_headers()
 
     def do_GET(self):
         parsed_url = urllib.parse.urlparse(self.path)
