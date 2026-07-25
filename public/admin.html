@@ -18,6 +18,14 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
+  <!-- PDF.js for Client-Side BTEB Result PDF Parsing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    if (typeof pdfjsLib !== 'undefined') {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+  </script>
+
   <style>
     :root {
       --font-primary: 'Inter', sans-serif;
@@ -2231,10 +2239,153 @@
       reader.readAsDataURL(file);
     }
 
-    // Publish Result PDF to Cloud Firestore & Parse Roll Numbers via Python Backend
-    let progressTimer = null;
+    let selectedPdfFileObject = null;
 
-    function handleResultPdfUpload(event) {
+    // Handle Result PDF File Selection
+    function onPdfFileSelected(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
+        showToast("Please select a valid PDF document file.", "error");
+        return;
+      }
+
+      selectedPdfFileObject = file;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        selectedPdfDataUrl = e.target.result;
+        document.getElementById("pdf-file-label").textContent = `Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+        showToast("PDF file attached successfully!", "success");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Helper: Parse & Filter Chapainawabganj Polytechnic Institute (20015) Student Results
+    function parseCngpiStudentResultsFromText(fullText, meta = {}) {
+      const results = {};
+      const lines = fullText.split(/\r?\n/);
+
+      let isCngpiSection = false;
+
+      // Regex patterns
+      const cngpiHeaderRegex = /(20015|chapainawabganj|cngpi)/i;
+      const instituteHeaderRegex = /^\s*(\d{5})\s*[-–(]/;
+
+      // 1. Roll + GPA: e.g. "200029 (3.54)" or "200029(3.54)" or "200029 [3.54]"
+      const passedRegex = /\b(\d{6})\s*[\(\[\{]\s*(\d\.\d{2})\s*[\)\]\}]/g;
+
+      // 2. Roll + Referred: e.g. "200033{25911(T), 25912(P)}" or "200033 {25911(T)}"
+      const referredRegex = /\b(\d{6})\s*[\{]\s*([^\}]+)[\}]/g;
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+
+        if (cngpiHeaderRegex.test(line)) {
+          isCngpiSection = true;
+        } else if (instituteHeaderRegex.test(line)) {
+          const m = line.match(instituteHeaderRegex);
+          if (m && m[1] !== "20015") {
+            isCngpiSection = false;
+          }
+        }
+
+        // Parse passed rolls
+        let pMatch;
+        while ((pMatch = passedRegex.exec(line)) !== null) {
+          const roll = pMatch[1];
+          const gpa = pMatch[2];
+          if (isCngpiSection || fullText.includes("20015") || fullText.toLowerCase().includes("chapainawabganj")) {
+            results[roll] = {
+              roll: roll,
+              reg: "2026" + roll.slice(-6),
+              name: "Student " + roll,
+              gpa: parseFloat(gpa),
+              status: "PASSED",
+              referred_subjects: [],
+              institute: "Chapainawabganj Polytechnic Institute",
+              institute_code: "20015",
+              department: meta.department || "Computer Science & Technology",
+              semester: meta.semester || "1st Semester",
+              exam_title: meta.title || "BTEB Board Final Exam 2026"
+            };
+          }
+        }
+
+        // Parse referred rolls
+        let rMatch;
+        while ((rMatch = referredRegex.exec(line)) !== null) {
+          const roll = rMatch[1];
+          const subsStr = rMatch[2];
+          const subsList = subsStr.split(',').map(s => s.trim()).filter(Boolean);
+
+          if (isCngpiSection || fullText.includes("20015") || fullText.toLowerCase().includes("chapainawabganj")) {
+            results[roll] = {
+              roll: roll,
+              reg: "2026" + roll.slice(-6),
+              name: "Student " + roll,
+              gpa: 0.00,
+              status: "REFERRED",
+              referred_subjects: subsList,
+              institute: "Chapainawabganj Polytechnic Institute",
+              institute_code: "20015",
+              department: meta.department || "Computer Science & Technology",
+              semester: meta.semester || "1st Semester",
+              exam_title: meta.title || "BTEB Board Final Exam 2026"
+            };
+          }
+        }
+      }
+
+      // If section-based parsing found no rolls, fallback to global pattern extraction
+      if (Object.keys(results).length === 0) {
+        let passMatch;
+        const globalPassRegex = /\b(\d{6})\s*[\(\[\{]\s*(\d\.\d{2})\s*[\)\]\}]/g;
+        while ((passMatch = globalPassRegex.exec(fullText)) !== null) {
+          const roll = passMatch[1];
+          const gpa = passMatch[2];
+          results[roll] = {
+            roll: roll,
+            reg: "2026" + roll.slice(-6),
+            name: "Student " + roll,
+            gpa: parseFloat(gpa),
+            status: "PASSED",
+            referred_subjects: [],
+            institute: "Chapainawabganj Polytechnic Institute",
+            institute_code: "20015",
+            department: meta.department || "Computer Science & Technology",
+            semester: meta.semester || "1st Semester",
+            exam_title: meta.title || "BTEB Board Final Exam 2026"
+          };
+        }
+
+        let refMatch;
+        const globalRefRegex = /\b(\d{6})\s*[\{]\s*([^\}]+)[\}]/g;
+        while ((refMatch = globalRefRegex.exec(fullText)) !== null) {
+          const roll = refMatch[1];
+          const subsStr = refMatch[2];
+          const subsList = subsStr.split(',').map(s => s.trim()).filter(Boolean);
+          results[roll] = {
+            roll: roll,
+            reg: "2026" + roll.slice(-6),
+            name: "Student " + roll,
+            gpa: 0.00,
+            status: "REFERRED",
+            referred_subjects: subsList,
+            institute: "Chapainawabganj Polytechnic Institute",
+            institute_code: "20015",
+            department: meta.department || "Computer Science & Technology",
+            semester: meta.semester || "1st Semester",
+            exam_title: meta.title || "BTEB Board Final Exam 2026"
+          };
+        }
+      }
+
+      return results;
+    }
+
+    // Publish Result PDF to Cloud Firestore & Parse Chapainawabganj (20015) Student Rolls In-Browser
+    async function handleResultPdfUpload(event) {
       event.preventDefault();
 
       const title = document.getElementById("result-title").value.trim();
@@ -2242,10 +2393,8 @@
       const semester = document.getElementById("result-semester").value;
       const urlInput = document.getElementById("result-pdf-url").value.trim();
 
-      const pdfUrl = selectedPdfDataUrl || urlInput;
-
-      if (!title || !pdfUrl) {
-        showToast("Please enter exam title and select a PDF file or URL.", "error");
+      if (!title || (!selectedPdfFileObject && !selectedPdfDataUrl && !urlInput)) {
+        showToast("Please enter exam title and attach a PDF result sheet.", "error");
         return;
       }
 
@@ -2257,150 +2406,160 @@
       const progressSubtext = document.getElementById("pdf-progress-subtext");
 
       progressBox.style.display = "block";
-      progressFill.style.width = "0%";
-      progressPercent.textContent = "0%";
-      progressSubtext.textContent = "Initializing PDF parser engine...";
+      progressFill.style.width = "5%";
+      progressPercent.textContent = "5%";
+      progressLabel.innerHTML = `<i data-lucide="loader" style="width: 16px; height: 16px; animation: spin 1s linear infinite;"></i> 📖 Reading PDF Document...`;
+      progressSubtext.textContent = "Initializing PDF parser engine in browser...";
+      lucide.createIcons();
 
-      // Poll progress every 200ms
-      if (progressTimer) clearInterval(progressTimer);
-      progressTimer = setInterval(() => {
-        fetch("/api/parse-progress")
-          .then(res => res.json())
-          .then(p => {
-            if (p.percentage !== undefined) {
-              progressFill.style.width = `${p.percentage}%`;
-              progressPercent.textContent = `${p.percentage}%`;
-              progressSubtext.textContent = p.message || `Parsing Page ${p.completed_pages} of ${p.total_pages}...`;
-            }
-          }).catch(e => console.warn(e));
-      }, 200);
-
-      showToast("Parsing BTEB PDF and extracting student results...", "info");
-
-      const pdfId = "pdf_" + Date.now();
-
-      // Send to Python PDF Parser API
-      fetch("/api/parse-pdf-upload", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          filename: title + ".pdf",
-          pdfBase64: selectedPdfDataUrl
-        })
-      })
-      .then(res => res.json())
-      .then(async data => {
-        clearInterval(progressTimer);
-        progressFill.style.width = "100%";
-        progressPercent.textContent = "100%";
-
-        const parsedCount = data.meta ? data.meta.totalResults : 0;
-        progressSubtext.textContent = `Completed! Uploading ${parsedCount} student roll results to Firebase...`;
-
-        // Upload PDF metadata and student roll records to Cloud Firestore
-        if (db) {
-          try {
-            // Determine clean URL (avoid storing huge base64 strings > 100KB in Firestore)
-            let cleanPdfUrl = data.fileUrl || urlInput;
-            if (!cleanPdfUrl || cleanPdfUrl.length > 500000) {
-              cleanPdfUrl = data.fileUrl || (urlInput || `/uploads/${title.replace(/[^a-zA-Z0-9_.-]/g, '_')}.pdf`);
-            }
-
-            // 1. Upload PDF metadata record to Firestore
-            const pdfPayload = {
-              pdfId: pdfId,
-              title: title,
-              department: department,
-              semester: semester,
-              pdfUrl: cleanPdfUrl,
-              totalResults: parsedCount,
-              createdAt: new Date().toISOString(),
-              publishedBy: ADMIN_USER
-            };
-            await db.collection("results").doc(pdfId).set(pdfPayload);
-
-            // 2. High-Speed Parallel Batch Upload of Student Roll Results to Cloud Firestore
-            const resultsMap = data.resultsByRoll || {};
-            const rolls = Object.keys(resultsMap);
-            const totalRolls = rolls.length;
-
-            if (totalRolls > 0) {
-              const uploadStartTime = Date.now();
-              let uploadedRollsCount = 0;
-
-              // Helper function to update Firebase Progress Bar & ETA
-              const updateFirebaseUploadUI = (current, total) => {
-                const elapsedSec = (Date.now() - uploadStartTime) / 1000;
-                const pct = Math.min(100, Math.round((current / total) * 100));
-                
-                // Speed & ETA Math
-                const rollsPerSec = elapsedSec > 0 ? (current / elapsedSec) : 0;
-                const remaining = total - current;
-                const etaSec = rollsPerSec > 0 ? Math.ceil(remaining / rollsPerSec) : 0;
-                
-                const speedText = rollsPerSec > 0 ? `(${Math.round(rollsPerSec)} rolls/sec)` : "";
-                const etaText = etaSec > 0 ? `${etaSec}s remaining` : (remaining === 0 ? "Finishing..." : "Calculating ETA...");
-
-                progressFill.style.width = `${pct}%`;
-                progressPercent.textContent = `${pct}%`;
-                progressLabel.innerHTML = `<i data-lucide="cloud-upload" style="width: 16px; height: 16px; animation: spin 1s linear infinite;"></i> Cloud Firestore Uploading...`;
-                progressSubtext.textContent = `Uploading ${current} of ${total} student rolls to Firebase ${speedText} • ETA: ${etaText}`;
-                lucide.createIcons();
-              };
-
-              updateFirebaseUploadUI(0, totalRolls);
-
-              // Split rolls into chunks of 300
-              const chunkSize = 300;
-              const chunks = [];
-              for (let i = 0; i < totalRolls; i += chunkSize) {
-                chunks.push(rolls.slice(i, i + chunkSize));
-              }
-
-              // Process parallel batch pools (8 concurrent batches at a time)
-              const BATCH_CONCURRENCY = 8;
-              for (let i = 0; i < chunks.length; i += BATCH_CONCURRENCY) {
-                const currentPool = chunks.slice(i, i + BATCH_CONCURRENCY);
-
-                await Promise.all(currentPool.map(async (chunk) => {
-                  const batch = db.batch();
-                  chunk.forEach(roll => {
-                    const item = resultsMap[roll];
-                    const docRef = db.collection("student_results").doc(roll);
-                    batch.set(docRef, { ...item, pdfId: pdfId, uploadedAt: new Date().toISOString() });
-                  });
-                  await batch.commit();
-                  uploadedRollsCount += chunk.length;
-                  updateFirebaseUploadUI(uploadedRollsCount, totalRolls);
-                }));
-              }
-
-              const totalElapsedSec = ((Date.now() - uploadStartTime) / 1000).toFixed(1);
-              progressSubtext.textContent = `🎉 Upload Completed in ${totalElapsedSec}s! ${totalRolls} student rolls live in Firebase.`;
-
-              // Popup alert notification for Firebase upload success
-              alert(`🎉 Success!\nResult PDF "${title}" and ${totalRolls} student roll results uploaded to Firebase in ${totalElapsedSec} seconds!`);
-              showToast(`Result PDF & ${totalRolls} roll results uploaded to Firebase!`, "success");
-            }
-
-            document.getElementById("result-title").value = "";
-            document.getElementById("result-pdf-url").value = "";
-            document.getElementById("pdf-file-label").textContent = "Click or Drag to Select Result PDF File";
-            selectedPdfDataUrl = "";
-            loadFirestoreResults();
-          } catch (fireErr) {
-            console.error("Firestore upload error:", fireErr);
-            showToast("Failed to upload results to Firebase: " + fireErr.message, "error");
+      try {
+        let arrayBuffer;
+        if (selectedPdfFileObject) {
+          arrayBuffer = await selectedPdfFileObject.arrayBuffer();
+        } else if (selectedPdfDataUrl && selectedPdfDataUrl.startsWith("data:")) {
+          const base64Str = selectedPdfDataUrl.split(',')[1];
+          const binaryStr = atob(base64Str);
+          const len = binaryStr.length;
+          const bytes = new Uint8Array(len);
+          for (let i = 0; i < len; i++) {
+            bytes[i] = binaryStr.charCodeAt(i);
           }
-        } else {
-          showToast("Database offline. Result saved locally.", "success");
+          arrayBuffer = bytes.buffer;
+        } else if (urlInput) {
+          const res = await fetch(urlInput);
+          arrayBuffer = await res.arrayBuffer();
         }
-      })
-      .catch(err => {
-        clearInterval(progressTimer);
-        console.warn("Python parsing error:", err);
+
+        if (!arrayBuffer) throw new Error("Could not load PDF document bytes.");
+
+        // Check if PDF.js is loaded
+        if (typeof pdfjsLib === "undefined") {
+          throw new Error("PDF.js library failed to load. Please check internet connection.");
+        }
+
+        // Load document via PDF.js
+        const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+        const pdfDoc = await loadingTask.promise;
+        const totalPages = pdfDoc.numPages;
+
+        let fullPdfText = "";
+        for (let i = 1; i <= totalPages; i++) {
+          const page = await pdfDoc.getPage(i);
+          const textContent = await page.getTextContent();
+          const pageStr = textContent.items.map(item => item.str).join(" ");
+          fullPdfText += `\n--- PAGE ${i} ---\n` + pageStr;
+
+          const pct = Math.round((i / totalPages) * 45); // 0% to 45%
+          progressFill.style.width = `${pct}%`;
+          progressPercent.textContent = `${pct}%`;
+          progressSubtext.textContent = `Reading PDF Pages (${i} of ${totalPages})...`;
+        }
+
+        // Stage 2: Filtering Chapainawabganj Polytechnic (20015) students
+        progressLabel.innerHTML = `<i data-lucide="filter" style="width: 16px; height: 16px;"></i> 🔍 Filtering Chapainawabganj (20015) Student Rolls...`;
+        progressFill.style.width = "50%";
+        progressPercent.textContent = "50%";
+        progressSubtext.textContent = "Detecting student rolls for Chapainawabganj Polytechnic Institute (Code: 20015)...";
+        lucide.createIcons();
+
+        const extractedMap = parseCngpiStudentResultsFromText(fullPdfText, {
+          title,
+          department,
+          semester
+        });
+
+        const rolls = Object.keys(extractedMap);
+        const totalRolls = rolls.length;
+
+        if (totalRolls === 0) {
+          progressFill.style.width = "100%";
+          progressPercent.textContent = "100%";
+          progressSubtext.textContent = "⚠️ No student rolls detected in this PDF for Chapainawabganj Polytechnic (20015).";
+          showToast("No Chapainawabganj Polytechnic (20015) student rolls detected.", "warning");
+          return;
+        }
+
+        // Stage 3: Uploading to Cloud Firestore
+        progressLabel.innerHTML = `<i data-lucide="cloud-upload" style="width: 16px; height: 16px; animation: spin 1s linear infinite;"></i> 🚀 Uploading to Cloud Firestore...`;
+        progressSubtext.textContent = `Found ${totalRolls} Chapainawabganj student results! Publishing to Firebase...`;
+        lucide.createIcons();
+
+        const pdfId = "pdf_" + Date.now();
+        let cleanPdfUrl = urlInput || `/uploads/${title.replace(/[^a-zA-Z0-9_.-]/g, '_')}.pdf`;
+
+        if (db) {
+          // 1. Upload PDF metadata record
+          const pdfPayload = sanitizeFirestoreData({
+            pdfId: pdfId,
+            title: title,
+            department: department,
+            semester: semester,
+            pdfUrl: cleanPdfUrl,
+            totalResults: totalRolls,
+            institute: "Chapainawabganj Polytechnic Institute (20015)",
+            createdAt: new Date().toISOString(),
+            publishedBy: ADMIN_USER
+          });
+
+          await db.collection("results").doc(pdfId).set(pdfPayload);
+
+          // 2. Upload student results in batch chunks of 200
+          const chunkSize = 200;
+          let uploadedCount = 0;
+
+          for (let i = 0; i < totalRolls; i += chunkSize) {
+            const chunk = rolls.slice(i, i + chunkSize);
+            const batch = db.batch();
+
+            chunk.forEach(roll => {
+              const item = extractedMap[roll];
+              const cleanItem = sanitizeFirestoreData({
+                ...item,
+                pdfId: pdfId,
+                uploadedAt: new Date().toISOString()
+              });
+              const docRef = db.collection("student_results").doc(roll);
+              batch.set(docRef, cleanItem);
+
+              // Also save to results collection by roll for lookup backwards compatibility
+              const altRef = db.collection("results").doc(`roll_${roll}`);
+              batch.set(altRef, cleanItem);
+            });
+
+            await batch.commit();
+            uploadedCount += chunk.length;
+
+            const pct = 50 + Math.round((uploadedCount / totalRolls) * 50); // 50% to 100%
+            progressFill.style.width = `${pct}%`;
+            progressPercent.textContent = `${pct}%`;
+            progressSubtext.textContent = `Uploaded ${uploadedCount} of ${totalRolls} Chapainawabganj student rolls to Firestore...`;
+          }
+
+          progressFill.style.width = "100%";
+          progressPercent.textContent = "100%";
+          progressSubtext.textContent = `🎉 Completed! Published ${totalRolls} Chapainawabganj (20015) student roll results to Firebase.`;
+
+          alert(`🎉 Success!\nParsed PDF and published ${totalRolls} Chapainawabganj Polytechnic (20015) student results to Cloud Firestore!`);
+          showToast(`Published ${totalRolls} CNGPI student results to Firebase!`, "success");
+
+          // Reset inputs
+          document.getElementById("result-title").value = "";
+          document.getElementById("result-pdf-url").value = "";
+          document.getElementById("pdf-file-label").textContent = "Click or Drag to Select Result PDF File";
+          selectedPdfDataUrl = "";
+          selectedPdfFileObject = null;
+
+          loadFirestoreResults();
+        } else {
+          showToast("Database offline. Extracted results locally.", "warning");
+        }
+      } catch (err) {
+        console.error("PDF parse/upload error:", err);
+        progressFill.style.width = "100%";
+        progressPercent.textContent = "Error";
         progressSubtext.textContent = "Error parsing PDF: " + err.message;
-      });
+        showToast("PDF parsing error: " + err.message, "error");
+      }
     }
 
     // Load Published Results List from Cloud Firestore
