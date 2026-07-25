@@ -573,35 +573,8 @@
             }
           }
         } catch (err) {
-          console.warn("Firestore search warning, trying local server fallbacks:", err);
+          console.warn("Firestore search error:", err);
         }
-      }
-
-      // 4. Fallback Local API Search
-      fetchFallbackLocalApi(rollStr);
-    }
-
-    async function fetchFallbackLocalApi(rollStr) {
-      try {
-        let res = await fetch(`/api/result/${encodeURIComponent(rollStr)}`);
-        let data = await res.json();
-        if (data.ok && data.results && data.results.length > 0) {
-          renderStudentResult(data.results[0], rollStr);
-          return;
-        }
-        if (data.success && data.result) {
-          renderStudentResult(data.result, rollStr);
-          return;
-        }
-
-        res = await fetch(`/api/result?roll=${encodeURIComponent(rollStr)}`);
-        data = await res.json();
-        if (data.success && data.result) {
-          renderStudentResult(data.result, rollStr);
-          return;
-        }
-      } catch (e) {
-        console.warn("Local API fallback error:", e);
       }
 
       renderNotFound(rollStr);

@@ -357,22 +357,6 @@ def parse_pdf_bytes(pdf_bytes: bytes, source_name: str = "result.pdf", progress_
         "results": result_list,
     }
 
-def load_db():
-    if os.path.exists(DB_FILE):
-        try:
-            with open(DB_FILE, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        except Exception as e:
-            print("Error loading DB file:", e)
-    return {}
-
-def save_db(data):
-    try:
-        with open(DB_FILE, 'w', encoding='utf-8') as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
-    except Exception as e:
-        print("Error saving DB file:", e)
-
 class CustomHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=PUBLIC_DIR, **kwargs)
@@ -386,29 +370,7 @@ class CustomHandler(SimpleHTTPRequestHandler):
 
     def do_GET(self):
         parsed_url = urllib.parse.urlparse(self.path)
-        if parsed_url.path == '/api/result':
-            query = urllib.parse.parse_qs(parsed_url.query)
-            roll = query.get('roll', [''])[0].strip()
-            
-            db_data = load_db()
-            records_map = db_data.get("resultsByRoll", db_data)
-            
-            if roll in records_map:
-                res_data = records_map[roll]
-                self.send_response(200)
-                self.send_header('Content-Type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.end_headers()
-                self.wfile.write(json.dumps({"success": True, "result": res_data}).encode('utf-8'))
-            else:
-                self.send_response(200)
-                self.send_header('Content-Type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.end_headers()
-                self.wfile.write(json.dumps({"success": False, "message": f"No result found for Roll {roll}"}).encode('utf-8'))
-            return
-        
-        elif parsed_url.path == '/api/parse-progress':
+        if parsed_url.path == '/api/parse-progress':
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
             self.send_header('Access-Control-Allow-Origin', '*')
@@ -453,6 +415,7 @@ class CustomHandler(SimpleHTTPRequestHandler):
             if not pdf_bytes:
                 self.send_response(400)
                 self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
                 self.end_headers()
                 self.wfile.write(json.dumps({"success": False, "message": "No PDF data received."}).encode('utf-8'))
                 return
@@ -492,22 +455,13 @@ class CustomHandler(SimpleHTTPRequestHandler):
 
                 parsed_output = parse_pdf_bytes(pdf_bytes, source_name=filename, progress_callback=update_progress)
                 parsed_output["fileUrl"] = file_url
-                
-                # Merge into database
-                existing_db = load_db()
-                if "resultsByRoll" not in existing_db:
-                    existing_db = {"meta": parsed_output["meta"], "resultsByRoll": existing_db}
-                
-                existing_db["meta"] = parsed_output["meta"]
-                existing_db["resultsByRoll"].update(parsed_output["resultsByRoll"])
-                save_db(existing_db)
 
                 parsing_progress = {
                     "status": "completed",
                     "completed_pages": parsed_output["meta"]["totalPages"],
                     "total_pages": parsed_output["meta"]["totalPages"],
                     "percentage": 100,
-                    "message": f"Complete! Parsed {parsed_output['meta']['totalResults']} student results."
+                    "message": f"Complete! Parsed {parsed_output['meta']['totalResults']} CNGPI student results."
                 }
 
                 self.send_response(200)
@@ -526,6 +480,7 @@ class CustomHandler(SimpleHTTPRequestHandler):
                 }
                 self.send_response(500)
                 self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
                 self.end_headers()
                 self.wfile.write(json.dumps({"success": False, "message": str(e)}).encode('utf-8'))
             return
@@ -533,48 +488,6 @@ class CustomHandler(SimpleHTTPRequestHandler):
         return super().do_POST()
 
 if __name__ == '__main__':
-    # Initialize DB with mock demo data if empty
-    db = load_db()
-    if not db:
-        db = {
-          "meta": { "totalResults": 2, "totalPages": 1 },
-          "resultsByRoll": {
-            "654321": {
-              "roll": "654321",
-              "instituteCode": "13143",
-              "instituteName": "Chapainawabganj Polytechnic Institute",
-              "status": "pass",
-              "statusLabel": "Passed",
-              "gpa1": 3.85,
-              "gpa2": 3.90,
-              "semesterResults": {
-                "semester1": { "gpa": 3.85, "result": "Published" },
-                "semester2": { "gpa": 3.90, "result": "Published" }
-              },
-              "failedSubjects": [],
-              "failedSubjectCount": 0
-            },
-            "654322": {
-              "roll": "654322",
-              "instituteCode": "13143",
-              "instituteName": "Chapainawabganj Polytechnic Institute",
-              "status": "referred",
-              "statusLabel": "Referred",
-              "gpa1": "ref",
-              "gpa2": 3.50,
-              "semesterResults": {
-                "semester1": { "gpa": "ref", "result": "Referred" },
-                "semester2": { "gpa": 3.50, "result": "Published" }
-              },
-              "failedSubjects": [
-                { "code": "28511", "name": "Computer Office Application", "semester": "Semester 1", "components": ["T"], "componentLabel": "Theory" }
-              ],
-              "failedSubjectCount": 1
-            }
-          }
-        }
-        save_db(db)
-
     server = HTTPServer(('0.0.0.0', PORT), CustomHandler)
-    print(f"BTEB Parser Server running on port {PORT}...")
+    print(f"Stateless BTEB Parser Microservice running on port {PORT}...")
     server.serve_forever()
