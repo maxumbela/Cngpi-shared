@@ -1,0 +1,1574 @@
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  Terminal,
+  Cpu,
+  Sparkles,
+  Code2,
+  Layers,
+  Globe,
+  Github,
+  Youtube,
+  Instagram,
+  Facebook,
+  ExternalLink,
+  Copy,
+  Check,
+  Settings,
+  Plus,
+  Trash2,
+  RotateCcw,
+  Play,
+  Sliders,
+  Compass,
+  Award,
+  Briefcase,
+  GraduationCap,
+  MapPin,
+  Zap,
+  Video,
+  Wifi,
+  Anchor,
+  ChevronRight,
+  X,
+  Eye,
+  Wand2,
+  Share2,
+  Volume2
+} from 'lucide-react';
+
+// ==========================================
+// DEFAULT INITIAL DATA (Persisted in LocalStorage)
+// ==========================================
+const INITIAL_DATA = {
+  profile: {
+    nameEn: "Md. Shaharia Islam Sakib",
+    nameBn: "মোঃ শাহরিয়ার ইসলাম সাকিব",
+    taglineEn: "Web & App Developer • AI Content Creator • IoT Builder • Marine Surveyor",
+    taglineBn: "ওয়েব ও অ্যাপ ডেভেলপার • এআই কন্টেন্ট ক্রিয়েটর • আইওটি নির্মাতা • মেরিন সার্ভেয়ার",
+    bioEn: "Passionate technologist blending software engineering, AI visual storytelling (Qalpik), and microcontroller automation (ESP32) with real-world marine cargo surveying operations.",
+    bioBn: "সফটওয়্যার তৈরি, কোড লার্নিং, এআই ভিডিও ও কন্টেন্ট ক্রিয়েশন (কালপিক) এবং ইলেকট্রনিক্স অটোমেশন (ESP32) নিয়ে কাজ করতে ভালোবাসি। বর্তমানে টিসিআইএস বাংলাদেশ লিমিটেডে মেরিন সার্ভেয়ার হিসেবে কর্মরত।",
+    locationEn: "Narayanganj / Dhaka & Tanore, Rajshahi",
+    locationBn: "নারায়ণগঞ্জ / ঢাকা ও তানোর, রাজশাহী",
+    badges: [
+      { text: "Qalpik (@qalpikai.official)", color: "cyan" },
+      { text: "⚚ অদৃশ্য পথিক ⚚", color: "magenta" },
+      { text: "স্বপ্নচারী", color: "violet" },
+      { text: "𝐈𝐭'𝐬 𝐒𝐚𝐤𝐢𝐛 ✗", color: "emerald" }
+    ]
+  },
+  projects: [
+    {
+      id: "imatex-pro",
+      titleEn: "Imatex Pro",
+      titleBn: "ইমাটেক্স প্রো (Imatex Pro)",
+      category: "web",
+      badge: "Featured App",
+      descEn: "Custom typography & dynamic text-rendering web application featuring live neon glow controls, custom fonts, and instant canvas export. Default signature preview: 'I love Sakib'.",
+      descBn: "কাস্টম টাইপোগ্রাফি এবং লাইভ টেক্সট-রেন্ডারিং ওয়েব অ্যাপ্লিকেশন। এতে নিয়ন গ্লো, কালার গ্রেডিয়েন্ট এবং ক্যানভাস প্রিভিউ ('I love Sakib') কাস্টমাইজ করার সুবিধা রয়েছে।",
+      tech: ["JavaScript", "HTML5 Canvas", "Tailwind CSS", "Typography Engine"],
+      link: "https://github.com/Mohammad-Creator-Sakib",
+      interactiveType: "imatex"
+    },
+    {
+      id: "qalpik-ai",
+      titleEn: "Qalpik (কালপিক) AI Studio",
+      titleBn: "কালপিক (Qalpik) এআই স্টুডিও",
+      category: "ai",
+      badge: "AI Media Brand",
+      descEn: "AI-generated 9:16 vertical anime stories, Bengali motivational video narratives, lo-fi soundscapes, and futuristic visual storytelling across YouTube, TikTok & Facebook.",
+      descBn: "এআই জেনারেটেড অ্যানিমে স্টোরি, ৯:১৬ শর্টস/রিলস অ্যানিমেশন, মোটিভেশনাল বাংলা স্ক্রিপ্ট এবং লো-ফাই মিউজিক কন্টেন্ট তৈরির ক্রিয়েটিভ ব্র্যান্ড।",
+      tech: ["AI Video Gen", "Prompt Engineering", "9:16 Vertical", "Bengali Storytelling"],
+      link: "https://youtube.com/@qalpikai.official",
+      interactiveType: "qalpik"
+    },
+    {
+      id: "esp32-iot",
+      titleEn: "ESP32 Smart IoT & OTA Controller",
+      titleBn: "ESP32 স্মার্ট আইওটি ও অটোমেশন",
+      category: "iot",
+      badge: "Hardware + Cloud",
+      descEn: "Microcontroller automation system integrating multi-channel relays, piezo buzzers, environmental sensors, Blynk IoT live dashboard, and wireless ArduinoOTA firmware updates.",
+      descBn: "ESP32 মাইক্রোকন্ট্রোলার দিয়ে তৈরি স্মার্ট কন্ট্রোল সিস্টেম—যাতে রিলে, বাজার, সেন্সর, Blynk IoT ক্লাউড ড্যাশবোর্ড এবং তার ছাড়াই ArduinoOTA আপডেট সুবিধা রয়েছে।",
+      tech: ["ESP32", "C++ / Arduino", "Blynk IoT", "ArduinoOTA", "Sensors & Relays"],
+      link: "https://github.com/Mohammad-Creator-Sakib",
+      interactiveType: "iot"
+    },
+    {
+      id: "smart-alarm-callhub",
+      titleEn: "Smart-alarm & Call-Hub",
+      titleBn: "Smart-alarm এবং Call-Hub",
+      category: "web",
+      badge: "GitHub Repos",
+      descEn: "Open-source software utilities built with automated CI/CD workflows, modern dark UI architectures, and responsive utility management.",
+      descBn: "অটোমেটেড বিল্ড ওয়ার্কফ্লো এবং আধুনিক ডার্ক ইউজার ইন্টারফেসে তৈরি ওপেন-সোর্স সফটওয়্যার প্রজেক্ট ও ইউটিলিটি টুলস।",
+      tech: ["React", "GitHub Actions", "Modern UI", "Web APIs"],
+      link: "https://github.com/Mohammad-Creator-Sakib",
+      interactiveType: null
+    },
+    {
+      id: "3d-vision-web",
+      titleEn: "3D Web & MediaPipe Hand-Tracking Lab",
+      titleBn: "থ্রিডি ওয়েব ও MediaPipe হ্যান্ড-ট্র্যাকিং",
+      category: "ai",
+      badge: "Interactive 3D",
+      descEn: "Experimental browser applications combining Three.js 3D particle shaders with real-time MediaPipe computer vision gesture controls.",
+      descBn: "Three.js থ্রিডি গ্রাফিক্স এবং MediaPipe কম্পিউটার ভিশন ব্যবহার করে হাতের ইশারায় নিয়ন্ত্রণযোগ্য ইন্টারঅ্যাক্টিভ ওয়েব এক্সপেরিমেন্ট।",
+      tech: ["Three.js", "MediaPipe AI", "React", "WebGL"],
+      link: "https://github.com/Mohammad-Creator-Sakib",
+      interactiveType: null
+    }
+  ],
+  socials: [
+    {
+      id: "s1",
+      category: "AI & Content Brand",
+      platform: "YouTube",
+      name: "Qalpik (কালপিক)",
+      handle: "@qalpikai.official",
+      url: "https://youtube.com/@qalpikai.official",
+      accent: "from-red-500 to-pink-600",
+      descEn: "AI Anime Stories & Visual Shorts",
+      descBn: "এআই অ্যানিমে স্টোরি এবং শর্টস ভিডিও"
+    },
+    {
+      id: "s2",
+      category: "AI & Content Brand",
+      platform: "TikTok",
+      name: "Qalpik Official",
+      handle: "@qalpikai.official",
+      url: "https://tiktok.com/@qalpikai.official",
+      accent: "from-cyan-400 to-fuchsia-500",
+      descEn: "9:16 Vertical AI Animations",
+      descBn: "৯:১৬ ভার্টিক্যাল এআই অ্যানিমেশন"
+    },
+    {
+      id: "s3",
+      category: "AI & Content Brand",
+      platform: "Facebook",
+      name: "Qalpik Page",
+      handle: "@qalpikai.official",
+      url: "https://facebook.com/qalpikai.official",
+      accent: "from-blue-500 to-cyan-400",
+      descEn: "Community & Bengali AI Stories",
+      descBn: "বাংলা এআই কন্টেন্ট ও কমিউনিটি"
+    },
+    {
+      id: "s4",
+      category: "AI & Content Brand",
+      platform: "Instagram",
+      name: "Qalpik AI",
+      handle: "@qalpikai.official",
+      url: "https://instagram.com/qalpikai.official",
+      accent: "from-purple-500 to-orange-400",
+      descEn: "AI Art & Reels Showcase",
+      descBn: "এআই আর্ট এবং রিলস গ্যালারি"
+    },
+    {
+      id: "s5",
+      category: "Developer & Freelance",
+      platform: "GitHub",
+      name: "Mohammad-Creator-Sakib",
+      handle: "Mohammad-Creator-Sakib",
+      url: "https://github.com/Mohammad-Creator-Sakib",
+      accent: "from-emerald-400 to-cyan-500",
+      descEn: "Smart-alarm, Call-Hub, Imatex Pro & Code",
+      descBn: "ওপেন সোর্স কোড ও সফটওয়্যার রিপোজিটরি"
+    },
+    {
+      id: "s6",
+      category: "Developer & Freelance",
+      platform: "Fiverr",
+      name: "Social By Sakib",
+      handle: "@socialbysakib",
+      url: "https://fiverr.com/socialbysakib",
+      accent: "from-green-400 to-emerald-600",
+      descEn: "Web Apps, AI Content & Digital Services",
+      descBn: "ফ্রিল্যান্স ওয়েব ডেভেলপমেন্ট ও এআই সার্ভিস"
+    },
+    {
+      id: "s7",
+      category: "Creative Personas",
+      platform: "Facebook Profile",
+      name: "⚚ অদৃশ্য পথিক ⚚",
+      handle: "অদৃশ্য পথিক",
+      url: "https://facebook.com",
+      accent: "from-indigo-500 to-purple-600",
+      descEn: "Personal thoughts, poetry & stories",
+      descBn: "ব্যক্তিগত ভাবনা, গল্প ও স্ট্যাটাস"
+    },
+    {
+      id: "s8",
+      category: "Creative Personas",
+      platform: "TikTok Persona",
+      name: "স্বপ্নচারী / 𝐈𝐭'𝐬 𝐒𝐚𝐤𝐢𝐛 ✗",
+      handle: "@its_sakib",
+      url: "https://tiktok.com",
+      accent: "from-pink-500 to-violet-600",
+      descEn: "Creative edits & personal vlogs",
+      descBn: "ক্রিয়েটিভ এডিট ও পার্সোনাল কন্টেন্ট"
+    }
+  ],
+  timeline: [
+    {
+      id: "t1",
+      periodEn: "Oct 2026 – Present",
+      periodBn: "অক্টোবর ২০২৬ – বর্তমান",
+      roleEn: "Marine Surveyor",
+      roleBn: "মেরিন সার্ভেয়ার (Marine Surveyor)",
+      orgEn: "TCIS Bangladesh Limited (Dhaka & Narayanganj)",
+      orgBn: "টিসিআইএস বাংলাদেশ লিমিটেড (ঢাকা ও নারায়ণগঞ্জ)",
+      descEn: "Inspecting and surveying ship cargo unloading operations, draft verification, and marine logistics reporting.",
+      descBn: "জাহাজের কার্গো আনলোডিং অপারেশন পরিদর্শন, পণ্য যাচাইকরণ এবং মেরিন সার্ভে রিপোর্ট তৈরি।",
+      type: "work"
+    },
+    {
+      id: "t2",
+      periodEn: "Ongoing",
+      periodBn: "চলমান",
+      roleEn: "Founder & AI Creator / Full-Stack Maker",
+      roleBn: "ফাউন্ডার ও এআই ক্রিয়েটর / সফটওয়্যার নির্মাতা",
+      orgEn: "Qalpik (@qalpikai.official) & @socialbysakib",
+      orgBn: "কালপিক (@qalpikai.official) এবং @socialbysakib",
+      descEn: "Building custom web apps (Imatex Pro, Call-Hub), ESP32 IoT systems, and producing viral AI anime & motivational stories.",
+      descBn: "ওয়েব অ্যাপ তৈরি, কোড লার্নিং, এআই ভিডিও ও অ্যানিমে কন্টেন্ট তৈরি এবং ফ্রিল্যান্স ডিজিটাল সার্ভিস।",
+      type: "creator"
+    },
+    {
+      id: "t3",
+      periodEn: "4th Semester (Current)",
+      periodBn: "৪র্থ পর্ব (চলমান)",
+      roleEn: "Diploma in Engineering (Electronics Technology)",
+      roleBn: "ডিপ্লোমা ইন ইঞ্জিনিয়ারিং (ইলেকট্রনিক্স টেকনোলজি)",
+      orgEn: "Chapainawabganj Government Polytechnic Institute",
+      orgBn: "চাঁপাইনবাবগঞ্জ সরকারি পলিটেকনিক ইনস্টিটিউট",
+      descEn: "Focusing on microcontrollers (ESP32/Arduino), circuit design, embedded C++, and industrial electronics.",
+      descBn: "মাইক্রোকন্ট্রোলার, সার্কিট ডিজাইন, এমবেডেড সিস্টেম এবং ইলেকট্রনিক্স প্রযুক্তিতে অধ্যয়নরত।",
+      type: "education"
+    },
+    {
+      id: "t4",
+      periodEn: "2024",
+      periodBn: "২০২৪",
+      roleEn: "Secondary School Certificate (SSC - Science)",
+      roleBn: "এসএসসি (বিজ্ঞান বিভাগ - GPA 4.33/5.00)",
+      orgEn: "Baharail Borendra High School, Tanore, Rajshahi",
+      orgBn: "বাহারাইল বরেন্দ্র উচ্চ বিদ্যালয়, তানোর, রাজশাহী",
+      descEn: "Graduated with GPA 4.33 out of 5.00 under Rajshahi Education Board from Shikpur Baharail, Tanore.",
+      descBn: "রাজশাহী শিক্ষা বোর্ডের অধীনে বিজ্ঞান বিভাগ থেকে জিপিএ ৪.৩৩ পেয়ে উত্তীর্ণ (শিকপুর বাহারাইল, তানোর)।",
+      type: "education"
+    }
+  ]
+};
+
+export default function App() {
+  // Language state: 'bn' (Bangla default since user spoke in Bangla) or 'en'
+  const [lang, setLang] = useState('bn');
+
+  // Portfolio Data State (Persisted in localStorage)
+  const [data, setData] = useState(() => {
+    try {
+      const saved = localStorage.getItem('sakib_cyber_portfolio_v1');
+      return saved ? JSON.parse(saved) : INITIAL_DATA;
+    } catch {
+      return INITIAL_DATA;
+    }
+  });
+
+  // Save to localStorage whenever data changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('sakib_cyber_portfolio_v1', JSON.stringify(data));
+    } catch (e) {
+      console.error("Failed to save state:", e);
+    }
+  }, [data]);
+
+  // Project filter state
+  const [activeCategory, setActiveCategory] = useState('all');
+
+  // Interactive Playground Tab ('imatex' | 'qalpik' | 'iot')
+  const [labTab, setLabTab] = useState('imatex');
+
+  // Imatex Pro Mini Studio State
+  const [imatexText, setImatexText] = useState('I love Sakib');
+  const [imatexColor, setImatexColor] = useState('#00f3ff');
+  const [imatexGlow, setImatexGlow] = useState(24);
+  const [imatexFont, setImatexFont] = useState('Orbitron, sans-serif');
+  const [imatexBg, setImatexBg] = useState('cyber-grid');
+
+  // Qalpik AI Story Generator State
+  const [aiGenre, setAiGenre] = useState('cyber-anime');
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [showOutroOverlay, setShowOutroOverlay] = useState(false);
+  const [generatedStory, setGeneratedStory] = useState({
+    title: "নিয়ন শহরের নিঃসঙ্গ কোডার (The Lone Coder of Neon Dhaka)",
+    visualPrompt: "9:16 vertical anime masterpiece, young Bangladeshi hacker standing on a rainy cyberpunk rooftop in Narayanganj overlooking glowing cargo ships, neon cyan hologram screens floating, Makoto Shinkai lighting, 8k cinematic.",
+    narrationBn: "সবাই যখন ঘুমিয়ে পড়ে, তখন কোডের প্রতিটি লাইনে আমি খুঁজি নতুন এক পৃথিবী। হারতে হারতে যেদিন মানুষ ক্লান্ত হয়ে যায়, ঠিক সেদিনই জন্ম নেয় আসল গল্প...",
+    musicTag: "Lo-Fi Rain & Cyberpunk Synth (78 BPM)"
+  });
+
+  // ESP32 Simulator State
+  const [relay1, setRelay1] = useState(true);
+  const [relay2, setRelay2] = useState(false);
+  const [buzzerActive, setBuzzerActive] = useState(false);
+  const [otaProgress, setOtaProgress] = useState(100);
+
+  // Copy feedback toast
+  const [copiedId, setCopiedId] = useState(null);
+  const [toastMsg, setToastMsg] = useState(null);
+
+  // Admin Modal State
+  const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const [newProject, setNewProject] = useState({
+    titleEn: '',
+    titleBn: '',
+    category: 'web',
+    badge: 'New Project',
+    descEn: '',
+    descBn: '',
+    tech: 'React, Tailwind, AI',
+    link: 'https://github.com/Mohammad-Creator-Sakib'
+  });
+
+  // Typing animation for Hero subtitle
+  const roles = lang === 'bn'
+    ? [
+        "সফটওয়্যার ও ওয়েব ডেভেলপার 💻",
+        "এআই ভিডিও ও অ্যানিমে ক্রিয়েটর (Qalpik) 🎬",
+        "ESP32 ও ইলেকট্রনিক্স অটোমেশন নির্মাতা ⚡",
+        "মেরিন সার্ভেয়ার (TCIS Bangladesh) ⚓"
+      ]
+    : [
+        "Full-Stack Web & App Developer 💻",
+        "AI Video & Anime Story Creator (Qalpik) 🎬",
+        "ESP32 IoT & Electronics Technologist ⚡",
+        "Marine Surveyor at TCIS Bangladesh ⚓"
+      ];
+
+  const [roleIndex, setRoleIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRoleIndex((prev) => (prev + 1) % roles.length);
+    }, 3200);
+    return () => clearInterval(interval);
+  }, [roles.length]);
+
+  const showToast = (msg) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(null), 2800);
+  };
+
+  const handleCopy = (text, id) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    showToast(lang === 'bn' ? `কপি করা হয়েছে: ${text}` : `Copied: ${text}`);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  // Trigger Qalpik AI Story Generation + 1-second Outro Preview
+  const handleGenerateAiStory = () => {
+    setAiGenerating(true);
+    setShowOutroOverlay(false);
+
+    const presets = {
+      'cyber-anime': {
+        title: "২০৭৭ সালের অদৃশ্য পথিক (The Invisible Wanderer of 2077)",
+        visualPrompt: "9:16 vertical anime scene, hooded cybernetic youth walking through glowing neon alleys, holographic Bengali typography floating in the sky, purple and cyan rain reflections, cinematic anime style.",
+        narrationBn: "শহরের হাজারো আলোর ভিড়ে কিছু মানুষ থাকে একদম একা। কিন্তু তাদের মাথার ভেতর চলতে থাকে আগামীকালের সবচেয়ে বড় বিপ্লব...",
+        musicTag: "Dark Synthwave & Emotional Piano"
+      },
+      'motivation': {
+        title: "শূন্য থেকে শুরু (Rising from Zero)",
+        visualPrompt: "9:16 vertical anime timelapse, student working late night with soldering iron, ESP32 microcontroller glowing blue, dual monitors running code, warm desk lamp vs cold rain outside, inspiring atmosphere.",
+        narrationBn: "তোমার কাছে আজ হয়তো সবকিছু নেই, কিন্তু তোমার ভেতর যে স্বপ্নটা আছে—সেটাকে কোড আর পরিশ্রমে রূপ দাও। সাফল্য নিজেই তোমাকে খুঁজে নেবে।",
+        musicTag: "Epic Orchestral Lo-Fi Beat"
+      },
+      'sea-voyage': {
+        title: "গভীর সমুদ্রের নাবিক ও এআই (The Marine Surveyor's Horizon)",
+        visualPrompt: "9:16 vertical anime art, massive cargo vessel anchored at misty river port at dawn, young surveyor holding a glowing futuristic tablet scanning containers, dramatic clouds.",
+        narrationBn: "নদীর ঢেউ আর জাহাজের ব্যস্ততার মাঝেও প্রযুক্তির স্বপ্ন থেমে থাকে না। প্রতিটি নতুন দিন এক একটি নতুন অভিযানের নাম।",
+        musicTag: "Ambient Ocean & Chillhop"
+      }
+    };
+
+    setTimeout(() => {
+      setGeneratedStory(presets[aiGenre] || presets['cyber-anime']);
+      setAiGenerating(false);
+      // Show the signature 1-second Qalpik outro overlay
+      setShowOutroOverlay(true);
+      setTimeout(() => {
+        setShowOutroOverlay(false);
+      }, 1600);
+    }, 700);
+  };
+
+  // Trigger simulated OTA update on ESP32
+  const handleTriggerOTA = () => {
+    setOtaProgress(0);
+    let current = 0;
+    const timer = setInterval(() => {
+      current += 20;
+      if (current >= 100) {
+        setOtaProgress(100);
+        clearInterval(timer);
+        showToast(lang === 'bn' ? 'ESP32 ArduinoOTA আপডেট সম্পন্ন!' : 'ESP32 ArduinoOTA Firmware Updated!');
+      } else {
+        setOtaProgress(current);
+      }
+    }, 250);
+  };
+
+  // Admin Panel: Add New Project
+  const handleAddProject = (e) => {
+    e.preventDefault();
+    if (!newProject.titleEn && !newProject.titleBn) return;
+    const created = {
+      id: 'proj-' + Date.now(),
+      titleEn: newProject.titleEn || newProject.titleBn,
+      titleBn: newProject.titleBn || newProject.titleEn,
+      category: newProject.category,
+      badge: newProject.badge || 'Custom',
+      descEn: newProject.descEn || newProject.descBn,
+      descBn: newProject.descBn || newProject.descEn,
+      tech: newProject.tech.split(',').map((t) => t.trim()).filter(Boolean),
+      link: newProject.link || '#',
+      interactiveType: null
+    };
+    setData((prev) => ({
+      ...prev,
+      projects: [created, ...prev.projects]
+    }));
+    setNewProject({
+      titleEn: '',
+      titleBn: '',
+      category: 'web',
+      badge: 'New Project',
+      descEn: '',
+      descBn: '',
+      tech: 'React, Tailwind, AI',
+      link: 'https://github.com/Mohammad-Creator-Sakib'
+    });
+    showToast(lang === 'bn' ? 'নতুন প্রজেক্ট যোগ করা হয়েছে!' : 'New project added!');
+  };
+
+  const handleDeleteProject = (id) => {
+    setData((prev) => ({
+      ...prev,
+      projects: prev.projects.filter((p) => p.id !== id)
+    }));
+    showToast(lang === 'bn' ? 'প্রজেক্ট মুছে ফেলা হয়েছে' : 'Project removed');
+  };
+
+  const handleResetDefault = () => {
+    setData(INITIAL_DATA);
+    localStorage.removeItem('sakib_cyber_portfolio_v1');
+    showToast(lang === 'bn' ? 'ডিফল্ট ডেটা রিসেট করা হয়েছে!' : 'Reset to default portfolio data!');
+  };
+
+  const filteredProjects = activeCategory === 'all'
+    ? data.projects
+    : data.projects.filter((p) => p.category === activeCategory);
+
+  return (
+    <div className="min-h-screen bg-[#060711] text-slate-100 font-sans selection:bg-cyan-500 selection:text-slate-950 relative overflow-x-hidden">
+      {/* ==========================================
+          AMBIENT CYBERPUNK NEON BACKGROUND GLOWS
+         ========================================== */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div className="absolute -top-40 -left-40 w-96 h-96 bg-cyan-500/15 rounded-full blur-[130px]" />
+        <div className="absolute top-1/3 -right-40 w-[28rem] h-[28rem] bg-fuchsia-600/15 rounded-full blur-[140px]" />
+        <div className="absolute -bottom-40 left-1/3 w-96 h-96 bg-violet-600/15 rounded-full blur-[130px]" />
+        {/* Subtle Cyber Grid Overlay */}
+        <div
+          className="absolute inset-0 opacity-[0.07]"
+          style={{
+            backgroundImage: `linear-gradient(to right, #22d3ee 1px, transparent 1px), linear-gradient(to bottom, #22d3ee 1px, transparent 1px)`,
+            backgroundSize: '44px 44px'
+          }}
+        />
+      </div>
+
+      {/* ==========================================
+          FLOATING TOAST NOTIFICATION
+         ========================================== */}
+      {toastMsg && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-xl bg-slate-900/95 border border-cyan-400/50 text-cyan-300 shadow-[0_0_25px_rgba(34,211,238,0.3)] backdrop-blur-md animate-bounce">
+          <Sparkles className="w-4 h-4 text-cyan-400 shrink-0" />
+          <span className="text-sm font-medium">{toastMsg}</span>
+        </div>
+      )}
+
+      {/* ==========================================
+          STICKY GLASSMORPHIC NAVBAR
+         ========================================== */}
+      <header className="sticky top-0 z-40 backdrop-blur-xl bg-[#060711]/80 border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          {/* Brand Logo */}
+          <a href="#top" className="flex items-center gap-3 group">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 via-blue-500 to-fuchsia-600 p-[2px] shadow-[0_0_20px_rgba(34,211,238,0.35)]">
+              <div className="w-full h-full bg-[#060711] rounded-[10px] flex items-center justify-center">
+                <span className="font-black text-lg bg-gradient-to-r from-cyan-400 to-fuchsia-400 bg-clip-text text-transparent">
+                  S✗
+                </span>
+              </div>
+            </div>
+            <div>
+              <span className="font-bold tracking-tight text-white block leading-none">
+                {lang === 'bn' ? 'সাকিব' : 'SAKIB'}
+                <span className="text-cyan-400 ml-1 text-xs font-mono">// AI & CODE</span>
+              </span>
+              <span className="text-[11px] text-slate-400 font-mono block mt-0.5">
+                @qalpikai.official
+              </span>
+            </div>
+          </a>
+
+          {/* Navigation Links */}
+          <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-300">
+            <a href="#projects" className="hover:text-cyan-400 transition">
+              {lang === 'bn' ? 'প্রজেক্টস' : 'Projects'}
+            </a>
+            <a href="#playground" className="hover:text-cyan-400 transition flex items-center gap-1">
+              <Wand2 className="w-3.5 h-3.5 text-fuchsia-400" />
+              {lang === 'bn' ? 'এআই ও কোড ল্যাব' : 'AI & Code Lab'}
+            </a>
+            <a href="#socials" className="hover:text-cyan-400 transition">
+              {lang === 'bn' ? 'সোশ্যাল হাব' : 'Social Hub'}
+            </a>
+            <a href="#journey" className="hover:text-cyan-400 transition">
+              {lang === 'bn' ? 'অভিজ্ঞতা ও শিক্ষা' : 'Journey'}
+            </a>
+          </nav>
+
+          {/* Actions: Language Switch & Admin Customizer */}
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={() => setLang(lang === 'bn' ? 'en' : 'bn')}
+              className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-cyan-500/30 text-xs font-semibold text-cyan-300 flex items-center gap-1.5 transition cursor-pointer"
+              title="Switch Language / ভাষা পরিবর্তন করুন"
+            >
+              <Globe className="w-3.5 h-3.5 text-cyan-400" />
+              {lang === 'bn' ? 'EN / বাংলা' : 'বাংলা / EN'}
+            </button>
+
+            <button
+              onClick={() => setIsAdminOpen(true)}
+              className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-fuchsia-600/80 to-violet-600/80 hover:from-fuchsia-500 hover:to-violet-500 border border-fuchsia-400/40 text-xs font-semibold text-white flex items-center gap-1.5 shadow-[0_0_15px_rgba(217,70,239,0.3)] transition cursor-pointer"
+            >
+              <Settings className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">
+                {lang === 'bn' ? 'কাস্টমাইজ' : 'Admin'}
+              </span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* ==========================================
+          MAIN CONTENT CONTAINER
+         ========================================== */}
+      <main id="top" className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-24 space-y-24">
+        
+        {/* ==========================================
+            1. HERO SECTION
+           ========================================== */}
+        <section className="relative rounded-3xl p-6 sm:p-10 lg:p-12 bg-gradient-to-b from-white/[0.06] to-white/[0.02] border border-white/10 backdrop-blur-2xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.6)]">
+          <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            {/* Left Column: Bio & Persona Badges */}
+            <div className="lg:col-span-7 space-y-6">
+              {/* Status Pill */}
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-medium">
+                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+                <span className="w-2 h-2 rounded-full bg-cyan-400 -ml-3" />
+                {lang === 'bn'
+                  ? 'সফটওয়্যার, এআই কন্টেন্ট এবং আইওটি প্রজেক্টের জন্য প্রস্তুত'
+                  : 'Available for Software, AI Content & IoT Innovations'}
+              </div>
+
+              {/* Main Name */}
+              <div className="space-y-2">
+                <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">
+                  <span className="bg-gradient-to-r from-white via-cyan-200 to-fuchsia-300 bg-clip-text text-transparent">
+                    {lang === 'bn' ? data.profile.nameBn : data.profile.nameEn}
+                  </span>
+                </h1>
+                {lang === 'bn' && (
+                  <p className="text-sm sm:text-base font-mono text-slate-400">
+                    {data.profile.nameEn}
+                  </p>
+                )}
+              </div>
+
+              {/* Animated Role Switcher */}
+              <div className="h-8 flex items-center">
+                <div className="inline-flex items-center gap-2 text-base sm:text-xl font-semibold text-cyan-400 font-mono">
+                  <Terminal className="w-5 h-5 text-fuchsia-400 shrink-0" />
+                  <span className="transition-all duration-300">{roles[roleIndex]}</span>
+                </div>
+              </div>
+
+              {/* Bio Description */}
+              <p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-2xl">
+                {lang === 'bn' ? data.profile.bioBn : data.profile.bioEn}
+              </p>
+
+              {/* Stylized Persona Badges */}
+              <div className="space-y-2">
+                <span className="text-xs uppercase tracking-wider text-slate-400 font-mono block">
+                  {lang === 'bn' ? 'ডিজিটাল পরিচয় ও ব্র্যান্ডসমূহ:' : 'Digital Identities & Personas:'}
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {data.profile.badges.map((b, idx) => (
+                    <span
+                      key={idx}
+                      className="px-3 py-1 rounded-lg text-xs font-medium bg-white/5 border border-white/15 text-slate-200 hover:border-cyan-400/60 hover:text-cyan-300 transition"
+                    >
+                      {b.text}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Hero CTA Buttons */}
+              <div className="flex flex-wrap items-center gap-3.5 pt-2">
+                <a
+                  href="#projects"
+                  className="px-5 py-3 rounded-xl bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 font-bold text-sm flex items-center gap-2 shadow-[0_0_25px_rgba(34,211,238,0.4)] hover:brightness-110 transition"
+                >
+                  <Code2 className="w-4 h-4" />
+                  {lang === 'bn' ? 'আমার প্রজেক্টগুলো দেখুন' : 'Explore Projects'}
+                </a>
+                <a
+                  href="#playground"
+                  className="px-5 py-3 rounded-xl bg-fuchsia-600/20 hover:bg-fuchsia-600/30 border border-fuchsia-400/40 text-fuchsia-200 font-semibold text-sm flex items-center gap-2 transition"
+                >
+                  <Sparkles className="w-4 h-4 text-fuchsia-400" />
+                  {lang === 'bn' ? 'এআই এবং কোড ল্যাব' : 'Live AI & Code Lab'}
+                </a>
+                <a
+                  href="#socials"
+                  className="px-4 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 font-medium text-sm flex items-center gap-2 transition"
+                >
+                  <Share2 className="w-4 h-4 text-cyan-400" />
+                  {lang === 'bn' ? 'সোশ্যাল লিংকস' : 'Social Hub'}
+                </a>
+              </div>
+            </div>
+
+            {/* Right Column: Futuristic Cyberpunk Command Card */}
+            <div className="lg:col-span-5">
+              <div className="rounded-2xl bg-[#090b1a]/90 border border-cyan-500/30 p-5 shadow-[0_0_35px_rgba(34,211,238,0.15)] space-y-4">
+                {/* Terminal Top Bar */}
+                <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-rose-500" />
+                    <span className="w-3 h-3 rounded-full bg-amber-400" />
+                    <span className="w-3 h-3 rounded-full bg-emerald-400" />
+                    <span className="text-xs font-mono text-slate-400 ml-2">
+                      sakib@qalpik-studio:~
+                    </span>
+                  </div>
+                  <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+                    SYS.ONLINE
+                  </span>
+                </div>
+
+                {/* Live Stats Grid */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10">
+                    <div className="flex items-center gap-2 text-cyan-400 text-xs font-mono mb-1">
+                      <Code2 className="w-4 h-4" />
+                      <span>SOFTWARE</span>
+                    </div>
+                    <p className="text-lg font-bold text-white">Imatex Pro</p>
+                    <p className="text-xs text-slate-400">Smart-alarm • Call-Hub</p>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10">
+                    <div className="flex items-center gap-2 text-fuchsia-400 text-xs font-mono mb-1">
+                      <Video className="w-4 h-4" />
+                      <span>AI STUDIO</span>
+                    </div>
+                    <p className="text-lg font-bold text-white">Qalpik (কালপিক)</p>
+                    <p className="text-xs text-slate-400">9:16 Anime & Stories</p>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10">
+                    <div className="flex items-center gap-2 text-emerald-400 text-xs font-mono mb-1">
+                      <Cpu className="w-4 h-4" />
+                      <span>HARDWARE</span>
+                    </div>
+                    <p className="text-lg font-bold text-white">ESP32 IoT</p>
+                    <p className="text-xs text-slate-400">Blynk • ArduinoOTA</p>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10">
+                    <div className="flex items-center gap-2 text-amber-400 text-xs font-mono mb-1">
+                      <Anchor className="w-4 h-4" />
+                      <span>PROFESSION</span>
+                    </div>
+                    <p className="text-lg font-bold text-white">Marine Survey</p>
+                    <p className="text-xs text-slate-400">TCIS Bangladesh Ltd.</p>
+                  </div>
+                </div>
+
+                {/* Location & GitHub Quick Copy */}
+                <div className="p-3 rounded-xl bg-gradient-to-r from-cyan-500/10 via-fuchsia-500/10 to-transparent border border-cyan-500/20 flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2 text-slate-300">
+                    <MapPin className="w-4 h-4 text-cyan-400 shrink-0" />
+                    <span>{lang === 'bn' ? data.profile.locationBn : data.profile.locationEn}</span>
+                  </div>
+                  <button
+                    onClick={() => handleCopy('https://github.com/Mohammad-Creator-Sakib', 'hero-gh')}
+                    className="px-2.5 py-1 rounded-md bg-white/10 hover:bg-white/20 text-cyan-300 font-mono flex items-center gap-1 transition cursor-pointer"
+                  >
+                    {copiedId === 'hero-gh' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>GitHub</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ==========================================
+            2. INTERACTIVE AI & CODE PLAYGROUND
+           ========================================== */}
+        <section id="playground" className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div>
+              <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-fuchsia-400 mb-2">
+                <Sparkles className="w-4 h-4" />
+                <span>{lang === 'bn' ? 'ইন্টারঅ্যাক্টিভ ল্যাবরেটরি' : 'Interactive Showcase Lab'}</span>
+              </div>
+              <h2 className="text-2xl sm:text-4xl font-bold text-white">
+                {lang === 'bn'
+                  ? 'সরাসরি টেস্ট করুন: Imatex Pro, Qalpik AI এবং ESP32'
+                  : 'Test Live: Imatex Pro, Qalpik AI & ESP32 Simulator'}
+              </h2>
+            </div>
+
+            {/* Lab Mode Selector Tabs */}
+            <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 self-start">
+              <button
+                onClick={() => setLabTab('imatex')}
+                className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition cursor-pointer ${
+                  labTab === 'imatex'
+                    ? 'bg-cyan-400 text-slate-950 shadow-[0_0_15px_rgba(34,211,238,0.4)]'
+                    : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                Imatex Pro Styler
+              </button>
+              <button
+                onClick={() => setLabTab('qalpik')}
+                className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition cursor-pointer ${
+                  labTab === 'qalpik'
+                    ? 'bg-fuchsia-500 text-white shadow-[0_0_15px_rgba(217,70,239,0.4)]'
+                    : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                Qalpik AI Studio
+              </button>
+              <button
+                onClick={() => setLabTab('iot')}
+                className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition cursor-pointer ${
+                  labTab === 'iot'
+                    ? 'bg-emerald-400 text-slate-950 shadow-[0_0_15px_rgba(52,211,153,0.4)]'
+                    : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                ESP32 IoT Panel
+              </button>
+            </div>
+          </div>
+
+          {/* LAB 1: IMATEX PRO LIVE TEXT RENDERER */}
+          {labTab === 'imatex' && (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 rounded-2xl bg-white/[0.03] border border-cyan-500/30 p-6 backdrop-blur-xl">
+              <div className="lg:col-span-5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-bold text-cyan-300 flex items-center gap-2">
+                    <Sliders className="w-5 h-5" />
+                    <span>Imatex Pro — Live Typography Controls</span>
+                  </h3>
+                  <span className="text-xs font-mono px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300">
+                    v2.4 Engine
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400">
+                  {lang === 'bn'
+                    ? 'আপনার তৈরি Imatex Pro অ্যাপের মতো এখানে যেকোনো টেক্সট লিখে নিয়ন গ্লো এবং কালার পরীক্ষা করুন।'
+                    : 'Customize the signature preview text, neon intensity, and backdrop style in real time.'}
+                </p>
+
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs text-slate-300 block mb-1">
+                      {lang === 'bn' ? 'প্রিভিউ টেক্সট (Preview Text):' : 'Render Text:'}
+                    </label>
+                    <input
+                      type="text"
+                      value={imatexText}
+                      onChange={(e) => setImatexText(e.target.value)}
+                      placeholder="I love Sakib"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-white/15 text-white text-sm focus:outline-none focus:border-cyan-400"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs text-slate-300 block mb-1">
+                        {lang === 'bn' ? 'নিয়ন কালার:' : 'Neon Color:'}
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={imatexColor}
+                          onChange={(e) => setImatexColor(e.target.value)}
+                          className="w-10 h-9 rounded cursor-pointer bg-transparent border border-white/20"
+                        />
+                        <span className="text-xs font-mono text-slate-400">{imatexColor}</span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-slate-300 block mb-1">
+                        {lang === 'bn' ? `গ্লো পাওয়ার (${imatexGlow}px):` : `Glow Radius (${imatexGlow}px):`}
+                      </label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="60"
+                        value={imatexGlow}
+                        onChange={(e) => setImatexGlow(Number(e.target.value))}
+                        className="w-full accent-cyan-400 mt-2 cursor-pointer"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Quick Preset Chips */}
+                  <div className="pt-2">
+                    <span className="text-xs text-slate-400 block mb-1.5">
+                      {lang === 'bn' ? 'কুইক প্রিসেট:' : 'Quick Presets:'}
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        { label: 'I love Sakib', color: '#00f3ff' },
+                        { label: 'Qalpik AI কালপিক', color: '#f43f5e' },
+                        { label: '⚚ অদৃশ্য পথিক ⚚', color: '#a855f7' },
+                        { label: '𝐈𝐭\'𝐬 𝐒𝐚𝐤𝐢𝐛 ✗', color: '#10b981' }
+                      ].map((preset, i) => (
+                        <button
+                          key={i}
+                          onClick={() => {
+                            setImatexText(preset.label);
+                            setImatexColor(preset.color);
+                          }}
+                          className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-slate-300 transition cursor-pointer"
+                        >
+                          {preset.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Imatex Live Canvas Stage */}
+              <div className="lg:col-span-7 flex flex-col justify-center items-center min-h-[240px] rounded-2xl bg-[#05060f] border border-white/10 p-8 relative overflow-hidden">
+                <div
+                  className="absolute inset-0 opacity-20"
+                  style={{
+                    backgroundImage: `radial-gradient(${imatexColor} 1px, transparent 1px)`,
+                    backgroundSize: '20px 20px'
+                  }}
+                />
+                <span className="absolute top-3 left-4 text-[11px] font-mono text-slate-500">
+                  IMATEX_PRO_CANVAS // 1920x1080
+                </span>
+                <div
+                  className="text-center font-black tracking-wide break-words max-w-full transition-all duration-200 select-all"
+                  style={{
+                    fontSize: 'clamp(1.8rem, 4vw, 3.2rem)',
+                    color: '#ffffff',
+                    textShadow: `0 0 ${imatexGlow / 2}px ${imatexColor}, 0 0 ${imatexGlow}px ${imatexColor}, 0 0 ${imatexGlow * 1.8}px ${imatexColor}`
+                  }}
+                >
+                  {imatexText || 'I love Sakib'}
+                </div>
+                <span className="mt-6 text-xs font-mono text-slate-400">
+                  Designed by Mohammad-Creator-Sakib
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* LAB 2: QALPIK AI ANIME STORY & 9:16 PROMPT STUDIO */}
+          {labTab === 'qalpik' && (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 rounded-2xl bg-white/[0.03] border border-fuchsia-500/30 p-6 backdrop-blur-xl">
+              <div className="lg:col-span-5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-bold text-fuchsia-300 flex items-center gap-2">
+                    <Video className="w-5 h-5" />
+                    <span>Qalpik (কালপিক) — AI Story Engine</span>
+                  </h3>
+                  <span className="text-xs font-mono px-2 py-0.5 rounded bg-fuchsia-500/20 text-fuchsia-300">
+                    9:16 Vertical
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400">
+                  {lang === 'bn'
+                    ? 'কালপিক (Qalpik) চ্যানেলের জন্য ৯:১৬ অ্যানিমে ভিজ্যুয়াল প্রম্পট, বাংলা ভয়েসওভার স্ক্রিপ্ট এবং ১ সেকেন্ডের আউটরো ওভারলে জেনারেট করুন।'
+                    : 'Generate 9:16 vertical AI anime prompts, Bengali motivational narration, and test the signature 1-second Qalpik outro overlay.'}
+                </p>
+
+                <div className="space-y-2">
+                  <label className="text-xs text-slate-300 block">
+                    {lang === 'bn' ? 'গল্পের থিম নির্বাচন করুন:' : 'Select Story Theme:'}
+                  </label>
+                  <div className="grid grid-cols-1 gap-2">
+                    {[
+                      { id: 'cyber-anime', labelBn: '🌌 সাইবারপাঙ্ক অ্যানিমে স্টোরি', labelEn: '🌌 Cyberpunk Anime Story' },
+                      { id: 'motivation', labelBn: '🔥 মোটিভেশনাল কোডিং ও সংগ্রাম', labelEn: '🔥 Late-Night Coding & Struggle' },
+                      { id: 'sea-voyage', labelBn: '⚓ সমুদ্রের নাবিক ও ভবিষ্যৎ প্রযুক্তি', labelEn: '⚓ Marine Horizon & Sci-Fi' }
+                    ].map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => setAiGenre(item.id)}
+                        className={`text-left px-3.5 py-2.5 rounded-xl border text-xs font-medium transition cursor-pointer ${
+                          aiGenre === item.id
+                            ? 'bg-fuchsia-500/20 border-fuchsia-400 text-white'
+                            : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
+                        }`}
+                      >
+                        {lang === 'bn' ? item.labelBn : item.labelEn}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleGenerateAiStory}
+                  disabled={aiGenerating}
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-fuchsia-500 to-violet-600 hover:from-fuchsia-400 hover:to-violet-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(217,70,239,0.4)] transition cursor-pointer"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  {aiGenerating
+                    ? (lang === 'bn' ? 'এআই স্ক্রিপ্ট তৈরি হচ্ছে...' : 'Synthesizing AI Scene...')
+                    : (lang === 'bn' ? 'নতুন এআই অ্যানিমে দৃশ্য ও আউটরো প্রিভিউ দেখুন' : 'Generate AI Scene & 1s Outro Overlay')}
+                </button>
+              </div>
+
+              {/* Right Column: 9:16 Preview & Prompt Output */}
+              <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
+                {/* 9:16 Vertical Phone Mockup */}
+                <div className="sm:col-span-5 flex justify-center">
+                  <div className="w-48 h-80 rounded-3xl bg-gradient-to-b from-indigo-950 via-purple-950 to-slate-950 border-2 border-fuchsia-400/40 relative overflow-hidden shadow-[0_0_30px_rgba(217,70,239,0.25)] flex flex-col justify-between p-4">
+                    <div className="flex items-center justify-between text-[10px] font-mono text-fuchsia-300">
+                      <span>9:16 SHORTS</span>
+                      <span>@qalpikai.official</span>
+                    </div>
+
+                    <div className="my-auto text-center space-y-2">
+                      <div className="w-12 h-12 rounded-full bg-fuchsia-500/20 border border-fuchsia-400/50 mx-auto flex items-center justify-center">
+                        <Play className="w-5 h-5 text-fuchsia-300 fill-fuchsia-300" />
+                      </div>
+                      <p className="text-xs font-bold text-white leading-snug">
+                        {generatedStory.title}
+                      </p>
+                      <p className="text-[11px] text-slate-300 italic line-clamp-3">
+                        "{generatedStory.narrationBn}"
+                      </p>
+                    </div>
+
+                    <div className="text-[10px] font-mono text-cyan-300 flex items-center gap-1">
+                      <Volume2 className="w-3 h-3 shrink-0" />
+                      <span className="truncate">{generatedStory.musicTag}</span>
+                    </div>
+
+                    {/* 1-SECOND SIGNATURE QALPIK OUTRO OVERLAY */}
+                    {showOutroOverlay && (
+                      <div className="absolute inset-0 bg-slate-950/95 backdrop-blur-md flex flex-col items-center justify-center p-4 text-center animate-fade-in z-20">
+                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-400 to-fuchsia-500 flex items-center justify-center font-black text-slate-950 text-lg mb-2 shadow-[0_0_20px_rgba(217,70,239,0.6)]">
+                          Q
+                        </div>
+                        <p className="text-xs font-extrabold text-white tracking-wide">
+                          Qalpik - AI Anime Stories
+                        </p>
+                        <p className="text-[11px] text-cyan-300 mt-1 font-semibold">
+                          Follow for more! ✨
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Generated Script & Visual Prompt Details */}
+                <div className="sm:col-span-7 space-y-3 bg-[#070914] p-4 rounded-2xl border border-white/10">
+                  <div>
+                    <span className="text-[11px] font-mono uppercase text-fuchsia-400 block">
+                      AI Video Visual Prompt (Midjourney / Runway / Kling):
+                    </span>
+                    <p className="text-xs text-slate-300 font-mono mt-1 bg-white/5 p-2.5 rounded-lg border border-white/5">
+                      {generatedStory.visualPrompt}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-[11px] font-mono uppercase text-cyan-400 block">
+                      বাংলা ভয়েসওভার স্ক্রিপ্ট (Narration):
+                    </span>
+                    <p className="text-xs text-slate-200 mt-1 bg-white/5 p-2.5 rounded-lg border border-white/5 leading-relaxed">
+                      {generatedStory.narrationBn}
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-between pt-1">
+                    <button
+                      onClick={() => setShowOutroOverlay(true)}
+                      className="text-xs text-fuchsia-300 hover:text-fuchsia-200 font-medium flex items-center gap-1 cursor-pointer"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      <span>Preview 1s Outro Card</span>
+                    </button>
+                    <button
+                      onClick={() => handleCopy(generatedStory.visualPrompt, 'prompt-copy')}
+                      className="px-2.5 py-1 rounded bg-white/10 hover:bg-white/15 text-xs text-cyan-300 flex items-center gap-1 cursor-pointer"
+                    >
+                      <Copy className="w-3 h-3" />
+                      <span>Copy Prompt</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* LAB 3: ESP32 IOT HARDWARE DASHBOARD SIMULATOR */}
+          {labTab === 'iot' && (
+            <div className="rounded-2xl bg-white/[0.03] border border-emerald-500/30 p-6 backdrop-blur-xl grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+              <div className="lg:col-span-5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-bold text-emerald-300 flex items-center gap-2">
+                    <Cpu className="w-5 h-5" />
+                    <span>ESP32 + Blynk IoT Virtual Node</span>
+                  </h3>
+                  <span className="text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 flex items-center gap-1">
+                    <Wifi className="w-3 h-3" /> Connected
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400">
+                  {lang === 'bn'
+                    ? 'চাঁপাইনবাবগঞ্জ সরকারি পলিটেকনিকের ইলেকট্রনিক্স টেকনোলজি এবং আপনার তৈরি ESP32 মাইক্রোকন্ট্রোলার প্রজেক্টের ইন্টারঅ্যাক্টিভ ড্যাশবোর্ড ডেমো।'
+                    : 'Interactive simulation of Sakib’s ESP32 hardware setup with dual relays, buzzer alarm trigger, and wireless ArduinoOTA firmware flashing.'}
+                </p>
+
+                <div className="p-3.5 rounded-xl bg-slate-900/90 border border-white/10 font-mono text-xs space-y-1 text-slate-300">
+                  <div className="text-emerald-400">// ESP32 Status Telemetry</div>
+                  <div>MCU: ESP32-WROOM-32D (240MHz Dual Core)</div>
+                  <div>Relay_1 (GPIO 26): {relay1 ? 'HIGH (ON)' : 'LOW (OFF)'}</div>
+                  <div>Relay_2 (GPIO 27): {relay2 ? 'HIGH (ON)' : 'LOW (OFF)'}</div>
+                  <div>Buzzer (GPIO 14): {buzzerActive ? 'ACTIVE_ALARM' : 'STANDBY'}</div>
+                </div>
+              </div>
+
+              <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {/* Relay 1 Card */}
+                <div className="p-4 rounded-xl bg-[#070a14] border border-white/10 flex flex-col justify-between">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-mono text-slate-400">GPIO 26</span>
+                    <span className={`w-2.5 h-2.5 rounded-full ${relay1 ? 'bg-emerald-400 shadow-[0_0_10px_#34d399]' : 'bg-slate-600'}`} />
+                  </div>
+                  <div className="my-4">
+                    <p className="font-bold text-white">Main Power Relay</p>
+                    <p className="text-xs text-slate-400">{relay1 ? 'Active / Running' : 'Disconnected'}</p>
+                  </div>
+                  <button
+                    onClick={() => setRelay1(!relay1)}
+                    className={`w-full py-2 rounded-lg text-xs font-bold transition cursor-pointer ${
+                      relay1 ? 'bg-emerald-400 text-slate-950' : 'bg-white/10 text-slate-300'
+                    }`}
+                  >
+                    {relay1 ? 'TURN OFF' : 'TURN ON'}
+                  </button>
+                </div>
+
+                {/* Relay 2 + Smart Buzzer */}
+                <div className="p-4 rounded-xl bg-[#070a14] border border-white/10 flex flex-col justify-between">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-mono text-slate-400">GPIO 14</span>
+                    <span className={`w-2.5 h-2.5 rounded-full ${buzzerActive ? 'bg-rose-500 animate-ping' : 'bg-slate-600'}`} />
+                  </div>
+                  <div className="my-4">
+                    <p className="font-bold text-white">Smart-Alarm Buzzer</p>
+                    <p className="text-xs text-slate-400">{buzzerActive ? 'Siren Ringing!' : 'Silent Mode'}</p>
+                  </div>
+                  <button
+                    onClick={() => setBuzzerActive(!buzzerActive)}
+                    className={`w-full py-2 rounded-lg text-xs font-bold transition cursor-pointer ${
+                      buzzerActive ? 'bg-rose-500 text-white' : 'bg-white/10 text-slate-300'
+                    }`}
+                  >
+                    {buzzerActive ? 'STOP ALARM' : 'TEST BUZZER'}
+                  </button>
+                </div>
+
+                {/* Wireless ArduinoOTA Card */}
+                <div className="p-4 rounded-xl bg-[#070a14] border border-white/10 flex flex-col justify-between">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-mono text-cyan-400">ArduinoOTA</span>
+                    <span className="text-xs font-mono text-emerald-400">{otaProgress}%</span>
+                  </div>
+                  <div className="my-4 space-y-2">
+                    <p className="font-bold text-white">Wireless Firmware</p>
+                    <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-cyan-400 to-emerald-400 transition-all duration-200"
+                        style={{ width: `${otaProgress}%` }}
+                      />
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleTriggerOTA}
+                    className="w-full py-2 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/40 text-cyan-300 text-xs font-bold transition cursor-pointer"
+                  >
+                    FLASH OTA UPDATE
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </section>
+
+        {/* ==========================================
+            3. FILTERABLE PROJECTS SHOWCASE
+           ========================================== */}
+        <section id="projects" className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div>
+              <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-cyan-400 mb-2">
+                <Layers className="w-4 h-4" />
+                <span>{lang === 'bn' ? 'প্রজেক্ট আর্কাইভ' : 'Featured Builds'}</span>
+              </div>
+              <h2 className="text-2xl sm:text-4xl font-bold text-white">
+                {lang === 'bn' ? 'সফটওয়্যার, এআই ও হার্ডওয়্যার প্রজেক্টস' : 'Software, AI & Hardware Portfolio'}
+              </h2>
+            </div>
+
+            {/* Category Filter Buttons */}
+            <div className="flex flex-wrap gap-2">
+              {[
+                { id: 'all', labelBn: 'সবগুলো (All)', labelEn: 'All Projects' },
+                { id: 'web', labelBn: 'সফটওয়্যার ও ওয়েব', labelEn: 'Web & Software' },
+                { id: 'ai', labelBn: 'এআই ও ভিডিও (AI)', labelEn: 'AI & 3D Media' },
+                { id: 'iot', labelBn: 'হার্ডওয়্যার (ESP32)', labelEn: 'IoT & Electronics' }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveCategory(tab.id)}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-semibold border transition cursor-pointer ${
+                    activeCategory === tab.id
+                      ? 'bg-cyan-400/20 border-cyan-400 text-cyan-300 shadow-[0_0_15px_rgba(34,211,238,0.25)]'
+                      : 'bg-white/5 border-white/10 text-slate-400 hover:text-white'
+                  }`}
+                >
+                  {lang === 'bn' ? tab.labelBn : tab.labelEn}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Project Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredProjects.map((project) => (
+              <div
+                key={project.id}
+                className="group rounded-2xl bg-gradient-to-b from-white/[0.06] to-white/[0.02] border border-white/10 hover:border-cyan-400/50 p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 shadow-lg"
+              >
+                <div className="space-y-4">
+                  {/* Top Badge & Category Icon */}
+                  <div className="flex items-center justify-between">
+                    <span className="px-2.5 py-1 rounded-md text-[11px] font-mono font-semibold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
+                      {project.badge}
+                    </span>
+                    <span className="text-xs font-mono text-slate-400 uppercase">
+                      //{project.category}
+                    </span>
+                  </div>
+
+                  {/* Project Title */}
+                  <h3 className="text-xl font-bold text-white group-hover:text-cyan-300 transition">
+                    {lang === 'bn' ? project.titleBn : project.titleEn}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="text-sm text-slate-300 leading-relaxed">
+                    {lang === 'bn' ? project.descBn : project.descEn}
+                  </p>
+                </div>
+
+                <div className="pt-6 mt-6 border-t border-white/10 space-y-4">
+                  {/* Tech Stack Pills */}
+                  <div className="flex flex-wrap gap-1.5">
+                    {project.tech.map((t, i) => (
+                      <span
+                        key={i}
+                        className="px-2 py-0.5 rounded bg-white/5 text-[11px] font-mono text-slate-300"
+                      >
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Card Actions */}
+                  <div className="flex items-center justify-between pt-1">
+                    {project.interactiveType ? (
+                      <a
+                        href="#playground"
+                        onClick={() => setLabTab(project.interactiveType)}
+                        className="text-xs font-bold text-fuchsia-300 hover:text-fuchsia-200 flex items-center gap-1"
+                      >
+                        <Sparkles className="w-3.5 h-3.5" />
+                        <span>{lang === 'bn' ? 'লাইভ ডেমো টেস্ট করুন' : 'Launch Interactive Lab'}</span>
+                      </a>
+                    ) : (
+                      <span className="text-xs font-mono text-slate-500">GitHub Repository</span>
+                    )}
+
+                    <a
+                      href={project.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-cyan-400 hover:text-slate-950 text-xs font-semibold text-white flex items-center gap-1.5 transition"
+                    >
+                      <span>{lang === 'bn' ? 'লিংক' : 'Open'}</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ==========================================
+            4. SMART SOCIAL MEDIA & CREATOR HUB
+           ========================================== */}
+        <section id="socials" className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div>
+              <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-fuchsia-400 mb-2">
+                <Share2 className="w-4 h-4" />
+                <span>{lang === 'bn' ? 'সোশ্যাল মিডিয়া এবং ব্র্যান্ড নেটওয়ার্ক' : 'Connected Ecosystem'}</span>
+              </div>
+              <h2 className="text-2xl sm:text-4xl font-bold text-white">
+                {lang === 'bn' ? 'আমার সোশ্যাল মিডিয়া ও ক্রিয়েটর হাব' : 'Smart Social Media & Creator Hub'}
+              </h2>
+            </div>
+            <p className="text-xs sm:text-sm text-slate-400 max-w-md">
+              {lang === 'bn'
+                ? 'সবগুলো প্ল্যাটফর্ম ক্যাটাগরি অনুযায়ী সাজানো রয়েছে। যেকোনো হ্যান্ডেল এক ক্লিকে কপি করতে পারবেন।'
+                : 'Organized across AI Content (Qalpik), Developer Profiles, and Personal Creative Personas.'}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {data.socials.map((soc) => (
+              <div
+                key={soc.id}
+                className="rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 hover:border-cyan-400/40 p-5 flex flex-col justify-between transition group relative overflow-hidden"
+              >
+                {/* Top Gradient Accent Bar */}
+                <div className={`
+                  absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${soc.accent}
+                `} />
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400">
+                      {soc.category}
+                    </span>
+                    <span className="px-2 py-0.5 rounded bg-white/5 text-[11px] font-semibold text-cyan-300">
+                      {soc.platform}
+                    </span>
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-bold text-white group-hover:text-cyan-300 transition">
+                      {soc.name}
+                    </h3>
+                    <p className="text-xs font-mono text-fuchsia-300 mt-0.5">
+                      {soc.handle}
+                    </p>
+                  </div>
+
+                  <p className="text-xs text-slate-400">
+                    {lang === 'bn' ? soc.descBn : soc.descEn}
+                  </p>
+                </div>
+
+                <div className="pt-4 mt-4 border-t border-white/10 flex items-center justify-between gap-2">
+                  <button
+                    onClick={() => handleCopy(soc.handle, soc.id)}
+                    className="px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs text-slate-300 flex items-center gap-1.5 transition cursor-pointer"
+                    title="Copy Handle"
+                  >
+                    {copiedId === soc.id ? (
+                      <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    ) : (
+                      <Copy className="w-3.5 h-3.5 text-cyan-400" />
+                    )}
+                    <span>{copiedId === soc.id ? 'Copied' : 'Copy'}</span>
+                  </button>
+
+                  <a
+                    href={soc.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1.5 rounded-lg bg-cyan-500/15 hover:bg-cyan-400 hover:text-slate-950 text-cyan-300 text-xs font-semibold flex items-center gap-1 transition"
+                  >
+                    <span>{lang === 'bn' ? 'ভিজিট' : 'Visit'}</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ==========================================
+            5. EXPERIENCE & EDUCATION TIMELINE
+           ========================================== */}
+        <section id="journey" className="space-y-6">
+          <div>
+            <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-emerald-400 mb-2">
+              <Compass className="w-4 h-4" />
+              <span>{lang === 'bn' ? 'পেশাগত অভিজ্ঞতা ও শিক্ষা' : 'Career & Academic Path'}</span>
+            </div>
+            <h2 className="text-2xl sm:text-4xl font-bold text-white">
+              {lang === 'bn' ? 'আমার যাত্রা ও শিক্ষাগত যোগ্যতা' : 'Experience & Education Timeline'}
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {data.timeline.map((item) => (
+              <div
+                key={item.id}
+                className="rounded-2xl bg-white/[0.03] border border-white/10 p-6 relative overflow-hidden flex flex-col justify-between"
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="px-3 py-1 rounded-full text-xs font-mono bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+                      {lang === 'bn' ? item.periodBn : item.periodEn}
+                    </span>
+                    {item.type === 'work' && <Briefcase className="w-5 h-5 text-amber-400" />}
+                    {item.type === 'creator' && <Sparkles className="w-5 h-5 text-fuchsia-400" />}
+                    {item.type === 'education' && <GraduationCap className="w-5 h-5 text-emerald-400" />}
+                  </div>
+
+                  <h3 className="text-xl font-bold text-white">
+                    {lang === 'bn' ? item.roleBn : item.roleEn}
+                  </h3>
+
+                  <p className="text-xs sm:text-sm font-semibold text-cyan-300">
+                    {lang === 'bn' ? item.orgBn : item.orgEn}
+                  </p>
+
+                  <p className="text-sm text-slate-300 leading-relaxed">
+                    {lang === 'bn' ? item.descBn : item.descEn}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </main>
+
+      {/* ==========================================
+          FOOTER
+         ========================================== */}
+      <footer className="relative z-10 border-t border-white/10 bg-[#04050c] py-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-white">
+              {lang === 'bn' ? data.profile.nameBn : data.profile.nameEn}
+            </span>
+            <span>•</span>
+            <span>Qalpik (@qalpikai.official)</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setIsAdminOpen(true)}
+              className="text-cyan-400 hover:underline cursor-pointer"
+            >
+              {lang === 'bn' ? 'অ্যাডমিন প্যানেল ও লিংক এডিটর' : 'Open Admin Customizer'}
+            </button>
+            <span>•</span>
+            <span>Built with Cyber-Glass Architecture</span>
+          </div>
+        </div>
+      </footer>
+
+      {/* ==========================================
+          6. LIVE ADMIN PANEL / CUSTOMIZER MODAL
+         ========================================== */}
+      {isAdminOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-[#0b0d1e] border border-cyan-500/40 rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 max-h-[90vh] overflow-y-auto shadow-[0_0_50px_rgba(34,211,238,0.25)]">
+            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+              <div className="flex items-center gap-2.5">
+                <Settings className="w-5 h-5 text-cyan-400" />
+                <h3 className="text-lg sm:text-xl font-bold text-white">
+                  {lang === 'bn'
+                    ? 'ওয়েবসাইট কাস্টমাইজার (Admin Panel)'
+                    : 'Live Portfolio Admin & Link Manager'}
+                </h3>
+              </div>
+              <button
+                onClick={() => setIsAdminOpen(false)}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Edit Bio Section */}
+            <div className="space-y-3">
+              <h4 className="text-xs font-mono uppercase tracking-wider text-cyan-400">
+                {lang === 'bn' ? '১. আপনার বায়ো ও পরিচয় আপডেট করুন' : '1. Edit Bio & Tagline'}
+              </h4>
+              <div className="grid grid-cols-1 gap-3">
+                <input
+                  type="text"
+                  value={data.profile.nameBn}
+                  onChange={(e) =>
+                    setData({
+                      ...data,
+                      profile: { ...data.profile, nameBn: e.target.value }
+                    })
+                  }
+                  placeholder="নাম (বাংলায়)"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-white/15 text-sm text-white"
+                />
+                <textarea
+                  rows={2}
+                  value={data.profile.bioBn}
+                  onChange={(e) =>
+                    setData({
+                      ...data,
+                      profile: { ...data.profile, bioBn: e.target.value }
+                    })
+                  }
+                  placeholder="সংক্ষিপ্ত বায়ো (বাংলায়)"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-white/15 text-sm text-white"
+                />
+              </div>
+            </div>
+
+            {/* Add New Project Form */}
+            <form onSubmit={handleAddProject} className="space-y-3 border-t border-white/10 pt-4">
+              <h4 className="text-xs font-mono uppercase tracking-wider text-fuchsia-400">
+                {lang === 'bn' ? '২. নতুন প্রজেক্ট যোগ করুন' : '2. Add a New Project Card'}
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <input
+                  type="text"
+                  placeholder="প্রজেক্টের নাম (যেমন: AI Bot)"
+                  value={newProject.titleBn}
+                  onChange={(e) =>
+                    setNewProject({ ...newProject, titleBn: e.target.value, titleEn: e.target.value })
+                  }
+                  className="px-3.5 py-2 rounded-xl bg-slate-900 border border-white/15 text-sm text-white"
+                />
+                <select
+                  value={newProject.category}
+                  onChange={(e) => setNewProject({ ...newProject, category: e.target.value })}
+                  className="px-3.5 py-2 rounded-xl bg-slate-900 border border-white/15 text-sm text-white"
+                >
+                  <option value="web">Web & Software</option>
+                  <option value="ai">AI & Video Content</option>
+                  <option value="iot">ESP32 & Hardware</option>
+                </select>
+              </div>
+              <input
+                type="text"
+                placeholder="প্রজেক্টের বিবরণ..."
+                value={newProject.descBn}
+                onChange={(e) =>
+                  setNewProject({ ...newProject, descBn: e.target.value, descEn: e.target.value })
+                }
+                className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-white/15 text-sm text-white"
+              />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <input
+                  type="text"
+                  placeholder="টেকনোলজি (কমা দিয়ে লিখুন: React, AI)"
+                  value={newProject.tech}
+                  onChange={(e) => setNewProject({ ...newProject, tech: e.target.value })}
+                  className="px-3.5 py-2 rounded-xl bg-slate-900 border border-white/15 text-sm text-white"
+                />
+                <input
+                  type="text"
+                  placeholder="প্রজেক্ট লিংক (https://...)"
+                  value={newProject.link}
+                  onChange={(e) => setNewProject({ ...newProject, link: e.target.value })}
+                  className="px-3.5 py-2 rounded-xl bg-slate-900 border border-white/15 text-sm text-white"
+                />
+              </div>
+              <button
+                type="submit"
+                className="px-4 py-2 rounded-xl bg-cyan-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                <span>{lang === 'bn' ? 'প্রজেক্ট যুক্ত করুন' : 'Add Project'}</span>
+              </button>
+            </form>
+
+            {/* Manage Existing Projects */}
+            <div className="space-y-2 border-t border-white/10 pt-4">
+              <h4 className="text-xs font-mono uppercase tracking-wider text-slate-400">
+                {lang === 'bn' ? 'বর্তমান প্রজেক্ট তালিকা:' : 'Current Projects:'}
+              </h4>
+              <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+                {data.projects.map((p) => (
+                  <div
+                    key={p.id}
+                    className="flex items-center justify-between px-3 py-2 rounded-lg bg-white/5 text-xs"
+                  >
+                    <span className="font-medium text-white">{p.titleBn}</span>
+                    <button
+                      onClick={() => handleDeleteProject(p.id)}
+                      className="text-rose-400 hover:text-rose-300 flex items-center gap-1 cursor-pointer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Footer Controls */}
+            <div className="flex items-center justify-between border-t border-white/10 pt-4">
+              <button
+                onClick={handleResetDefault}
+                className="px-3.5 py-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>{lang === 'bn' ? 'ডিফল্ট রিসেট করুন' : 'Reset Defaults'}</span>
+              </button>
+
+              <button
+                onClick={() => setIsAdminOpen(false)}
+                className="px-5 py-2 rounded-xl bg-gradient-to-r from-cyan-400 to-fuchsia-500 text-slate-950 font-bold text-xs cursor-pointer"
+              >
+                {lang === 'bn' ? 'সেভ ও বন্ধ করুন' : 'Save & Close'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
